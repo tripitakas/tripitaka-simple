@@ -3,10 +3,17 @@
 
 from tornado.ioloop import IOLoop
 from tornado.web import Application, RequestHandler
+from tornado import netutil, process
+from tornado.httpserver import HTTPServer
+from tornado.options import define, options
+import logging
 from os import path, listdir
 import json
 
 BASE_DIR = path.dirname(__file__)
+define('port', default=8001, help='run port', type=int)
+define('debug', default=options.port != 80, help='debug mode', type=bool)
+define('num_processes', default=4, help='sub-processes count', type=int)
 
 
 def load_json(filename):
@@ -15,7 +22,7 @@ def load_json(filename):
             with open(filename) as f:
                 return json.load(f)
         except Exception as e:
-            print(e)
+            logging.error('%s: %s' % (str(e), filename))
 
 
 def save_json(obj, filename, sort_keys=False):
@@ -44,21 +51,35 @@ class CutHandler(RequestHandler):
         page = load_json(filename)
         blocks = json.loads(self.get_body_argument('blocks'))
         assert 'imgsize' in page and isinstance(blocks, list)
-        page['blocks'] = blocks
-        save_json(page, filename)
+        if page['blocks'] != blocks:
+            page['blocks'] = blocks
+            save_json(page, filename)
+            logging.info('%d blocks saved: %s' % (len(blocks), name))
         self.write('ok')
 
 
 def make_app():
     handlers = [MainHandler, CutHandler]
     return Application([(h.URL, h) for h in handlers],
-                       debug=True,
+                       debug=options.debug,
                        static_path=path.join(BASE_DIR, 'static'),
                        template_path=path.join(BASE_DIR, 'views'))
 
 
 if __name__ == '__main__':
-    app = make_app()
-    app.listen(8001)
-    print('Start the app on http://localhost:8001')
-    IOLoop.current().start()
+    options.parse_command_line()
+    try:
+        app = make_app()
+        server = HTTPServer(app)
+        if options.debug:
+            server.listen(options.port)
+            fork_id = 0
+        else:
+            sockets = netutil.bind_sockets(options.port)
+            fork_id = process.fork_processes(options.num_processes)
+            server.add_sockets(sockets)
+
+        logging.info('Start the app #%d on http://localhost:%d' % (fork_id, options.port))
+        IOLoop.current().start()
+    except KeyboardInterrupt:
+        logging.info('Stop the app')
