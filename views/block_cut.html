@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh-hans">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="description" content="藏经栏切分校对">
+  <title>GL_79_4_7</title>
+  
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+  <link href="{{ static_url('css/cut.css') }}" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.js"></script>
+</head>
+
+<body>
+
+<div id="top-nav" class="navbar navbar-xs navbar-inverse navbar-fixed-top">
+  <div class="navbar-header">
+    <a class="navbar-brand" href="../">切分校对示例 <span class="glyphicon glyphicon-th" aria-hidden="true"></span></a>
+  </div>
+  <div class="buttons">
+    <button class="btn btn-default" id="save">保存</button>
+  </div>
+</div>
+
+<div id="body-content">
+  <div id="app">
+    <div class="cut-area">
+      <div id="holder"></div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/raphael/2.2.7/raphael.js"></script>
+<script src="{{ static_url('js/vendor/raphael.zoom.js') }}"></script>
+<script src="{{ static_url('js/vendor/jquery.mapkey.js') }}"></script>
+<script src="{{ static_url('js/cut.js') }}"></script>
+<script src="{{ static_url('js/cut_keys.js') }}"></script>
+
+<script>
+  var HTML_DECODE = {
+    '&lt;': '<',
+    '&gt;': '>',
+    '&amp;': '&',
+    '&nbsp;': ' ',
+    '&quot;': '"',
+    '&copy;': '©'
+  };
+  function decodeHtml(s) {
+    return s.replace(/&\w+;|&#(\d+);/g, function ($0, $1) {
+      var c = HTML_DECODE[$0];
+      if (c === undefined) {
+        // Maybe is Entity Number
+        if (!isNaN($1)) {
+          c = String.fromCharCode(($1 === 160) ? 32 : $1);
+        } else {
+          // Not Entity Number
+          c = $0;
+        }
+      }
+      return c;
+    });
+  }
+
+  $.cut.create({
+    blockMode: true,
+    width: {{imgsize['width']}},
+    height: {{imgsize['height']}},
+    holder: 'holder',
+    image: "{{static_url('img/' + page['imgname'] + '.jpg')}}",
+    chars: JSON.parse(decodeHtml('{{blocks}}'))
+  });
+
+  $.cut.bindKeys();
+
+  $('#save').click(function() {
+    $.post('/{{page['imgname']}}', {blocks: JSON.stringify($.cut.exportBoxes())});
+  });
+</script>
+
+</body>
+</html>

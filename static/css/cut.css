@@ -1,0 +1,22 @@
+body {
+    font-size: 14px;
+    margin: 0;
+    padding: 0;
+}
+
+.cut-area {
+    padding-top: 80px;
+    padding-left: 10%;
+    margin-bottom: 40px;
+    min-width: 500px;
+}
+
+@media (min-width: 768px) {
+    #top-nav .buttons {
+        margin-top: 8px;
+    }
+}
+
+#holder {
+    cursor: crosshair;
+}

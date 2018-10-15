@@ -1,0 +1,60 @@
+# OS junk files
+[Tt]humbs.db
+Desktop.ini
+*.DS_Store
+*.bak*
+*.tmp
+*.log
+._*
+~*
+
+# PyCharm
+.idea/
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+# lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+*.eggs
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.coverage
+.cache/
+.pytest*/
+nosetests.xml
+coverage.xml
+
+## Configure for this project
+
+*.sqlite
+*.pkl
+*.db
+*.rdb
+static/pos/
+static/img/
+log/
