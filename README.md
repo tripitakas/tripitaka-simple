@@ -13,6 +13,8 @@ pip install -r requirements.txt
 
 3. 将栏切分的 img 和 pos 文件夹复制到 static 目录下，有增加或改动后直接更新即可。
 
+   可运行 `python static/resize-image.py` 缩小页面图和检查切分JSON的正确性。
+
 ## 运行
 
 - 在 PyCharm 中选中 app.py 右键点“Debug app”，或在命令行中运行 `python app.py`。

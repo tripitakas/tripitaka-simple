@@ -57,4 +57,5 @@ coverage.xml
 *.rdb
 static/pos/
 static/img/
+static/icon/
 log/
