@@ -20,3 +20,9 @@ pip install -r requirements.txt
 - 在 PyCharm 中选中 app.py 右键点“Debug app”，或在命令行中运行 `python app.py`。
 
 - 在浏览器中打开 [localhost:8001](http://localhost:8001)
+
+## 参考资料
+
+- [Tornado Web应用结构](https://segmentfault.com/a/1190000004240965)
+- [Tornado 4.3 文档中文版](https://tornado-zh.readthedocs.io/zh/latest/)
+- [前端模板语法](https://tornado-zh.readthedocs.io/zh/latest/guide/templates.html)
