@@ -55,6 +55,9 @@ coverage.xml
 *.pkl
 *.db
 *.rdb
+static/block_pos/
+static/line_pos/
+static/char_pos/
 static/pos/
 static/img/
 static/icon/

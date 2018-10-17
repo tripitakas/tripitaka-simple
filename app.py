@@ -31,23 +31,28 @@ def save_json(obj, filename, sort_keys=False):
 
 
 class MainHandler(RequestHandler):
-    URL = r'/'
+    URL = r'/(char|block|line)?'
 
-    def get(self):
-        pages = [f[:-5] for f in listdir(path.join(BASE_DIR, 'static', 'pos')) if f.endswith('.json')]
-        self.render('index.html', pages=pages)
+    def get(self, pos='block'):
+        if pos == 'block':
+            pages = [f[:-5] for f in listdir(path.join(BASE_DIR, 'static', 'block_pos')) if f.endswith('.json')]
+        elif pos == 'char':
+            pages = [f[:-4] for f in listdir(path.join(BASE_DIR, 'static', 'char_pos')) if f.endswith('.cut')]
+        else:
+            pages = []
+        self.render('index.html', pages=pages, pos=pos)
 
 
-class CutHandler(RequestHandler):
-    URL = r'/(\w+)'
+class BlockCutHandler(RequestHandler):
+    URL = r'/block/(\w+)'
 
     def get(self, name):
-        filename = path.join(BASE_DIR, 'static', 'pos', name + '.json')
+        filename = path.join(BASE_DIR, 'static', 'block_pos', name + '.json')
         page = load_json(filename)
         self.render('block_cut.html', page=page, imgsize=page['imgsize'], blocks=json.dumps(page.get('blocks', [])))
 
     def post(self, name):
-        filename = path.join(BASE_DIR, 'static', 'pos', name + '.json')
+        filename = path.join(BASE_DIR, 'static', 'block_pos', name + '.json')
         page = load_json(filename)
         blocks = json.loads(self.get_body_argument('blocks'))
         assert 'imgsize' in page and isinstance(blocks, list)
@@ -58,8 +63,29 @@ class CutHandler(RequestHandler):
         self.write('ok')
 
 
+class CharCutHandler(RequestHandler):
+    URL = r'/char/(\w+)'
+
+    def get(self, name):
+        filename = path.join(BASE_DIR, 'static', 'char_pos', name + '.cut')
+        page = load_json(filename)
+        page['imgname'] = page.get('imgname', name)
+        self.render('char_cut.html', page=page, imgsize=page['imgsize'], chars=json.dumps(page.get('char_data', [])))
+
+    def post(self, name):
+        filename = path.join(BASE_DIR, 'static', 'char_pos', name + '.cut')
+        page = load_json(filename)
+        chars = json.loads(self.get_body_argument('chars'))
+        assert isinstance(chars, list)
+        if page['chars'] != chars:
+            page['chars'] = chars
+            save_json(page, filename)
+            logging.info('%d chars saved: %s' % (len(chars), name))
+        self.write('ok')
+
+
 def make_app():
-    handlers = [MainHandler, CutHandler]
+    handlers = [MainHandler, BlockCutHandler, CharCutHandler]
     return Application([(h.URL, h) for h in handlers],
                        debug=options.debug,
                        static_path=path.join(BASE_DIR, 'static'),

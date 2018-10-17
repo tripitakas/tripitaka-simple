@@ -38,11 +38,8 @@ def export_icon(filename, dst_dir, fn, size):
 def export_icons(img_dir, icon_dir):
     for fn in os.listdir(img_dir):
         filename = path.join(img_dir, fn)
-        if '_s.jpg' in fn:
-            export_icon(filename, icon_dir, fn.replace('_s.jpg', '.jpg'), 300)
-            os.remove(filename)
         if '.jpg' in fn:
-            export_icon(filename, img_dir, fn, 768)
+            export_icon(filename, icon_dir, fn, 300)
 
 
 def check_json(json_dir):
@@ -60,7 +57,22 @@ def check_json(json_dir):
             print('%s error: %s' % (str(e), filename))
 
 
+def set_char_img_size(img_dir, json_dir):
+    for fn in os.listdir(json_dir):
+        json_file = os.path.join(json_dir, fn)
+        img_file = os.path.join(img_dir, fn[:-3] + 'jpg')
+        if fn.endswith('.cut') and os.path.exists(img_file):
+            with open(json_file) as f:
+                info = json.load(f)
+            im = Image.open(img_file)
+            w, h = im.size
+            info['imgsize'] = dict(width=w, height=h)
+            with open(json_file, 'w') as f:
+                json.dump(info, f, ensure_ascii=False)
+
+
 if __name__ == "__main__":
     base_dir = path.dirname(__file__)
-    check_json(path.join(base_dir, 'pos'))
-    # export_icons(path.join(base_dir, 'img'), path.join(base_dir, 'icon'))
+    # check_json(path.join(base_dir, 'block_pos'))
+    export_icons(path.join(base_dir, 'img'), path.join(base_dir, 'icon'))
+    set_char_img_size(path.join(base_dir, 'img'), path.join(base_dir, 'char_pos'))
