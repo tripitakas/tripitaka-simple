@@ -88,7 +88,7 @@
       return data.paper.rect(x, y, width, height)
         .initZoom().setAttr({
           stroke: rgb_a(data.changedColor, data.boxOpacity),
-          'stroke-width': 1.5 * (data.blockMode ? 10 : 1)
+          'stroke-width': 1.5 / data.ratioInitial
           // fill: rgb_a(data.hoverFill, .15)
         });
     }
@@ -122,7 +122,7 @@
     handleFill: '#ffffff',                    // 字框控制点的填充色
     activeHandleColor: '#72141d',             // 活动控制点的线色
     activeHandleFill: '#0000ff',              // 活动控制点的填充色
-    handleSize: 1.7,                          // 字框控制点的半宽
+    handleSize: 2.2,                          // 字框控制点的半宽
     boxFill: 'rgba(0, 0, 0, .01)',            // 默认的字框填充色，不能全透明
     boxOpacity: 0.7,                          // 字框线半透明度
     activeFillOpacity: 0.4,                   // 略过或当期字框的填充半透明度
@@ -157,7 +157,7 @@
 
     showHandles: function(el, handle) {
       var i, pt, r;
-      var size = data.handleSize * ((data.ratio - 1) * 0.4 + 1) * (data.blockMode ? 3 : 1);
+      var size = data.handleSize;
 
       for (i = 0; i < handle.handles.length; i++) {
         handle.handles[i].remove();
@@ -172,7 +172,7 @@
               stroke: i === handle.index ? data.activeHandleColor : data.hoverColor,
               fill: i === handle.index ? rgb_a(data.activeHandleFill, 0.8) :
                   rgb_a(data.handleFill, data.activeFillOpacity),
-              'stroke-width': (data.blockMode ? 2 : 1)
+              'stroke-width': 1.5
             });
           handle.handles.push(r);
         }
@@ -402,10 +402,8 @@
       data.blockMode = p.blockMode;
       if (p.blockMode) {
         data.activeFillOpacity = 0.2;
-        setTimeout(function () {
-          self.setRatio(1);
-        }, 0);
       }
+      data.ratioInitial = ($(data.holder).width() - 20) / p.width;
       data.scrollContainer = p.scrollContainer && $(p.scrollContainer);
       if (!p.readonly) {
         $(data.holder)
@@ -428,7 +426,7 @@
         b.shape = data.paper.rect(b.x, b.y, b.w, b.h)
           .attr({
             stroke: rgb_a(data.normalColor, data.boxOpacity),
-            'stroke-width': 1.5 * (data.blockMode ? 10 : 1)
+            'stroke-width': 1.5 / data.ratioInitial
             // fill: data.boxFill
           })
           .data('cid', b.char_id)
@@ -445,6 +443,7 @@
       data.height = p.height;
       data.chars = p.chars;
       self.switchCurrentBox(leftTop);
+      self.setRatio(1);
 
       return data;
     },
@@ -529,7 +528,7 @@
 
     exportBoxes: function() {
       var r = function(v) {
-        return Math.round(v * 10 / data.ratio) / 10;
+        return Math.round(v * 10 / data.ratio / data.ratioInitial) / 10;
       };
       return data.chars.filter(function(c) { return c.shape; }).map(function(c) {
         var box = c.shape.getBBox();
@@ -717,9 +716,10 @@
       this.hoverOut(state.hover);
       this.hoverOut(state.edit);
 
-      data.ratio = ratio / (data.blockMode ? 5 : 1);
-      data.paper.setZoom(data.ratio);
-      data.paper.setSize(data.width * data.ratio, data.height * data.ratio);
+      data.ratio = ratio;
+      ratio *= data.ratioInitial;
+      data.paper.setZoom(ratio);
+      data.paper.setSize(data.width * ratio, data.height * ratio);
 
       this.switchCurrentBox(el);
 
