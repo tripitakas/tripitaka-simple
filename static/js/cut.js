@@ -1,7 +1,7 @@
 /*
  * cut.js
  *
- * Date: 2018-9-27
+ * Date: 2018-10-18
  */
 (function() {
   'use strict';
@@ -415,8 +415,19 @@
       }
 
       var xMin = 1e5, yMin= 1e5, leftTop = null;
+      var meanWidth = [], meanHeight = [];
+
+      p.chars.forEach(function(b) {
+        meanWidth.push(b.w);
+        meanHeight.push(b.h)
+      });
+      meanWidth = meanWidth[parseInt(meanWidth.length / 2)];
+      meanHeight = meanHeight[parseInt(meanHeight.length / 2)];
 
       p.chars.forEach(function(b, idx) {
+        if (b.w < meanWidth / 4 && b.h < meanHeight / 4) {
+          return;
+        }
         if (b.block_no && b.line_no && b.char_no) {
           b.char_id = (b.block_no * 1000 + b.line_no) + 'n' + (b.char_no > 9 ? b.char_no : '0' + b.char_no);
         }
