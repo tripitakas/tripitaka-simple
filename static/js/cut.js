@@ -296,6 +296,7 @@
       notifyChanged(state.edit, 'navigate');
     },
 
+    // 创建校对画布和各个框
     create: function(p) {
       var self = this;
 
@@ -396,6 +397,7 @@
 
       data.image = data.paper.image(p.image, 0, 0, p.width, p.height);
       data.paper.rect(0, 0, p.width, p.height)
+        .initZoom()
         .attr({'stroke': 'transparent', fill: data.boxFill});
 
       state.readonly = p.readonly;
@@ -421,11 +423,13 @@
         meanWidth.push(b.w);
         meanHeight.push(b.h)
       });
+      meanWidth.sort()
+      meanHeight.sort()
       meanWidth = meanWidth[parseInt(meanWidth.length / 2)];
       meanHeight = meanHeight[parseInt(meanHeight.length / 2)];
 
       p.chars.forEach(function(b, idx) {
-        if (b.w < meanWidth / 4 && b.h < meanHeight / 4) {
+        if (p.removeSmallBoxes && b.w < meanWidth / 4 && b.h < meanHeight / 4) {
           return;
         }
         if (b.block_no && b.line_no && b.char_no) {
@@ -435,6 +439,7 @@
           b.char_id = 'org' + idx;
         }
         b.shape = data.paper.rect(b.x, b.y, b.w, b.h)
+          .initZoom()
           .attr({
             stroke: rgb_a(data.normalColor, data.boxOpacity),
             'stroke-width': 1.5 / data.ratioInitial
