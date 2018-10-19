@@ -445,17 +445,23 @@
       if (typeof p.chars === 'string') {
         p.chars = JSON.parse(decodeHtml(p.chars));
       }
-      p.chars.forEach(function(b) {
-        meanWidth.push(b.w);
-        meanHeight.push(b.h)
-      });
-      meanWidth.sort();
-      meanHeight.sort();
-      meanWidth = meanWidth[parseInt(meanWidth.length / 2)];
-      meanHeight = meanHeight[parseInt(meanHeight.length / 2)];
+
+      if (p.removeSmallBoxes) {
+        p.chars.forEach(function (b) {
+          meanWidth.push(b.w + 1000);
+          meanHeight.push(b.h + 1000)
+        });
+        meanWidth.sort();
+        meanHeight.sort();
+        meanWidth = meanWidth.slice(parseInt(meanWidth.length * 0.8));
+        meanHeight = meanHeight.slice(parseInt(meanHeight.length * 0.8));
+        meanWidth = meanWidth[parseInt(meanWidth.length / 2)] - 1000;
+        meanHeight = meanHeight[parseInt(meanHeight.length / 2)] - 1000;
+      }
 
       p.chars.forEach(function(b, idx) {
-        if (p.removeSmallBoxes && b.w < meanWidth / 4 && b.h < meanHeight / 4) {
+        if (p.removeSmallBoxes && (b.w < meanWidth / 4 && b.h < meanHeight / 4
+            || b.w < meanWidth / 8 || b.h < meanHeight / 8)) {
           return;
         }
         if (b.block_no && b.line_no && b.char_no) {
@@ -501,6 +507,7 @@
           info.char_id = 'new' + i;
           if (!this.findCharById(info.char_id)) {
             data.chars.push(info);
+            notifyChanged(dst, 'added');
             break;
           }
         }

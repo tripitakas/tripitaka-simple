@@ -86,6 +86,15 @@
     $.cut.switchHighlightBoxes(type);
   });
 
+  $.cut.onBoxChanged(function (char, box, reason) {
+    if (reason === 'removed' || reason === 'added') {
+      var type = $.cut.data.hlType;
+      $.cut.switchHighlightBoxes(type);
+      $.cut.switchHighlightBoxes(type);
+    }
+    showHighLightCount();
+  });
+
   function save(submit) {
     $.post('/{{pos}}/{{kind}}/{{imgname}}', {boxes: JSON.stringify($.cut.exportBoxes())}, function (res) {
       console.log(typeof res, res);
