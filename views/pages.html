@@ -46,7 +46,7 @@
 
       <li class="dropdown">
         <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
-           aria-expanded="false">字切分校对 <span class="caret"></span></a>
+           aria-expanded="false">字框切分校对 <span class="caret"></span></a>
         <ul class="dropdown-menu">
           {% for k in kinds %}
           <li><a href="/char/{{k}}">{{k}}</a></li>
@@ -59,11 +59,16 @@
 
 <div id="body-content" style="padding-top: 80px;">
   <div class="row">
-    <ul>
-      {% for k in kinds %}
-      <li><a href="/char/{{k}}">{{k}} ({{len(index.get(k, []))}})</a></li>
-      {% end %}
-    </ul>
+    {% for p in pages %}
+    <div class="col-xs-6 col-md-3">
+      <div class="thumbnail">
+        <a href="/{{pos}}/{{kind}}/{{p[3:]}}"><img src="{{static_url(get_icon(p))}}"></a>
+        <div class="caption text-center">
+          <p>{{p}}</p>
+        </div>
+      </div>
+    </div>
+    {% end %}
   </div>
 </div>
 

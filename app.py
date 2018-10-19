@@ -14,6 +14,7 @@ BASE_DIR = path.dirname(__file__)
 define('port', default=8001, help='run port', type=int)
 define('debug', default=options.port != 80, help='debug mode', type=bool)
 define('num_processes', default=4, help='sub-processes count', type=int)
+kinds = ['GL', 'JX', 'QL', 'YB']
 
 
 def load_json(filename):
@@ -31,61 +32,56 @@ def save_json(obj, filename, sort_keys=False):
 
 
 class MainHandler(RequestHandler):
-    URL = r'/(char|block|line)?'
+    URL = r'/'
 
-    def get(self, pos='block'):
-        if pos == 'block':
-            pages = [f[:-5] for f in listdir(path.join(BASE_DIR, 'static', 'block_pos')) if f.endswith('.json')]
-        elif pos == 'char':
-            pages = [f[:-4] for f in listdir(path.join(BASE_DIR, 'static', 'char_pos')) if f.endswith('.cut')]
-        else:
-            pages = []
-        self.render('index.html', pages=pages, pos=pos)
+    def get(self):
+        index = load_json(path.join('static', 'index.json'))
+        self.render('index.html', kinds=kinds, index=index)
 
 
-class BlockCutHandler(RequestHandler):
-    URL = r'/block/(\w+)'
+class PagesHandler(RequestHandler):
+    URL = r'/(block|column|char)/([A-Z]{2})'
 
-    def get(self, name):
-        filename = path.join(BASE_DIR, 'static', 'block_pos', name + '.json')
+    def get(self, pos, kind):
+        def get_icon(p):
+            return path.join('icon', *p.split('_')[:-1], p + '.jpg')
+
+        index = load_json(path.join('static', 'index.json'))
+        pages = index[kind]
+        pos_type = '字切分' if pos == 'char' else '栏切分' if pos == 'block' else '列切分'
+        self.render('pages.html', kinds=kinds, pages=pages,
+                    pos_type=pos_type, pos=pos, kind=kind, get_icon=get_icon)
+
+
+class CutProofHandler(RequestHandler):
+    URL = r'/(block|column|char)/([A-Z]{2})/(\w{4,20})'
+
+    def get(self, pos, kind, name):
+        def get_img(p):
+            return path.join('img', *p.split('_')[:-1], p + '.jpg')
+
+        name = kind + '_' + name
+        filename = path.join(BASE_DIR, 'static', 'char-pos', *name.split('_')[:-1], name + '.json')
         page = load_json(filename)
-        self.render('block_cut.html', page=page, imgsize=page['imgsize'], blocks=json.dumps(page.get('blocks', [])))
+        page[pos + 's'] = json.dumps(page[pos + 's'])
+        self.render('char_cut.html' if pos == 'char' else 'block_cut.html',
+                    pos_type='字切分' if pos == 'char' else '栏切分' if pos == 'block' else '列切分',
+                    page=page, pos=pos, kind=kind, **page, get_img=get_img)
 
-    def post(self, name):
-        filename = path.join(BASE_DIR, 'static', 'block_pos', name + '.json')
+    def post(self, pos, kind, name):
+        filename = path.join(BASE_DIR, 'static', 'char-pos', *name.split('_')[:-1], name + '.json')
         page = load_json(filename)
-        blocks = json.loads(self.get_body_argument('blocks'))
-        assert 'imgsize' in page and isinstance(blocks, list)
-        if page['blocks'] != blocks:
-            page['blocks'] = blocks
+        boxes = json.loads(self.get_body_argument('boxes'))
+        assert isinstance(boxes, list)
+        if page[pos + 's'] != boxes:
+            page[pos + 's'] = boxes
             save_json(page, filename)
-            logging.info('%d blocks saved: %s' % (len(blocks), name))
-        self.write('ok')
-
-
-class CharCutHandler(RequestHandler):
-    URL = r'/char/(\w+)'
-
-    def get(self, name):
-        filename = path.join(BASE_DIR, 'static', 'char_pos', name + '.cut')
-        page = load_json(filename)
-        page['imgname'] = page.get('imgname', name)
-        self.render('char_cut.html', page=page, imgsize=page['imgsize'], chars=json.dumps(page.get('char_data', [])))
-
-    def post(self, name):
-        filename = path.join(BASE_DIR, 'static', 'char_pos', name + '.cut')
-        page = load_json(filename)
-        chars = json.loads(self.get_body_argument('chars'))
-        assert isinstance(chars, list)
-        if page['chars'] != chars:
-            page['chars'] = chars
-            save_json(page, filename)
-            logging.info('%d chars saved: %s' % (len(chars), name))
+            logging.info('%d boxes saved: %s' % (len(boxes), name))
         self.write('ok')
 
 
 def make_app():
-    handlers = [MainHandler, BlockCutHandler, CharCutHandler]
+    handlers = [MainHandler, PagesHandler, CutProofHandler]
     return Application([(h.URL, h) for h in handlers],
                        debug=options.debug,
                        static_path=path.join(BASE_DIR, 'static'),

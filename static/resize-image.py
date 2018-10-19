@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import os
-from os import path
+from os import path, mkdir
 from PIL import Image
 from glob import glob
 import json
@@ -36,8 +36,12 @@ def export_icon(filename, dst_dir, fn, size):
 
 
 def export_icons(img_dir, icon_dir):
+    if not path.exists(icon_dir):
+        mkdir(icon_dir)
     for fn in os.listdir(img_dir):
         filename = path.join(img_dir, fn)
+        if path.isdir(filename):
+            export_icons(filename, path.join(icon_dir, fn))
         if '.jpg' in fn:
             export_icon(filename, icon_dir, fn, 300)
 
@@ -75,4 +79,4 @@ if __name__ == "__main__":
     base_dir = path.dirname(__file__)
     # check_json(path.join(base_dir, 'block_pos'))
     export_icons(path.join(base_dir, 'img'), path.join(base_dir, 'icon'))
-    set_char_img_size(path.join(base_dir, 'img'), path.join(base_dir, 'char_pos'))
+    # set_char_img_size(path.join(base_dir, 'img'), path.join(base_dir, 'char_pos'))

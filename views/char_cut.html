@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
   <meta name="description" content="藏经字切分校对">
-  <title>{{page['imgname']}}</title>
+  <title>{{imgname}}</title>
   
   <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
   <link href="{{ static_url('css/cut.css') }}" rel="stylesheet">
@@ -24,34 +24,31 @@
       <span class="icon-bar"></span>
       <span class="icon-bar"></span>
     </button>
-    <a class="navbar-brand" href="../char">字切分校对 <span class="glyphicon glyphicon-th" aria-hidden="true"></span></a>
+    <a class="navbar-brand" href="/{{pos}}/{{kind}}">字切分校对 <span class="glyphicon glyphicon-th" aria-hidden="true"></span></a>
   </div>
 
   <!-- Collect the nav links, forms, and other content for toggling -->
   <div class="collapse navbar-collapse" id="bs-navbar-collapse-1">
     <ul class="nav navbar-nav">
-      <li class="dropdown">
-        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">高亮显示 <span class="caret"></span></a>
-        <ul class="dropdown-menu hl-btn">
-          <li><a href="#" id="hl-all">所有<sup class="count"></sup></a></li>
-          <li><a href="#" id="hl-large">大框<sup class="count"></sup></a></li>
-          <li><a href="#" id="hl-small">小框<sup class="count"></sup></a></li>
-          <li><a href="#" id="hl-narrow">窄框<sup class="count"></sup></a></li>
-          <li><a href="#" id="hl-flat">扁框<sup class="count"></sup></a></li>
-          <li><a href="#" id="hl-overlap">重叠<sup class="count"></sup></a></li>
-        </ul>
-      </li>
-      <li><a href="" id="save">保存</a></li>
+
+      <div class="btn-group navbar-btn hl-btn" role="group" aria-label="高亮">
+        <button type="button" class="btn btn-default" id="hl-all">所有<sup class="count"></sup></button>
+        <button type="button" class="btn btn-default" id="hl-large">大框<sup class="count"></sup></button>
+        <button type="button" class="btn btn-default" id="hl-small">小框<sup class="count"></sup></button>
+        <button type="button" class="btn btn-default" id="hl-narrow">窄框<sup class="count"></sup></button>
+        <button type="button" class="btn btn-default" id="hl-flat">扁框<sup class="count"></sup></button>
+        <button type="button" class="btn btn-default" id="hl-overlap">重叠<sup class="count"></sup></button>
+      </div>
+      <div class="btn-group navbar-btn" role="group">
+        <button type="button" class="btn btn-primary" id="save">保存</button>
+        <button type="button" class="btn btn-primary" id="submit">提交</button>
+      </div>
     </ul>
   </div>
 </div>
 
 <div id="body-content">
-  <div id="app">
-    <div class="cut-area">
-      <div id="holder"></div>
-    </div>
-  </div>
+  <div id="holder"></div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
@@ -63,36 +60,13 @@
 <script src="{{ static_url('js/cut_adv.js') }}"></script>
 
 <script>
-  var HTML_DECODE = {
-    '&lt;': '<',
-    '&gt;': '>',
-    '&amp;': '&',
-    '&nbsp;': ' ',
-    '&quot;': '"',
-    '&copy;': '©'
-  };
-  function decodeHtml(s) {
-    return s.replace(/&\w+;|&#(\d+);/g, function ($0, $1) {
-      var c = HTML_DECODE[$0];
-      if (c === undefined) {
-        // Maybe is Entity Number
-        if (!isNaN($1)) {
-          c = String.fromCharCode(($1 === 160) ? 32 : $1);
-        } else {
-          // Not Entity Number
-          c = $0;
-        }
-      }
-      return c;
-    });
-  }
-
   $.cut.create({
+    removeSmallBoxes: {{int(kind in ['JX'])}},
     width: {{imgsize['width']}},
     height: {{imgsize['height']}},
     holder: 'holder',
-    image: "{{static_url('img/' + page['imgname'] + '.jpg')}}",
-    chars: JSON.parse(decodeHtml('{{chars}}'))
+    image: "{{static_url(get_img(imgname))}}",
+    chars: '{{chars}}'
   });
 
   $.cut.bindKeys();
@@ -107,14 +81,18 @@
     });
   }
   showHighLightCount();
-  $('.hl-btn a').click(function() {
+  $('.hl-btn > button').click(function() {
     var type = this.getAttribute('id').replace(/^.*-/, '');
     $.cut.switchHighlightBoxes(type);
   });
 
-  $('#save').click(function() {
-    $.post('/{{page['imgname']}}', {blocks: JSON.stringify($.cut.exportBoxes())});
-  });
+  function save(submit) {
+    $.post('/{{pos}}/{{kind}}/{{imgname}}', {boxes: JSON.stringify($.cut.exportBoxes())}, function (res) {
+      console.log(typeof res, res);
+    });
+  }
+  $('#save').click(save.bind(null, false));
+  $('#submit').click(save.bind(null, true));
 </script>
 
 </body>
