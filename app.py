@@ -12,7 +12,7 @@ import json
 import random
 import re
 import time
-import datetime
+from datetime import datetime
 
 
 BASE_DIR = path.dirname(__file__)
@@ -34,6 +34,10 @@ def load_json(filename):
 def save_json(obj, filename, sort_keys=False):
     with open(filename, 'w') as f:
         json.dump(obj, f, ensure_ascii=False, sort_keys=sort_keys)
+
+
+def get_date_time(fmt=None):
+    return datetime.now().strftime(fmt or '%Y-%m-%d %H:%M:%S')
 
 
 class BaseHandler(RequestHandler):
@@ -71,38 +75,40 @@ class PagesHandler(BaseHandler):
             return path.join('icon', *p.split('_')[:-1], p + '.jpg')
 
         pos_type = '字切分' if pos == 'char' else '栏切分' if pos == 'block' else '列切分'
+        me = '\n' + (self.current_user or self.get_ip()) + '\n'
+        self.unlock_timeout(pos, me)
+
         if kind == 'me':
-            me = self.current_user or self.get_ip()
             pages = []
             lock_path = path.join(BASE_DIR, 'data', 'lock', pos)
             for fn in listdir(lock_path):
                 filename = path.join(lock_path, fn)
-                with open(filename) as f:
-                    text = f.read()
-                if me in text:
-                    pages.append(fn)
+                if '_' in fn and '.' not in fn:
+                    with open(filename) as f:
+                        text = f.read()
+                    if me in text:
+                        pages.append(fn)
             pages.sort()
             return self.render('pages.html', kinds=kinds, pages=pages, count=len(pages),
                                pos_type=pos_type, pos=pos, kind=kind, get_icon=get_icon)
 
-        self.unlock_timeout(pos)
         index = load_json(path.join('static', 'index.json'))
         pages, count = self.pick_pages(pos, index[kind], 12)
         self.render('pages.html', kinds=kinds, pages=pages, count=count,
                     pos_type=pos_type, pos=pos, kind=kind, get_icon=get_icon)
 
     @staticmethod
-    def unlock_timeout(pos):
+    def unlock_timeout(pos, me):
         lock_path = path.join(BASE_DIR, 'data', 'lock', pos)
         now = time.time()
         for fn in listdir(lock_path):
             filename = path.join(lock_path, fn)
-            if '_' in fn:
-                t = path.getctime(filename)
-                if now - t > 3600:
-                    with open(filename) as f:
-                        text = f.read()
-                    if 'saved' not in text:
+            if '_' in fn and '.' not in fn:
+                with open(filename) as f:
+                    text = f.read()
+                if 'saved' not in text:
+                    t = path.getctime(filename)
+                    if now - t > 3600 or me in text:
                         remove(filename)
                         logging.warning('%s unlocked: %s' % (fn, text))
 
@@ -137,8 +143,9 @@ class CutProofHandler(BaseHandler):
                 text = f.read()
                 if text and self.get_ip() not in text:
                     return self.write('error:别人已锁定了本页面，请返回选择其他页面。')
-        with open(lock_file, 'w') as f:
-            f.write('\n'.join([self.get_ip(), self.current_user]))
+        if not path.exists(lock_file):
+            with open(lock_file, 'w') as f:
+                f.write('\n'.join([self.get_ip(), self.current_user, get_date_time()]))
         self.render('char_cut.html' if pos == 'char' else 'block_cut.html',
                     pos_type='字切分' if pos == 'char' else '栏切分' if pos == 'block' else '列切分',
                     page=page, pos=pos, kind=kind, **page, get_img=get_img)
@@ -146,7 +153,7 @@ class CutProofHandler(BaseHandler):
     def post(self, pos, kind, name):
         filename = path.join(BASE_DIR, 'static', 'char-pos', *name.split('_')[:-1], name + '.json')
         page = load_json(filename)
-        submit = self.get_body_argument('submit') == 'true';
+        submit = self.get_body_argument('submit') == 'true'
         boxes = json.loads(self.get_body_argument('boxes'))
         assert isinstance(boxes, list)
         if page[pos + 's'] != boxes:
@@ -156,7 +163,7 @@ class CutProofHandler(BaseHandler):
 
         lock_file = PagesHandler.get_lock_file(pos, name)
         with open(lock_file, 'w') as f:
-            f.write('\n'.join([self.get_ip(), self.current_user, 'saved']))
+            f.write('\n'.join([self.get_ip(), self.current_user, get_date_time(), 'saved']))
 
         if submit:
             pages = PagesHandler.pick_pages(pos, load_json(path.join('static', 'index.json'))[kind], 1)[0]
