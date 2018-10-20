@@ -39,10 +39,8 @@
         <button type="button" class="btn btn-default" id="hl-flat">扁框<sup class="count"></sup></button>
         <button type="button" class="btn btn-default" id="hl-overlap">重叠<sup class="count"></sup></button>
       </div>
-      <div class="btn-group navbar-btn" role="group">
-        <button type="button" class="btn btn-primary" id="save">保存</button>
-        <button type="button" class="btn btn-primary" id="submit">提交</button>
-      </div>
+      <button type="button" class="btn btn-primary navbar-btn" id="save">保存</button>
+      <button type="button" class="btn btn-primary navbar-btn" id="submit">提交</button>
     </ul>
   </div>
 </div>
@@ -52,6 +50,7 @@
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.0/sweetalert.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/raphael/2.2.7/raphael.js"></script>
 <script src="{{ static_url('js/vendor/raphael.zoom.js') }}"></script>
 <script src="{{ static_url('js/vendor/jquery.mapkey.js') }}"></script>
@@ -96,8 +95,21 @@
   });
 
   function save(submit) {
-    $.post('/{{pos}}/{{kind}}/{{imgname}}', {boxes: JSON.stringify($.cut.exportBoxes())}, function (res) {
-      console.log(typeof res, res);
+    $.post('/{{pos}}/{{kind}}/{{imgname}}', {
+      submit: submit,
+      boxes: JSON.stringify($.cut.exportBoxes())
+    }, function (res) {
+      if (/^error:/.test(res)) {
+        swal('操作失败', res.replace(/^error:/, ''), 'error', {buttons: false, timer: 1500});
+      } else {
+        swal('操作成功', '{{imgname}} ' + (submit ? '已提交成功。' : '已保存成功。'), 'success',
+           {buttons: false, timer: 1000})
+           .then(function () {
+             if (/^jump:/.test(res)) {
+               window.location.href = '/{{pos}}/{{kind}}/' + res.replace(/^jump:/, '');
+             }
+           });
+      }
     });
   }
   $('#save').click(save.bind(null, false));

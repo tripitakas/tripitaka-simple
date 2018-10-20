@@ -59,4 +59,5 @@ static/index.json
 static/*pos/
 static/img/
 static/icon/
+data/lock/
 log/
