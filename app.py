@@ -168,6 +168,7 @@ def make_app():
     handlers = [MainHandler, PagesHandler, CutProofHandler]
     return Application([(h.URL, h) for h in handlers],
                        debug=options.debug,
+                       compiled_template_cache=False,
                        static_path=path.join(BASE_DIR, 'static'),
                        template_path=path.join(BASE_DIR, 'views'))
 

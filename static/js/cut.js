@@ -460,7 +460,7 @@
       }
 
       p.chars.forEach(function(b, idx) {
-        if (p.removeSmallBoxes && (b.w < meanWidth / 4 && b.h < meanHeight / 4
+        if (p.removeSmallBoxes && (b.w < meanWidth / 3 && b.h < meanHeight / 3
             || b.w < meanWidth / 8 || b.h < meanHeight / 8)) {
           return;
         }
