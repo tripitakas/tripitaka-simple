@@ -10,6 +10,7 @@
   
   <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
   <style>
     .row img {
       max-height: 160px;
@@ -19,7 +20,7 @@
 
 <body>
 
-<div id="top-nav" class="navbar navbar-xs navbar-inverse navbar-fixed-top">
+<div id="top-nav" class="container-fluid navbar navbar-xs navbar-inverse navbar-fixed-top">
   <div class="navbar-header">
     <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
             data-target="#bs-navbar-collapse-1" aria-expanded="false">
@@ -54,6 +55,7 @@
         </ul>
       </li>
     </ul>
+    {% include nav-right.html %}
   </div>
 </div>
 

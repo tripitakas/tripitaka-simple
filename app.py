@@ -42,6 +42,14 @@ class BaseHandler(RequestHandler):
         self.set_header('Cache-Control', 'no-cache')
         self.set_header('Access-Control-Allow-Headers', h)
 
+    @property
+    def current_user(self):
+        return self.get_cookie('cut-user', '')
+
+    def render(self, template_name, **kwargs):
+        kwargs['user'] = self.current_user or '匿名'
+        return super(BaseHandler, self).render(template_name, **kwargs)
+
     def get_ip(self):
         ip = self.request.headers.get('x-forwarded-for') or self.request.remote_ip
         return ip and re.sub(r'^::\d$', '', ip[:15]) or 'localhost'
@@ -52,21 +60,35 @@ class MainHandler(BaseHandler):
 
     def get(self):
         index = load_json(path.join('static', 'index.json'))
-        self.render('index.html', kinds=kinds, index=index)
+        self.render('index.html', kinds=kinds, index=index, pos='char')
 
 
 class PagesHandler(BaseHandler):
-    URL = r'/(block|column|char)/([A-Z]{2})/?'
+    URL = r'/(block|column|char)/([A-Z]{2}|me)/?'
 
     def get(self, pos, kind):
         def get_icon(p):
             return path.join('icon', *p.split('_')[:-1], p + '.jpg')
 
+        pos_type = '字切分' if pos == 'char' else '栏切分' if pos == 'block' else '列切分'
+        if kind == 'me':
+            me = self.current_user or self.get_ip()
+            pages = []
+            lock_path = path.join(BASE_DIR, 'data', 'lock', pos)
+            for fn in listdir(lock_path):
+                filename = path.join(lock_path, fn)
+                with open(filename) as f:
+                    text = f.read()
+                if me in text:
+                    pages.append(fn)
+            pages.sort()
+            return self.render('pages.html', kinds=kinds, pages=pages, count=len(pages),
+                               pos_type=pos_type, pos=pos, kind=kind, get_icon=get_icon)
+
         self.unlock_timeout(pos)
         index = load_json(path.join('static', 'index.json'))
-        pages = self.pick_pages(pos, index[kind], 12)
-        pos_type = '字切分' if pos == 'char' else '栏切分' if pos == 'block' else '列切分'
-        self.render('pages.html', kinds=kinds, pages=pages,
+        pages, count = self.pick_pages(pos, index[kind], 12)
+        self.render('pages.html', kinds=kinds, pages=pages, count=count,
                     pos_type=pos_type, pos=pos, kind=kind, get_icon=get_icon)
 
     @staticmethod
@@ -92,7 +114,7 @@ class PagesHandler(BaseHandler):
     def pick_pages(pos, pages, count):
         pages = [p for p in pages if not path.exists(PagesHandler.get_lock_file(pos, p))]
         random.shuffle(pages)
-        return sorted(pages[:count])
+        return sorted(pages[:count]), len(pages)
 
 
 class CutProofHandler(BaseHandler):
@@ -112,10 +134,11 @@ class CutProofHandler(BaseHandler):
         lock_file = PagesHandler.get_lock_file(pos, name)
         if path.exists(lock_file):
             with open(lock_file) as f:
-                if self.get_ip() not in f.read():
+                text = f.read()
+                if text and self.get_ip() not in text:
                     return self.write('error:别人已锁定了本页面，请返回选择其他页面。')
         with open(lock_file, 'w') as f:
-            f.write(self.get_ip())
+            f.write('\n'.join([self.get_ip(), self.current_user]))
         self.render('char_cut.html' if pos == 'char' else 'block_cut.html',
                     pos_type='字切分' if pos == 'char' else '栏切分' if pos == 'block' else '列切分',
                     page=page, pos=pos, kind=kind, **page, get_img=get_img)
@@ -133,10 +156,10 @@ class CutProofHandler(BaseHandler):
 
         lock_file = PagesHandler.get_lock_file(pos, name)
         with open(lock_file, 'w') as f:
-            f.write(self.get_ip() + '\nsaved')
+            f.write('\n'.join([self.get_ip(), self.current_user, 'saved']))
 
         if submit:
-            pages = PagesHandler.pick_pages(pos, load_json(path.join('static', 'index.json'))[kind], 1)
+            pages = PagesHandler.pick_pages(pos, load_json(path.join('static', 'index.json'))[kind], 1)[0]
             self.write('jump:' + pages[0][3:] if pages else 'error:本类切分已全部校对完成。')
         self.write('')
 
