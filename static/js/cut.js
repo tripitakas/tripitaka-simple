@@ -616,10 +616,11 @@
       if (state.edit) {
         var el = state.edit;
         var info = this.findCharById(el.data('cid'));
-        var next = this.navigate('down');
+        var hi = /small|narrow|flat/.test(data.hlType) && this.switchNextHighlightBox;
+        var next = hi ? this.switchNextHighlightBox(1) : this.navigate('down');
 
         if (next === info.char_id) {
-          next = this.navigate('left');
+          next = hi ? this.switchNextHighlightBox(-1) : this.navigate('left');
           if (next === info.char_id) {
             this.navigate('right');
           }
