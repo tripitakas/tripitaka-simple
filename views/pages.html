@@ -41,8 +41,8 @@
         <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
            aria-expanded="false">栏切分校对 <span class="caret"></span></a>
         <ul class="dropdown-menu">
-          {% for k in kinds %}
-          <li><a href="/block/{{k}}">{{k}}</a></li>
+          {% for k, n in kinds.items() %}
+          <li><a href="/block/{{k}}">{{n}}</a></li>
           {% end %}
         </ul>
       </li>
@@ -51,8 +51,8 @@
         <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
            aria-expanded="false">字框切分校对 <span class="caret"></span></a>
         <ul class="dropdown-menu">
-          {% for k in kinds %}
-          <li><a href="/char/{{k}}">{{k}}</a></li>
+          {% for k, n in kinds.items() %}
+          <li><a href="/char/{{k}}">{{n}}</a></li>
           {% end %}
         </ul>
       </li>
@@ -66,7 +66,7 @@
     <div class="panel panel-default">
       <div class="panel-heading">
         <h3 class="panel-title">
-          {{'我提交的' if kind == 'me' else kind}}{{pos_type}}校对页 ({{len(pages)}}/{{count}})
+          {{'我提交的' if kind == 'me' else kinds[kind]}}{{pos_type}}校对页 ({{len(pages)}}/{{count}})
         </h3>
       </div>
     </div>

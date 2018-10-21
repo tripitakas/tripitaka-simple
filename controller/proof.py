@@ -9,7 +9,7 @@ import random
 import time
 
 BASE_DIR = path.dirname(path.dirname(__file__))
-kinds = ['GL', 'JX', 'QL', 'YB']
+kinds = dict(GL='高丽藏', JX='嘉兴藏', QL='乾隆藏', YB='永乐北藏')
 
 
 class MainHandler(BaseHandler):

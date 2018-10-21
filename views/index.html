@@ -41,8 +41,8 @@
         <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
            aria-expanded="false">栏切分校对 <span class="caret"></span></a>
         <ul class="dropdown-menu">
-          {% for k in kinds %}
-          <li><a href="/block/{{k}}">{{k}}</a></li>
+          {% for k, n in kinds.items() %}
+          <li><a href="/block/{{k}}">{{n}}</a></li>
           {% end %}
         </ul>
       </li>
@@ -51,8 +51,8 @@
         <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
            aria-expanded="false">字切分校对 <span class="caret"></span></a>
         <ul class="dropdown-menu">
-          {% for k in kinds %}
-          <li><a href="/char/{{k}}">{{k}}</a></li>
+          {% for k, n in kinds.items() %}
+          <li><a href="/char/{{k}}">{{n}}</a></li>
           {% end %}
         </ul>
       </li>
@@ -64,8 +64,8 @@
 <div id="body-content" style="padding-top: 80px;">
   <div class="row">
     <ul>
-      {% for k in kinds %}
-      <li><a href="/char/{{k}}">{{k}} ({{len(index.get(k, []))}})</a></li>
+      {% for k, n in kinds.items() %}
+      <li><a href="/char/{{k}}">{{n}} ({{len(index.get(k, []))}})</a></li>
       {% end %}
     </ul>
   </div>
