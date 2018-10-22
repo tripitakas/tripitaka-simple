@@ -98,7 +98,8 @@ class CutProofHandler(BaseHandler):
         if path.exists(lock_file):
             with open(lock_file) as f:
                 text = f.read()
-                if text and self.get_ip() not in text and (self.current_user or '匿名') not in text:
+                if text and self.get_ip() not in text and (self.current_user or '匿名') not in text \
+                        and 'saved' not in text:
                     return self.write('error:别人已锁定了本页面，请返回选择其他页面。')
         if not path.exists(lock_file):
             with open(lock_file, 'w') as f:
@@ -119,8 +120,17 @@ class CutProofHandler(BaseHandler):
             logging.info('%d boxes saved: %s' % (len(boxes), name))
 
         lock_file = PagesHandler.get_lock_file(pos, name)
+        text = []
+        if path.exists(lock_file):
+            with open(lock_file) as f:
+                text = f.read()
+                if 'saved' in text:
+                    text = text.split('\n')
+                else:
+                    text = []
         with open(lock_file, 'w') as f:
-            f.write('\n'.join([self.get_ip(), self.current_user, get_date_time(), 'saved']))
+            text += [self.get_ip(), self.current_user, get_date_time(), 'saved']
+            f.write('\n'.join(text))
 
         if submit:
             pages = PagesHandler.pick_pages(pos, load_json(path.join('static', 'index.json'))[kind], 1)[0]

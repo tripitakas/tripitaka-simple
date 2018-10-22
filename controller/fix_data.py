@@ -42,21 +42,25 @@ def callback_get_ip_users(num, fn, filename, text, rows):
 
 
 def callback_anonymous(num, fn, filename, text, rows):
-    if not rows[1]:
-        if rows[0] in ip_user:
-            rows[1] = ip_user[rows[0]]
-            print(num + 1, fn, rows[0] + '->' + rows[1])
-            if 1:
-                with open(filename, 'w') as f:
-                    f.write('\n'.join(rows))
-            return True
-        else:
-            print(fn, rows[0], '?')
+    n = 0
+    for i in range(len(rows) // 3):
+        if not rows[1 + i * 3]:
+            if rows[0 + i * 3] in ip_user:
+                rows[1 + i * 3] = ip_user[rows[0 + i * 3]]
+                print(num + 1, fn, rows[0 + i * 3] + '->' + rows[1 + i * 3])
+                n += 1
+            else:
+                print(fn, rows[0 + i * 3], '?')
+    if n > 0:
+        with open(filename, 'w') as f:
+            f.write('\n'.join(rows))
+        return True
 
 
 def callback_sum_work(num, fn, filename, text, rows):
-    if rows[1]:
-        work[rows[1]] = work.get(rows[1], 0) + 1
+    for i in range(len(rows) // 3):
+        if rows[1 + i * 3]:
+            work[rows[1 + i * 3]] = work.get(rows[1 + i * 3], 0) + 1
 
 
 def fix():
