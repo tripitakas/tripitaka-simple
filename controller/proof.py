@@ -21,15 +21,19 @@ class MainHandler(BaseHandler):
 
 
 class PagesHandler(BaseHandler):
-    URL = r'/(block|column|char)/([A-Z]{2}|me)/?'
+    URL = [r'/(block|column|char)/([A-Z]{2}|me)/?',
+           r'/(block|column|char)/(me)/(\w+)']
 
-    def get(self, pos, kind):
+    def get(self, pos, kind, username=None):
         def get_icon(p):
             return path.join('icon', *p.split('_')[:-1], p + '.jpg')
 
         pos_type = '字切分' if pos == 'char' else '栏切分' if pos == 'block' else '列切分'
-        me = '\n' + (self.current_user or self.get_ip()) + '\n'
+        cur_user = self.current_user or self.get_ip()
+        username = username or cur_user
+        me = '\n' + username + '\n'
         self.unlock_timeout(pos, me)
+        username = '我' if username == cur_user else username
 
         if kind == 'me':
             pages = []
@@ -42,12 +46,12 @@ class PagesHandler(BaseHandler):
                     if me in text:
                         pages.append(fn)
             pages.sort()
-            return self.render('pages.html', kinds=kinds, pages=pages, count=len(pages),
+            return self.render('pages.html', kinds=kinds, pages=pages, count=len(pages), username=username,
                                pos_type=pos_type, pos=pos, kind=kind, get_icon=get_icon)
 
         index = load_json(path.join('static', 'index.json'))
         pages, count = self.pick_pages(pos, index[kind], 12)
-        self.render('pages.html', kinds=kinds, pages=pages, count=count,
+        self.render('pages.html', kinds=kinds, pages=pages, count=count, username=username,
                     pos_type=pos_type, pos=pos, kind=kind, get_icon=get_icon)
 
     @staticmethod

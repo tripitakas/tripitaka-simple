@@ -393,7 +393,7 @@
           // 刚开始改动，记下原来的图框并变暗，改完将删除，或放弃改动时(cancelDrag)恢复属性
           if (!state.originBox) {
             state.originBox = state.edit;
-            state.originBox.attr({stroke: 'rgba(0, 255, 0, 0.8)', 'opacity': 0.5});
+            state.originBox.attr({stroke: 'rgba(0, 255, 0, 0.8)', 'opacity': 0.1});
           } else {
             state.edit.remove();
           }

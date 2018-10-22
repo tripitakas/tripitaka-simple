@@ -18,8 +18,14 @@ define('num_processes', default=4, help='sub-processes count', type=int)
 
 
 def make_app():
-    handlers = [p.MainHandler, p.PagesHandler, p.CutProofHandler]
-    return Application([(h.URL, h) for h in handlers],
+    classes = [p.MainHandler, p.PagesHandler, p.CutProofHandler]
+    handlers = []
+    for cls in classes:
+        if isinstance(cls.URL, list):
+            handlers.extend([(s, cls) for s in cls.URL])
+        else:
+            handlers.append((cls.URL, cls))
+    return Application(handlers,
                        debug=options.debug,
                        compiled_template_cache=False,
                        static_path=path.join(BASE_DIR, 'static'),

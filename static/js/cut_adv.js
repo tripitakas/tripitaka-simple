@@ -3,6 +3,7 @@
 
   var data = $.cut.data;
   var fillColor = '#00f';
+  var allHide = false;
 
   function isOverlap(r1, r2, tol) {
     return r1.x + r1.width > r2.x + tol &&
@@ -29,20 +30,23 @@
       if (kind === 'large' || kind === 'small') {
         sizes = chars.map(function(c) {
           var r = c.shape.getBBox();
-          return c.ch !== '一' && r.width * r.height;
+          return r && c.ch !== '一' && r.width * r.height;
         }).filter(function(c) {
           return c;
         });
         sizes.sort();
         mean = sizes[parseInt(sizes.length / 2)];
       }
+      if (kind === 'all') {
+        allHide = !allHide;
+      }
 
       if (!test) {
         this.clearHighlight();
       }
       highlight = chars.map(function(c) {
-        if (c.shape) {
-          var r = c.shape.getBBox();
+        var r = c.shape && c.shape.getBBox();
+        if (r) {
           var degree = 0;
 
           if (kind === 'large') {
@@ -96,7 +100,7 @@
           return test ? [c.char_id, degree] : data.paper.rect(r.x, r.y, r.width, r.height)
             .initZoom().setAttr({
               stroke: 'transparent',
-              fill: $.cut.rgb_a(fillColor,
+              fill: kind === 'all' && allHide ? '#fff' : $.cut.rgb_a(fillColor,
                 degree >= 1.05 ? 0.8 :
                 degree >= 0.90 ? 0.65 :
                 degree >= 0.75 ? 0.5 :
