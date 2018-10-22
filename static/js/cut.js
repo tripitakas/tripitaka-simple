@@ -173,6 +173,60 @@
     scrolling: []                             // 防止多余滚动
   };
 
+  var undoData = {
+    d: {},
+    apply: null,
+
+    load: function (name, apply) {
+      this.apply = apply;
+      this.d = JSON.parse(localStorage.getItem('cutUndo') || '{}');
+      if (this.d.name !== name) {
+        this.d = {name: name, level: 1};
+      }
+      if (this.d.level === 1) {
+        this.d.stack = [$.cut.exportBoxes()];
+      } else {
+        this.apply(this.d.stack[this.d.level - 1]);
+      }
+    },
+    _save: function () {
+      localStorage.setItem('cutUndo', JSON.stringify(this.d));
+    },
+    change: function () {
+      this.d.stack.length = this.d.level;
+      this.d.stack.push($.cut.exportBoxes());
+      if (this.d.stack.length > 20) {
+        this.d.stack = this.d.stack.slice(this.d.stack.length - 20);
+      }
+      this.d.level = this.d.stack.length;
+      this._save();
+    },
+    undo: function () {
+      if (this.d.level > 1) {
+        var cid = $.cut.getCurrentCharID();
+        this.d.level--;
+        this.apply(this.d.stack[this.d.level - 1]);
+        this._save();
+        $.cut.switchCurrentBox(cid && $.cut.findCharById(cid).shape);
+      }
+    },
+    redo: function () {
+      if (this.d.level < this.d.stack.length) {
+        var cid = $.cut.getCurrentCharID();
+        this.d.level++;
+        this.apply(this.d.stack[this.d.level - 1]);
+        this._save();
+        $.cut.switchCurrentBox(cid && $.cut.findCharById(cid).shape);
+      }
+    },
+    canUndo: function () {
+      return this.d.level > 1;
+    },
+    canRedo: function () {
+      return this.d.level < this.d.stack.length;
+    }
+  };
+
   $.cut = {
     data: data,
     state: state,
@@ -470,30 +524,58 @@
         if (!b.char_id) {
           b.char_id = 'org' + idx;
         }
-        b.shape = data.paper.rect(b.x, b.y, b.w, b.h)
-          .attr({
-            stroke: rgb_a(data.normalColor, data.boxOpacity),
-            'stroke-width': 1.5 / data.ratioInitial
-            // fill: data.boxFill
-          })
-          .data('cid', b.char_id)
-          .data('char', b.ch);
+      });
+      data.width = p.width;
+      data.height = p.height;
+      data.chars = p.chars;
+      self._apply(p.chars, 1);
 
+      p.chars.forEach(function(b) {
         if (yMin > b.y - data.unit && xMin > b.x - data.unit) {
           yMin = b.y;
           xMin = b.x;
           leftTop = b.shape;
         }
       });
-
-      data.width = p.width;
-      data.height = p.height;
-      data.chars = p.chars;
       self.switchCurrentBox(leftTop);
       self.setRatio(1);
+      undoData.load(p.name, self._apply.bind(self));
 
       return data;
     },
+
+    _apply: function (chars, ratio) {
+      var self = this;
+      var s = ratio || data.ratio * data.ratioInitial;
+      data.chars.forEach(function(b) {
+        if (b.shape) {
+          b.shape.remove();
+          delete b.shape;
+        }
+      });
+      chars.forEach(function(b) {
+        var c = self.findCharById(b.char_id);
+        if (!c) {
+          c = JSON.parse(JSON.stringify(b));
+          data.chars.push(c);
+        }
+        c.shape = data.paper.rect(b.x * s, b.y * s, b.w * s, b.h * s).initZoom()
+          .setAttr({
+            stroke: rgb_a(data.normalColor, data.boxOpacity),
+            'stroke-width': 1.5 / data.ratioInitial
+            // fill: data.boxFill
+          })
+          .data('cid', b.char_id)
+          .data('char', b.ch);
+        if (!ratio) {
+        }
+      });
+    },
+
+    undo: undoData.undo.bind(undoData),
+    redo: undoData.redo.bind(undoData),
+    canUndo: undoData.canUndo.bind(undoData),
+    canRedo: undoData.canRedo.bind(undoData),
 
     _changeBox: function(src, dst) {
       if (!dst) {
@@ -523,6 +605,7 @@
       }
       state.originBox = null;
       state.edit = state.down = null;
+      undoData.change();
       notifyChanged(dst, 'changed');
       this.switchCurrentBox(dst);
 
@@ -578,7 +661,7 @@
       var r = function(v) {
         return Math.round(v * 10 / data.ratio / data.ratioInitial) / 10;
       };
-      return data.chars.filter(function(c) { return c.shape; }).map(function(c) {
+      return data.chars.filter(function(c) { return c.shape && c.shape.getBBox(); }).map(function(c) {
         var box = c.shape.getBBox();
         c = $.extend({}, c, {x: r(box.x), y: r(box.y), w: r(box.width), h: r(box.height)});
         delete c.shape;
@@ -627,6 +710,7 @@
         }
         info.shape = null;
         el.remove();
+        undoData.change();
         notifyChanged(el, 'removed');
 
         return info.char_id;

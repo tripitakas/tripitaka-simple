@@ -16,6 +16,15 @@
     if (name && name.length > 0) {
       $('.user').text(name);
       $.cookie('cut-user', name);
+      localStorage.setItem('cut-user', name);
     }
   }
+  var oldUser = localStorage.getItem('cut-user');
+  {% if not user or user == '匿名' %}
+  if (oldUser.length) {
+    changeNickname(oldUser);
+  }
+  {% else %}
+  localStorage.setItem('cut-user', '{{user}}');
+  {% end %}
 </script>

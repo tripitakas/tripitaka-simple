@@ -98,7 +98,7 @@ class CutProofHandler(BaseHandler):
         if path.exists(lock_file):
             with open(lock_file) as f:
                 text = f.read()
-                if text and self.get_ip() not in text:
+                if text and self.get_ip() not in text and (self.current_user or '匿名') not in text:
                     return self.write('error:别人已锁定了本页面，请返回选择其他页面。')
         if not path.exists(lock_file):
             with open(lock_file, 'w') as f:
