@@ -13,7 +13,7 @@ import controller.proof as p
 
 BASE_DIR = path.dirname(__file__)
 define('port', default=8001, help='run port', type=int)
-define('debug', default=options.port != 80, help='debug mode', type=bool)
+define('debug', default=True, help='debug mode', type=bool)
 define('num_processes', default=4, help='sub-processes count', type=int)
 
 
@@ -31,7 +31,7 @@ if __name__ == '__main__':
     try:
         app = make_app()
         server = HTTPServer(app, xheaders=True)
-        if options.debug:
+        if options.debug and options.port != 80:
             server.listen(options.port)
             fork_id = 0
         else:

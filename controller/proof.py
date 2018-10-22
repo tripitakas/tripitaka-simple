@@ -9,7 +9,7 @@ import random
 import time
 
 BASE_DIR = path.dirname(path.dirname(__file__))
-kinds = ['GL', 'JX', 'QL', 'YB']
+kinds = dict(GL='高丽藏', JX='嘉兴藏', QL='乾隆藏', YB='永乐北藏')
 
 
 class MainHandler(BaseHandler):
@@ -61,9 +61,9 @@ class PagesHandler(BaseHandler):
                     text = f.read()
                 if 'saved' not in text:
                     t = path.getctime(filename)
-                    if now - t > 3600 or me in text:
+                    if now - t > 60 * 30 or me in text:
                         remove(filename)
-                        logging.warning('%s unlocked: %s' % (fn, text))
+                        logging.warning('%s unlocked: %s' % (fn, text.replace('\n', '|')))
 
     @staticmethod
     def get_lock_file(pos, name):
