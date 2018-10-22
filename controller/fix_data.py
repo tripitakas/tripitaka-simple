@@ -1,13 +1,17 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from os import path, listdir, remove
+from os import path, listdir
 import re
 from operator import itemgetter
+from controller.base import BaseHandler
 
-data_path = path.dirname(__file__)
+
+data_path = path.join(path.dirname(path.dirname(__file__)), 'data')
 lock_path = path.join(data_path, 'lock', 'char')
 log_file = path.join(data_path, '..', 'log', 'app.log')
+ip_user = {}
+work = {}
 
 
 def clean_log():
@@ -29,18 +33,10 @@ def scan_lock_files(callback):
                 rows = text.split('\n')
             if callback(num, fn, filename, text, rows):
                 num += 1
-        else:
-            remove(filename)
 
 
 def callback_get_ip_users(num, fn, filename, text, rows):
-    if rows[1] == 'saved':
-        rows.insert(1, '')
-        with open(filename, 'w') as f:
-            f.write('\n'.join(rows))
-    if 'saved' not in text:
-        remove(filename)
-    elif rows[1]:
+    if 'saved' in text and rows[1]:
         ip_user[rows[0]] = rows[1]
         return True
 
@@ -55,8 +51,7 @@ def callback_anonymous(num, fn, filename, text, rows):
                     f.write('\n'.join(rows))
             return True
         else:
-            print(fn, rows[0])
-    # remove(filename)
+            print(fn, rows[0], '?')
 
 
 def callback_sum_work(num, fn, filename, text, rows):
@@ -64,9 +59,23 @@ def callback_sum_work(num, fn, filename, text, rows):
         work[rows[1]] = work.get(rows[1], 0) + 1
 
 
-ip_user, work = {}, {}
-scan_lock_files(callback_get_ip_users)
-scan_lock_files(callback_anonymous)
-scan_lock_files(callback_sum_work)
-print('\n'.join(['%s\t%s' % (u, c) for u, c in sorted(work.items(), key=itemgetter(1), reverse=True)]))
-clean_log()
+def fix():
+    work.clear()
+    scan_lock_files(callback_get_ip_users)
+    scan_lock_files(callback_anonymous)
+    scan_lock_files(callback_sum_work)
+    return [(u, c) for u, c in sorted(work.items(), key=itemgetter(1), reverse=True)]
+
+
+class RankingHandler(BaseHandler):
+    URL = r'/ranking'
+
+    def get(self):
+        ranking = fix()
+        items = ['<li><a href="/char/me/{0}">{0}</a> {1}</li>'.format(n, c) for n, c in ranking]
+        self.write('<h3>校对排行榜</h3><ol>%s</ol>' % ''.join(items))
+
+
+if __name__ == '__main__':
+    print(fix())
+    clean_log()
