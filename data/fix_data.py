@@ -3,6 +3,7 @@
 
 from os import path, listdir, remove
 import re
+from operator import itemgetter
 
 data_path = path.dirname(__file__)
 lock_path = path.join(data_path, 'lock', 'char')
@@ -33,6 +34,10 @@ def scan_lock_files(callback):
 
 
 def callback_get_ip_users(num, fn, filename, text, rows):
+    if rows[1] == 'saved':
+        rows.insert(1, '')
+        with open(filename, 'w') as f:
+            f.write('\n'.join(rows))
     if 'saved' not in text:
         remove(filename)
     elif rows[1]:
@@ -54,7 +59,14 @@ def callback_anonymous(num, fn, filename, text, rows):
     # remove(filename)
 
 
-ip_user = {}
+def callback_sum_work(num, fn, filename, text, rows):
+    if rows[1]:
+        work[rows[1]] = work.get(rows[1], 0) + 1
+
+
+ip_user, work = {}, {}
 scan_lock_files(callback_get_ip_users)
 scan_lock_files(callback_anonymous)
+scan_lock_files(callback_sum_work)
+print('\n'.join(['%s\t%s' % (u, c) for u, c in sorted(work.items(), key=itemgetter(1), reverse=True)]))
 clean_log()
