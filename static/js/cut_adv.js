@@ -21,7 +21,7 @@
       delete data.highlight;
     },
 
-    highlightBoxes: function(kind, test) {
+    highlightBoxes: function(kind, test, retain) {
       var chars = data.chars.filter(function(c) {
         return c.shape;
       });
@@ -37,7 +37,7 @@
         sizes.sort();
         mean = sizes[parseInt(sizes.length / 2)];
       }
-      if (kind === 'all') {
+      if (kind === 'all' && !retain) {
         allHide = !allHide;
       }
 

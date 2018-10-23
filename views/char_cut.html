@@ -109,11 +109,11 @@
   });
 
   $.cut.onBoxChanged(function (char, box, reason) {
-    if (reason === 'removed' || reason === 'added') {
+    if (reason === 'removed' || reason === 'added' || reason === 'changed') {
       var type = $.cut.data.hlType;
-      if (type && type !== 'all') {
-        $.cut.switchHighlightBoxes(type);
-        $.cut.switchHighlightBoxes(type);
+      if (type) {
+        $.cut.clearHighlight();
+        $.cut.highlightBoxes(type, false, true);
       }
     }
     showHighLightCount();
