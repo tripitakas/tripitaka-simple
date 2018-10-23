@@ -386,7 +386,7 @@
 
       var mouseHover = function(e) {
         var pt = getPoint(e);
-        var box = self.findBoxByPoint(pt);
+        var box = e.shiftKey ? null : self.findBoxByPoint(pt, e.altKey);
 
         if (state.hover !== box) {
           self.hoverOut(state.hover);
@@ -418,7 +418,11 @@
         state.downOrigin = state.down = getPoint(e);
 
         // 鼠标略过控制点时，当前字框的控制点不能被选中，则切换为另外已亮显热点控制点的字框
-        if ((!state.edit || state.editHandle.index < 0) && !state.lockBox) {
+        var lockBox = state.lockBox || e.altKey;
+        if (e.shiftKey) {
+          self.switchCurrentBox(null);
+        }
+        else if ((!state.edit || state.editHandle.index < 0) && !lockBox) {
           self.switchCurrentBox(state.hover);
         }
         // 检测可以拖动当前字框的哪个控制点，能拖动则记下控制点的拖动起始位置
@@ -426,7 +430,7 @@
         if (state.editHandle.index >= 0) {
           state.down = getHandle(state.edit, state.editHandle.index);
         }
-        else if (!state.lockBox) {
+        else if (!lockBox) {
           // 不能拖动当前字框的控制点，则取消当前字框的高亮显示，准备画出一个新字框
           self.hoverOut(state.edit);
           state.edit = null;
@@ -635,7 +639,7 @@
       });
     },
 
-    findBoxByPoint: function(pt) {
+    findBoxByPoint: function(pt, lockBox) {
       var ret = null, dist = 1e5, d, i, j, el;
       var isInRect = function(el, tol) {
         var box = el.getBBox();
@@ -645,7 +649,7 @@
           pt.y < box.y + box.height + tol;
       };
 
-      if (state.edit && (isInRect(state.edit, 10) || state.lockBox)) {
+      if (state.edit && (isInRect(state.edit, 10) || lockBox || state.lockBox)) {
         return state.edit;
       }
       for (i = 0; i < data.chars.length; i++) {
