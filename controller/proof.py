@@ -43,7 +43,7 @@ class PagesHandler(BaseHandler):
                 if '_' in fn and '.' not in fn:
                     with open(filename) as f:
                         text = f.read()
-                    if me in text:
+                    if me in text and fn not in pages:
                         pages.append(fn)
             pages.sort()
             return self.render('pages.html', kinds=kinds, pages=pages, count=len(pages), username=username,
