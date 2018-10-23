@@ -6,6 +6,7 @@
     <ul class="dropdown-menu">
       <li><input class="form-control" placeholder="英文或拼音昵称" onchange="changeNickname(this.value)"></li>
       <li role="separator" class="divider"></li>
+      <li><a href="#" id="last-cut">上次校对的页</a></li>
       <li><a href="/{{pos}}/me">我校对的页</a></li>
       <li><a href="/ranking">校对排行榜</a></li>
     </ul>
@@ -20,6 +21,7 @@
   $('#key-map').click(function () {
     $('#key-map').hide();
   });
+
   function changeNickname(name) {
     name = name.replace(/[^\w_]/g, '');
     if (name && name.length > 0) {
@@ -28,12 +30,22 @@
       localStorage.setItem('cut-user', name);
     }
   }
-  var oldUser = localStorage.getItem('cut-user');
-  {% if not user or user == '匿名' %}
-  if (oldUser && oldUser.length) {
-    changeNickname(oldUser);
-  }
-  {% else %}
-  localStorage.setItem('cut-user', '{{user}}');
-  {% end %}
+  (function () {
+    var undo = JSON.parse(localStorage.getItem('cutUndo') || '{}');
+    if (undo.name) {
+      var name = undo.name.split('_');
+      $('#last-cut').attr({href: '/' + name[0] + '/' + name[1] + '/' + name.slice(2).join('_')});
+    } else {
+      $('#last-cut').remove();
+    }
+
+    var oldUser = localStorage.getItem('cut-user');
+    {% if not user or user == '匿名' %}
+    if (oldUser && oldUser.length) {
+      changeNickname(oldUser);
+    }
+    {% else %}
+    localStorage.setItem('cut-user', '{{user}}');
+    {% end %}
+  }());
 </script>
