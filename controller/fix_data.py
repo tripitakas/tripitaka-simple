@@ -99,13 +99,15 @@ class HistoryHandler(BaseHandler):
                     user = rows[1 + i * 4] or rows[i * 4]
                     if user and user not in users:
                         users.add(user)
-                        pairs.append((user, rows[2 + i * 4][5:16]))
-                items.append((fn, ''.join(['<span>{0} <small>{1}</small></span>'.format(n, t) for n, t in pairs])))
+                        pairs.append((user, rows[2 + i * 4][5:19]))
+                items.append((fn, ''.join(['<span>{0} <small>{1}</small></span>'.format(n, t) for n, t in pairs]),
+                              pairs and pairs[0][1]))
 
         items = []
         name = name[:2].upper() + re.sub(r'-|\s', '_', name[2:])
         scan_lock_files(callback_get, path.join(data_path, 'lock', 'char' + h[1:]))
-        items = ['<li><span>{0}</span> {1}</li>'.format(fn, t) for fn, t in items]
+        items.sort(key=itemgetter(2))
+        items = ['<li><span>{0}</span> {1}</li>'.format(fn, s) for fn, s, t in items]
         css = 'li>span{display: inline-block; min-width: 120px; margin-right: 10px}'
         self.write('<style>%s</style><h3>页面校对历史</h3><ol>%s</ol>' % (css, ''.join(items)))
 
