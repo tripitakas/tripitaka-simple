@@ -23,10 +23,13 @@ def clean_log():
             f.writelines(rows)
 
 
-def scan_lock_files(callback):
+def scan_lock_files(callback, in_path=None):
     num = 0
-    for fn in listdir(lock_path):
-        filename = path.join(lock_path, fn)
+    in_path = in_path or lock_path
+    if not path.exists(in_path):
+        return
+    for fn in listdir(in_path):
+        filename = path.join(in_path, fn)
         if '.' not in fn and '_' in fn:
             with open(filename) as f:
                 text = f.read()
@@ -82,6 +85,29 @@ class RankingHandler(BaseHandler):
         ranking = fix()
         items = ['<li><a href="/char/me/{0}">{0}</a> {1}</li>'.format(n, c) for n, c in ranking]
         self.write('<h3>校对排行榜</h3><ol>%s</ol>' % ''.join(items))
+
+
+class HistoryHandler(BaseHandler):
+    URL = r'/(h\d?)/([A-Za-z0-9-_ ]+)'
+
+    def get(self, h, name):
+        def callback_get(num, fn, filename, text, rows):
+            if name in fn:
+                pairs = []
+                users = set()
+                for i in range(max(len(rows) // 4, 1)):
+                    user = rows[1 + i * 4] or rows[i * 4]
+                    if user and user not in users:
+                        users.add(user)
+                        pairs.append((user, rows[2 + i * 4][5:16]))
+                items.append((fn, ''.join(['<span>{0} <small>{1}</small></span>'.format(n, t) for n, t in pairs])))
+
+        items = []
+        name = name[:2].upper() + re.sub(r'-|\s', '_', name[2:])
+        scan_lock_files(callback_get, path.join(data_path, 'lock', 'char' + h[1:]))
+        items = ['<li><span>{0}</span> {1}</li>'.format(fn, t) for fn, t in items]
+        css = 'li>span{display: inline-block; min-width: 120px; margin-right: 10px}'
+        self.write('<style>%s</style><h3>页面校对历史</h3><ol>%s</ol>' % (css, ''.join(items)))
 
 
 if __name__ == '__main__':
