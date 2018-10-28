@@ -88,7 +88,7 @@ class RankingHandler(BaseHandler):
 
 
 class HistoryHandler(BaseHandler):
-    URL = r'/(h\d?)/([A-Za-z0-9-_ ]+)'
+    URL = r'/(h\d?)/([A-Za-z0-9-_ ]*)'
 
     def get(self, h, name):
         def callback_get(num, fn, filename, text, rows):
@@ -109,7 +109,7 @@ class HistoryHandler(BaseHandler):
         items.sort(key=itemgetter(2))
         items = ['<li><span>{0}</span> {1}</li>'.format(fn, s) for fn, s, t in items]
         css = 'li>span{display: inline-block; min-width: 120px; margin-right: 10px}'
-        self.write('<style>%s</style><h3>页面校对历史</h3><ol>%s</ol>' % (css, ''.join(items)))
+        self.write('<style>%s</style><h3>页面校对历史 (%d 个页面)</h3><ol>%s</ol>' % (css, len(items), ''.join(items)))
 
 
 if __name__ == '__main__':
