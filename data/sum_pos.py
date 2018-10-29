@@ -64,20 +64,34 @@ def callback_sum_changed_box(num, filename, p):
 
 
 if __name__ == '__main__':
-    if 1:
-        scan_pos_files(0, pos_path, callback_sum_new_box)
-        new_counts = sorted(new_counts.items(), key=itemgetter(1), reverse=True)
-        for i, (n, c) in enumerate(new_counts):
-            print('%d\t%s\t%s\t%d' % (i + 1, n[:2], n[3:], c))
-    if 1:
-        scan_pos_files(0, pos_path, callback_sum_changed_box)
-        changes = sorted(changes.items(), key=itemgetter(1), reverse=True)
-        for i, (n, c) in enumerate(changes):
-            print('%d\t%s\t%s\t%d' % (i + 1, n[:2], n[3:], c))
-    if 1:
-        scan_lock_files(callback_sum_work)
-        page_users = sorted(page_users.items(), key=itemgetter(1), reverse=True)
-        new_counts, changes = dict(new_counts), dict(changes)
-        for i, (n, (c, s)) in enumerate(page_users):
-            print('%d\t%s\t%s\t%d\t%d\t%d\t%s' % (
-                i + 1, n[:2], n[3:], c, new_counts.get(n, 0), changes.get(n, 0), s))
+    lines = []
+    scan_pos_files(0, pos_path, callback_sum_new_box)
+    new_counts = sorted(new_counts.items(), key=itemgetter(1), reverse=True)
+    for i, (n, c) in enumerate(new_counts):
+        s = '%d\t%s\t%s\t%d' % (i + 1, n[:2], n[3:], c)
+        print(s)
+        lines.append(s)
+    with open('new_box.txt', 'w') as f:
+        f.write('\n'.join(lines))
+
+    lines = []
+    scan_pos_files(0, pos_path, callback_sum_changed_box)
+    changes = sorted(changes.items(), key=itemgetter(1), reverse=True)
+    for i, (n, c) in enumerate(changes):
+        s = '%d\t%s\t%s\t%d' % (i + 1, n[:2], n[3:], c)
+        print(s)
+        lines.append(s)
+    with open('changed_box.txt', 'w') as f:
+        f.write('\n'.join(lines))
+
+    lines = []
+    scan_lock_files(callback_sum_work)
+    page_users = sorted(page_users.items(), key=itemgetter(1), reverse=True)
+    new_counts, changes = dict(new_counts), dict(changes)
+    for i, (n, (c, s)) in enumerate(page_users):
+        s = '%d\t%s\t%s\t%d\t%d\t%d\t%s' % (
+            i + 1, n[:2], n[3:], c, new_counts.get(n, 0), changes.get(n, 0), s)
+        print(s)
+        lines.append(s)
+    with open('work.txt', 'w') as f:
+        f.write('\n'.join(lines))
