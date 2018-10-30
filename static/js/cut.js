@@ -505,23 +505,9 @@
       }
 
       var xMin = 1e5, yMin= 1e5, leftTop = null;
-      var meanWidth = [], meanHeight = [];
 
       if (typeof p.chars === 'string') {
         p.chars = JSON.parse(decodeHtml(p.chars));
-      }
-
-      if (p.removeSmallBoxes) {
-        p.chars.forEach(function (b) {
-          meanWidth.push(b.w + 1000);
-          meanHeight.push(b.h + 1000)
-        });
-        meanWidth.sort();
-        meanHeight.sort();
-        meanWidth = meanWidth.slice(parseInt(meanWidth.length * 0.8));
-        meanHeight = meanHeight.slice(parseInt(meanHeight.length * 0.8));
-        meanWidth = meanWidth[parseInt(meanWidth.length / 2)] - 1000;
-        meanHeight = meanHeight[parseInt(meanHeight.length / 2)] - 1000;
       }
 
       p.chars.forEach(function(b, idx) {
@@ -535,7 +521,7 @@
       data.width = p.width;
       data.height = p.height;
       data.chars = p.chars;
-      data.removeSmall = p.removeSmallBoxes && [meanWidth, meanHeight];
+      data.removeSmall = p.removeSmallBoxes && [40, 40];
       self._apply(p.chars, 1);
 
       p.chars.forEach(function(b) {

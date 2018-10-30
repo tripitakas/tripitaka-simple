@@ -30,7 +30,7 @@ def scan_lock_files(callback):
 def callback_sum_work(num, fn, filename, text, rows):
     users = set()
     for i in range(max(len(rows) // 4, 1)):
-        user = rows[1 + i * 4]
+        user = rows[1 + i * 4] or rows[0 + i * 4]
         if user and user not in users:
             users.add(user)
     page_users[fn] = (len(users), '\t'.join(list(users)))
@@ -85,13 +85,25 @@ if __name__ == '__main__':
         f.write('\n'.join(lines))
 
     lines = []
+    work = {}
     scan_lock_files(callback_sum_work)
     page_users = sorted(page_users.items(), key=itemgetter(1), reverse=True)
     new_counts, changes = dict(new_counts), dict(changes)
-    for i, (n, (c, s)) in enumerate(page_users):
+    counts = {}
+    for i, (n, (c, person)) in enumerate(page_users):
+        kind, page, person_count = n[:2], n[3:], c
         s = '%d\t%s\t%s\t%d\t%d\t%d\t%s' % (
-            i + 1, n[:2], n[3:], c, new_counts.get(n, 0), changes.get(n, 0), s)
+            i + 1, kind, page, person_count, new_counts.get(n, 0), changes.get(n, 0), person)
         print(s)
         lines.append(s)
+        work[kind] = work.get(kind, {})
+        for p in person.split('\t'):
+            work[kind][p] = work[kind].get(p, 0) + 1
+            counts[p] = counts.get(p, 0) + 1
     with open('work.txt', 'w') as f:
         f.write('\n'.join(lines))
+    with open('work_count.txt', 'w') as f:
+        f.write('校对者\t页数\t%s\n' % '\t'.join(work.keys()))
+        counts = sorted(list(counts.items()), key=itemgetter(1), reverse=True)
+        for p in counts:
+            f.write('%s\t%d\t%s\n' % (p[0], p[1], '\t'.join([str(work[kind].get(p[0], 0)) for kind in work.keys()])))
