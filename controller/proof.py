@@ -24,6 +24,20 @@ class PagesHandler(BaseHandler):
     URL = [r'/(block|column|char)/([A-Z]{2}|me)/?',
            r'/(block|column|char)/(me)/(\w+)']
 
+    @staticmethod
+    def get_my_pages(pos, username):
+        pages = []
+        me = '\n' + username + '\n'
+        lock_path = path.join(BASE_DIR, 'data', 'lock', pos)
+        for fn in listdir(lock_path):
+            filename = path.join(lock_path, fn)
+            if '_' in fn and '.' not in fn:
+                with open(filename) as f:
+                    text = f.read()
+                if me in text and fn not in pages:
+                    pages.append(fn)
+        return sorted(pages)
+
     def get(self, pos, kind, username=None):
         def get_icon(p):
             return path.join('icon', *p.split('_')[:-1], p + '.jpg')
@@ -36,16 +50,7 @@ class PagesHandler(BaseHandler):
         username = '我' if username == cur_user else username
 
         if kind == 'me':
-            pages = []
-            lock_path = path.join(BASE_DIR, 'data', 'lock', pos)
-            for fn in listdir(lock_path):
-                filename = path.join(lock_path, fn)
-                if '_' in fn and '.' not in fn:
-                    with open(filename) as f:
-                        text = f.read()
-                    if me in text and fn not in pages:
-                        pages.append(fn)
-            pages.sort()
+            pages = self.get_my_pages(pos, username)
             return self.render('pages.html', kinds=kinds, pages=pages, count=len(pages), username=username,
                                pos_type=pos_type, pos=pos, kind=kind, get_icon=get_icon)
 
