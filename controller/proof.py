@@ -42,6 +42,10 @@ class PagesHandler(BaseHandler):
         def get_icon(p):
             return path.join('icon', *p.split('_')[:-1], p + '.jpg')
 
+        def get_info(p):
+            filename = path.join(BASE_DIR, 'static', 'char-pos', *p.split('_')[:-1], p + '.json')
+            return load_json(filename)
+
         pos_type = '字切分' if pos == 'char' else '栏切分' if pos == 'block' else '列切分'
         cur_user = self.current_user or self.get_ip()
         username = username or cur_user
@@ -52,12 +56,12 @@ class PagesHandler(BaseHandler):
         if kind == 'me':
             pages = self.get_my_pages(pos, username)
             return self.render('pages.html', kinds=kinds, pages=pages, count=len(pages), username=username,
-                               pos_type=pos_type, pos=pos, kind=kind, get_icon=get_icon)
+                               pos_type=pos_type, pos=pos, kind=kind, get_icon=get_icon, get_info=get_info)
 
         index = load_json(path.join('static', 'index.json'))
         pages, count = self.pick_pages(pos, index[kind], 12)
         self.render('pages.html', kinds=kinds, pages=pages, count=count, username=username,
-                    pos_type=pos_type, pos=pos, kind=kind, get_icon=get_icon)
+                    pos_type=pos_type, pos=pos, kind=kind, get_icon=get_icon, get_info=get_info)
 
     @staticmethod
     def unlock_timeout(pos, me):

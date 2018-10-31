@@ -170,7 +170,6 @@
     editStroke: 0,                            // 当前编辑字框原来的线色
     editHandle: {handles: [], index: -1, fill: 0}, // 当前编辑字框的控制点
 
-    lockBox: null,                            // 按n新增字框后就自动锁定，不能点击或拖动其他字框，只有按方向键或ESC键才解锁
     scrolling: []                             // 防止多余滚动
   };
 
@@ -538,6 +537,13 @@
       return data;
     },
 
+    switchPage: function (name, pageData) {
+      this.setRatio();
+      state.hover = state.edit = null;
+      $.extend(data, pageData);
+      undoData.load(name, this._apply.bind(this));
+    },
+
     _apply: function (chars, ratio) {
       var self = this;
       var s = ratio || data.ratio * data.ratioInitial;
@@ -847,6 +853,9 @@
       this.cancelDrag();
       this.hoverOut(state.hover);
       this.hoverOut(state.edit);
+      if (data.blockMode && ratio !== 1) {
+        return;
+      }
 
       data.ratio = ratio;
       ratio *= data.ratioInitial;
