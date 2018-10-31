@@ -662,11 +662,12 @@
       return ret;
     },
 
-    exportBoxes: function() {
+    exportBoxes: function(pageData) {
       var r = function(v) {
-        return Math.round(v * 10 / data.ratio / data.ratioInitial) / 10;
+        return Math.round(v * 10 / pageData.ratio / pageData.ratioInitial) / 10;
       };
-      return data.chars.filter(function(c) { return c.shape && c.shape.getBBox(); }).map(function(c) {
+      pageData = pageData || data;
+      return pageData.chars.filter(function(c) { return c.shape && c.shape.getBBox(); }).map(function(c) {
         var box = c.shape.getBBox();
         c = $.extend({}, c, {x: r(box.x), y: r(box.y), w: r(box.width), h: r(box.height)});
         delete c.shape;
