@@ -9,98 +9,103 @@
   <title>{{imgname}}</title>
   <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
   <link rel="shortcut icon" type="image/x-icon" href="/static/favicon.ico">
-  
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+
+  <link href="{{ static_url('css/bootstrap.min.css') }}" rel="stylesheet">
   <link href="{{ static_url('css/cut.css') }}" rel="stylesheet">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+  <script src="{{ static_url('js/vendor/jquery.js') }}"></script>
+  <script src="{{ static_url('js/vendor/jquery.cookie.min.js') }}"></script>
 </head>
 
 <body>
 
-<div id="top-nav" class="container-fluid navbar navbar-xs navbar-inverse navbar-fixed-top">
-  <div class="navbar-header">
-    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
-            data-target="#bs-navbar-collapse-1" aria-expanded="false">
-      <span class="sr-only">Toggle navigation</span>
-      <span class="icon-bar"></span>
-      <span class="icon-bar"></span>
-      <span class="icon-bar"></span>
-    </button>
-    <a class="navbar-brand" href="/{{pos}}/{{kind}}">{{pos_type}}校对 <span class="glyphicon glyphicon-th" aria-hidden="true"></span></a>
+  <div id="top-nav" class="container-fluid navbar navbar-xs navbar-inverse navbar-fixed-top">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-navbar-collapse-1"
+        aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="/{{pos}}/{{kind}}"><span class="glyphicon glyphicon-th" aria-hidden="true"></span>
+        {{pos_type}}校对 </a>
+    </div>
+
+    <!-- Collect the nav links, forms, and other content for toggling -->
+    <div class="collapse navbar-collapse" id="bs-navbar-collapse-1">
+      <ul class="nav navbar-nav">
+        <button type="button" class="btn btn-default" id="hl-all">高亮<sup class="count"></sup></button>
+        <button type="button" class="btn btn-primary navbar-btn" id="save">保存</button>
+        <button type="button" class="btn btn-primary navbar-btn" id="submit">提交</button>
+      </ul>
+      {% include nav-right.html %}
+    </div>
   </div>
 
-  <!-- Collect the nav links, forms, and other content for toggling -->
-  <div class="collapse navbar-collapse" id="bs-navbar-collapse-1">
-    <ul class="nav navbar-nav">
-      <button type="button" class="btn btn-default" id="hl-all">高亮<sup class="count"></sup></button>
-      <button type="button" class="btn btn-primary navbar-btn" id="save">保存</button>
-      <button type="button" class="btn btn-primary navbar-btn" id="submit">提交</button>
-    </ul>
-    {% include nav-right.html %}
+  <div id="body-content">
+    <div id="holder"></div>
   </div>
-</div>
 
-<div id="body-content">
-  <div id="holder"></div>
-</div>
+  <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script> -->
+  <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.0/sweetalert.min.js"></script> -->
+  <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/raphael/2.2.7/raphael.js"></script> -->
+  <script src="{{ static_url('js/vendor/bootstrap.min.js') }}"></script>
+  <script src="{{ static_url('js/vendor/sweetalert.min.js') }}"></script>
+  <script src="{{ static_url('js/vendor/raphael.js') }}"></script>
+  <script src="{{ static_url('js/vendor/raphael.zoom.js') }}"></script>
+  <script src="{{ static_url('js/vendor/jquery.mapkey.js') }}"></script>
+  <script src="{{ static_url('js/cut.js') }}"></script>
+  <script src="{{ static_url('js/cut_keys.js') }}"></script>
+  <script src="{{ static_url('js/cut_adv.js') }}"></script>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.0/sweetalert.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/raphael/2.2.7/raphael.js"></script>
-<script src="{{ static_url('js/vendor/raphael.zoom.js') }}"></script>
-<script src="{{ static_url('js/vendor/jquery.mapkey.js') }}"></script>
-<script src="{{ static_url('js/cut.js') }}"></script>
-<script src="{{ static_url('js/cut_keys.js') }}"></script>
-<script src="{{ static_url('js/cut_adv.js') }}"></script>
-
-<script>
-  $.cut.create({
-    blockMode: true,
-    name: '{{pos}}_{{imgname}}',
-    width: {{imgsize['width']}},
-    height: {{imgsize['height']}},
-    holder: 'holder',
-    image: "{{static_url(get_img(imgname))}}",
-    chars: '{{blocks if pos=="block" else columns}}'
+  <script>
+    $.cut.create({
+      blockMode: true,
+      name: '{{pos}}_{{imgname}}',
+      width: {{ imgsize['width'] }},
+      height: {{ imgsize['height'] }},
+      holder: 'holder',
+      image: "{{static_url(get_img(imgname))}}",
+      chars: '{{blocks if pos=="block" else columns}}'
   });
 
-  $.cut.bindKeys();
+    $.cut.bindKeys();
 
-  function showHighLightCount() {
-    $('#hl-all').each(function(i, btn) {
-      var type = btn.getAttribute('id').replace(/^.*-/, '');
+    function showHighLightCount() {
+      $('#hl-all').each(function (i, btn) {
+        var type = btn.getAttribute('id').replace(/^.*-/, '');
         var boxes = $.cut.highlightBoxes(type, true);
         $(btn).find('.count').text(boxes.length);
+      });
+    }
+    showHighLightCount();
+    $.cut.onBoxChanged(showHighLightCount);
+    $('#hl-all').click(function () {
+      $.cut.switchHighlightBoxes('all');
     });
-  }
-  showHighLightCount();
-  $.cut.onBoxChanged(showHighLightCount);
-  $('#hl-all').click(function() {
-    $.cut.switchHighlightBoxes('all');
-  });
 
-  function save(submit) {
-    $.post('/{{pos}}/{{kind}}/{{imgname}}', {
-      submit: submit,
-      boxes: JSON.stringify($.cut.exportBoxes())
-    }, function (res) {
-      if (/^error:/.test(res)) {
-        swal('操作失败', res.replace(/^error:/, ''), 'error', {buttons: false, timer: 1500});
-      } else {
-        swal('操作成功', '{{imgname}} ' + (submit ? '已提交成功。' : '已保存成功。'), 'success',
-           {buttons: false, timer: 1000})
-           .then(function () {
-             if (/^jump:/.test(res)) {
-               window.location.href = '/{{pos}}/{{kind}}/' + res.replace(/^jump:/, '');
-             }
-           });
-      }
-    });
-  }
-  $('#save').click(save.bind(null, false));
-  $('#submit').click(save.bind(null, true));
-</script>
+    function save(submit) {
+      $.post('/{{pos}}/{{kind}}/{{imgname}}', {
+        submit: submit,
+        boxes: JSON.stringify($.cut.exportBoxes())
+      }, function (res) {
+        if (/^error:/.test(res)) {
+          swal('操作失败', res.replace(/^error:/, ''), 'error', { buttons: false, timer: 1500 });
+        } else {
+          swal('操作成功', '{{imgname}} ' + (submit ? '已提交成功。' : '已保存成功。'), 'success',
+            { buttons: false, timer: 1000 })
+            .then(function () {
+              if (/^jump:/.test(res)) {
+                window.location.href = '/{{pos}}/{{kind}}/' + res.replace(/^jump:/, '');
+              }
+            });
+        }
+      });
+    }
+    $('#save').click(save.bind(null, false));
+    $('#submit').click(save.bind(null, true));
+  </script>
 
 </body>
+
 </html>

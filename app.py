@@ -8,7 +8,7 @@ from tornado.httpserver import HTTPServer
 from tornado.options import define, options
 import logging
 from os import path
-import controller.proof as p
+import controller.cut as cut
 from controller.fix_data import RankingHandler, HistoryHandler
 
 
@@ -19,7 +19,7 @@ define('num_processes', default=4, help='sub-processes count', type=int)
 
 
 def make_app():
-    classes = [p.MainHandler, p.PagesHandler, p.CutProofHandler, RankingHandler, HistoryHandler]
+    classes = [cut.MainHandler, cut.PagesHandler, cut.CutHandler, RankingHandler, HistoryHandler]
     handlers = []
     for cls in classes:
         if isinstance(cls.URL, list):
