@@ -12,7 +12,6 @@ BASE_DIR = path.dirname(path.dirname(__file__))
 # kinds = dict(GL='高丽藏', JX='嘉兴藏', QL='乾隆藏', YB='永乐北藏')
 kinds = dict(JX='嘉兴藏')
 
-
 class MainHandler(BaseHandler):
     URL = r'/'
 
@@ -43,7 +42,11 @@ class PagesHandler(BaseHandler):
         def get_icon(p):
             return path.join('icon', *p.split('_')[:-1], p + '.jpg')
 
-        pos_type='切字' if pos == 'char' else '切栏' if pos == 'block' else '切列'
+        def get_info(p):
+            filename = path.join(BASE_DIR, 'static', 'char-pos', *p.split('_')[:-1], p + '.json')
+            return load_json(filename)
+
+        pos_type = '字切分' if pos == 'char' else '栏切分' if pos == 'block' else '列切分'
         cur_user = self.current_user or self.get_ip()
         username = username or cur_user
         me = '\n' + username + '\n'
@@ -53,13 +56,13 @@ class PagesHandler(BaseHandler):
         if kind == 'me':
             pages = self.get_my_pages(pos, username)
             return self.render('pages.html', kinds=kinds, pages=pages, count=len(pages), username=username,
-                               pos_type=pos_type, pos=pos, kind=kind, get_icon=get_icon)
+                               pos_type=pos_type, pos=pos, kind=kind, get_icon=get_icon, get_info=get_info)
 
         index = load_json(path.join('static', 'index.json'))
         pages, count = self.pick_pages(pos, index[kind], 15)
-
-        self.render('pages.html', kinds=kinds, pages=pages, count=count, username=username,
-                    pos_type=pos_type, pos=pos, kind=kind, get_icon=get_icon)
+        html = 'block_pages.html' if pos == 'block' else 'char_pages.html'
+        self.render(html, kinds=kinds, pages=pages, count=count, username=username,
+                    pos_type=pos_type, pos=pos, kind=kind, get_icon=get_icon, get_info=get_info)
 
     @staticmethod
     def unlock_timeout(pos, me):
@@ -111,9 +114,8 @@ class CutHandler(BaseHandler):
         if not path.exists(lock_file):
             with open(lock_file, 'w') as f:
                 f.write('\n'.join([self.get_ip(), self.current_user, get_date_time()]))
-        
         self.render('char_cut.html' if pos == 'char' else 'block_cut.html',
-                    pos_type='切字' if pos == 'char' else '切栏' if pos == 'block' else '切列',
+                    pos_type='字切分' if pos == 'char' else '栏切分' if pos == 'block' else '列切分',
                     page=page, pos=pos, kind=kind, **page, get_img=get_img)
 
     def post(self, pos, kind, name):
@@ -144,9 +146,3 @@ class CutHandler(BaseHandler):
             pages = PagesHandler.pick_pages(pos, load_json(path.join('static', 'index.json'))[kind], 1)[0]
             self.write('jump:' + pages[0][3:] if pages else 'error:本类切分已全部校对完成。')
         self.write('')
-
-class CutApproveHandler(BaseHandler):
-    URL = r'/approve/block/(\w+)'
-    def post(self, pagecode):
-        print(pagecode)
-        self.write('{"status":"ok", "pageCode":"%s"}' % pagecode)

@@ -170,7 +170,6 @@
     editStroke: 0,                            // 当前编辑字框原来的线色
     editHandle: {handles: [], index: -1, fill: 0}, // 当前编辑字框的控制点
 
-    lockBox: null,                            // 按n新增字框后就自动锁定，不能点击或拖动其他字框，只有按方向键或ESC键才解锁
     scrolling: []                             // 防止多余滚动
   };
 
@@ -538,6 +537,13 @@
       return data;
     },
 
+    switchPage: function (name, pageData) {
+      this.setRatio();
+      state.hover = state.edit = null;
+      $.extend(data, pageData);
+      undoData.load(name, this._apply.bind(this));
+    },
+
     _apply: function (chars, ratio) {
       var self = this;
       var s = ratio || data.ratio * data.ratioInitial;
@@ -656,11 +662,12 @@
       return ret;
     },
 
-    exportBoxes: function() {
+    exportBoxes: function(pageData) {
       var r = function(v) {
-        return Math.round(v * 10 / data.ratio / data.ratioInitial) / 10;
+        return Math.round(v * 10 / pageData.ratio / pageData.ratioInitial) / 10;
       };
-      return data.chars.filter(function(c) { return c.shape && c.shape.getBBox(); }).map(function(c) {
+      pageData = pageData || data;
+      return pageData.chars.filter(function(c) { return c.shape && c.shape.getBBox(); }).map(function(c) {
         var box = c.shape.getBBox();
         c = $.extend({}, c, {x: r(box.x), y: r(box.y), w: r(box.width), h: r(box.height)});
         delete c.shape;
@@ -847,6 +854,9 @@
       this.cancelDrag();
       this.hoverOut(state.hover);
       this.hoverOut(state.edit);
+      if (data.blockMode && ratio !== 1) {
+        return;
+      }
 
       data.ratio = ratio;
       ratio *= data.ratioInitial;
