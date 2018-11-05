@@ -123,11 +123,11 @@ class CutHandler(BaseHandler):
         """
         保存一个或多个页面的切分校对数据.
 
-        保存一个页面时 name 为页名，请求体中需要有 boxes 框数组. 保存多个页面时 name 为空，请求体的 boxes 为页与框数组的字典.
+        保存一个页面时 name 为页名，请求体中需要有 boxes 框数组. 保存多个页面时 name 为空，请求体的 boxes 为[页,框数组]的数组.
         如果在请求体中指定了 submit 属性，则会输出下一个校对任务的页名（jump:name 格式，无藏别）.
         :param pos: 校对类型，block 为栏切分，column 为列切分，char 为字框切分
         :param kind: 藏别，例如 GL、JX
-        :param name: 页名，例如 GL_1047_1_5，请求体中需要有 boxes 框数组. 如果页名为空，则 boxes 为{name: boxes, ...}字典
+        :param name: 页名，例如 GL_1047_1_5，请求体中需要有 boxes 框数组. 如果页名为空，则 boxes 为[[name,boxes], ...]数组
         :return: None
         """
         submit = self.get_body_argument('submit') == 'true'
@@ -136,8 +136,8 @@ class CutHandler(BaseHandler):
         if name:
             self.save(pos, name, boxes)
         else:
-            for name, boxes in boxes.items():
-                self.save(pos, name, boxes)
+            for name, arr in boxes:
+                self.save(pos, name, arr)
 
         if submit:
             pages = PagesHandler.pick_pages(pos, load_json(path.join('static', 'index.json'))[kind], 1)[0]
