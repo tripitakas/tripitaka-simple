@@ -15,8 +15,9 @@
   <script src="{{ static_url('js/vendor/jquery.cookie.min.js') }}"></script>
 
   <style>
-    .rows img {
-      max-height: 400px;
+    .rows .thumbnail {
+      /* max-height: 600px; */
+      /* overflow: auto; */
     }
   </style>
 </head>
@@ -64,6 +65,7 @@
 
   <div id="body-content" style="padding-top: 80px;">
     <div class="rows container-fluid">
+
       <div class="panel panel-default">
         <div class="panel-heading">
           <h3 class="panel-title">
@@ -74,37 +76,43 @@
 
       {% for p in pages %}
       <div class="col-xs-6 col-md-4">
-        <div class="thumbnail">
-          <div class="caption text-center">
-            <a href="/{{pos}}/{{p[:2]}}/{{p[3:]}}">{{p}}</a>
-          </div>
-          <a href="/{{pos}}/{{p[:2]}}/{{p[3:]}}"><img src="{{static_url(get_icon(p))}}"></a>
-          <div class="caption text-center">
-            <P>
-              <button type="button" class="approve btn btn-primary navbar-btn" page-code={{p}}>通过</button>&nbsp
-              <a class="btn btn-primary navbar-btn" id="edit" href="/{{pos}}/{{p[:2]}}/{{p[3:]}}">修改</a>
-            </P>
+        <div class="thumbnail" id="{{p}}">
+          <div id="holder-{{p}}"></div>
+          <div class="caption text-center" id="title-{{p}}">
+            <p>{{p}}</p>
           </div>
         </div>
       </div>
       {% end %}
+
     </div>
-  </div>
 
-  <script src="{{ static_url('js/vendor/bootstrap.min.js') }}"></script>
-
-  <script>
-    $('body').on('click', '.approve', function (){
-      var pageCode = $(this).attr("page-code");
-      $.post("/approve/block/"+pageCode,function(data){
-        if(data.status = 'ok') {
-          $(this).text('√已通过');
-        } else {
-          alert('错误：'+data.msg)
-        }
+    <script src="{{ static_url('js/vendor/bootstrap.min.js') }}"></script>
+    <script src="{{ static_url('js/vendor/raphael.js') }}"></script>
+    <script src="{{ static_url('js/vendor/raphael.zoom.js') }}"></script>
+    <script src="{{ static_url('js/cut.js') }}"></script>
+    <script>
+      var pages = {};
+      var curPage;
+      $('.thumbnail').click(function () {
+        curPage = $(this).attr('id');
+        $.cut.switchPage(curPage, pages[curPage]);
       });
-    });
-  </script>
+      {% if pos == 'block' %}
+      {% for p, info in zip(pages, [get_info(p) for p in pages]) %}
+      curPage = '{{p}}';
+      pages[curPage] = $.extend({}, $.cut.create({
+        blockMode: true,
+        name: '{{pos}}_{{info["imgname"]}}',
+        width: {{ info["imgsize"]['width'] }},
+        height: {{ info["imgsize"]['height'] }},
+        holder: 'holder-{{p}}',
+        image: "{{static_url(get_icon(p))}}",
+        chars: '{{info["blocks"] if pos=="block" else info["columns"]}}'
+          }));
+      {% end %}
+      {% end %}
+    </script>
 
 </body>
 
