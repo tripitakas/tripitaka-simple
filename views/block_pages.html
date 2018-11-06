@@ -15,7 +15,7 @@
 
   <style>
     .thumbnail .img {
-      min-height: 680px;
+      min-height: 450px;
       text-align: center;
     }
     .thumbnail svg {
@@ -64,7 +64,7 @@
       </div>
 
       {% for p in pages %}
-      <div class="col-xs-6 col-md-4">
+      <div class="col-xs-4 col-md-3">
         <div class="thumbnail" id="{{p}}">
           <div class="img" id="holder-{{p}}"></div>
           <div class="caption text-center" id="title-{{p}}">
@@ -93,6 +93,7 @@
       });
 
       {% for p, info in zip(pages, [get_info(p) for p in pages]) %}
+      {% if info %}
       curPage = '{{p}}';
       pages[curPage] = $.extend({}, $.cut.create({
         blockMode: true,
@@ -106,6 +107,7 @@
           }));
 
       $.cut.bindKeys();
+      {% end %}
       {% end %}
 
       function save(submit) {

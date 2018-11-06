@@ -89,7 +89,7 @@
         .initZoom().setAttr({
           stroke: rgb_a(data.changedColor, data.boxOpacity),
           'stroke-width': 1.5 / data.ratioInitial   // 除以初始比例是为了在刚加载宽撑满显示时线宽看起来是1.5
-          // fill: rgb_a(data.hoverFill, .15)       // 新画的框不填充
+          , fill: data.blockMode && rgb_a(data.hoverFill, 0.1)
         });
     }
   }
@@ -542,6 +542,7 @@
       state.hover = state.edit = null;
       $.extend(data, pageData);
       undoData.load(name, this._apply.bind(this));
+      this.navigate('left');
     },
 
     _apply: function (chars, ratio) {
@@ -570,6 +571,7 @@
           .setAttr({
             stroke: rgb_a(data.normalColor, data.boxOpacity),
             'stroke-width': 1.5 / data.ratioInitial   // 除以初始比例是为了在刚加载宽撑满显示时线宽看起来是1.5
+            , fill: data.blockMode && rgb_a(data.hoverFill, 0.1)
           })
           .data('cid', b.char_id)
           .data('char', b.ch);
