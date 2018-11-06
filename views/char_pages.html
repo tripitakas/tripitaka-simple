@@ -38,7 +38,7 @@
         <span class="icon-bar"></span>
       </button>
       <a class="navbar-brand" href="/"><span class="glyphicon glyphicon-th" aria-hidden="true"></span></a>
-      <a class="navbar-brand" style="padding-left: 0px;">切字校对</a>
+      <a class="navbar-brand" style="padding-left: 0px;">{{pos_type}}校对</a>
     </div>
 
     <!-- Collect the nav links, forms, and other content for toggling -->
@@ -52,7 +52,7 @@
       <div class="panel panel-default">
         <div class="panel-heading">
           <h3 class="panel-title">
-            {{username + '提交的' if kind == 'me' else kinds[kind]}} / {{pos_type}}校对页 ({{len(pages)}}/{{count}})
+            {{username + '提交的' if kind == 'me' else kinds[pos][kind]}} / {{pos_type}}校对页 ({{len(pages)}}/{{count}})
           </h3>
         </div>
       </div>

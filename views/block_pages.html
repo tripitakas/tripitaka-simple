@@ -9,7 +9,6 @@
   <title>藏经切分校对</title>
   <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
   <link rel="shortcut icon" type="image/x-icon" href="/static/favicon.ico">
-
   <link href="{{ static_url('css/bootstrap.min.css') }}" rel="stylesheet">
   <script src="{{ static_url('js/vendor/jquery.js') }}"></script>
   <script src="{{ static_url('js/vendor/jquery.cookie.min.js') }}"></script>
@@ -19,11 +18,9 @@
       min-height: 680px;
       text-align: center;
     }
-
     .thumbnail svg {
       margin: auto;
     }
-
   </style>
 </head>
 
@@ -61,7 +58,7 @@
       <div class="panel panel-default">
         <div class="panel-heading">
           <h3 class="panel-title">
-            {{username + '提交的' if kind == 'me' else kinds[kind]}} / {{pos_type}}校对页 ({{len(pages)}}/{{count}})
+            {{username + '提交的' if kind == 'me' else kinds[pos][kind]}} / {{pos_type}}校对页 ({{len(pages)}}/{{count}})
           </h3>
         </div>
       </div>
@@ -80,6 +77,7 @@
     </div>
 
     <script src="{{ static_url('js/vendor/bootstrap.min.js') }}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.0/sweetalert.min.js"></script>
     <script src="{{ static_url('js/vendor/raphael.js') }}"></script>
     <script src="{{ static_url('js/vendor/raphael.zoom.js') }}"></script>
     <script src="{{ static_url('js/vendor/jquery.mapkey.js') }}"></script>
@@ -93,7 +91,7 @@
         curPage = $(this).attr('id');
         $.cut.switchPage(curPage, pages[curPage]);
       });
-      {% if pos == 'block' %}
+
       {% for p, info in zip(pages, [get_info(p) for p in pages]) %}
       curPage = '{{p}}';
       pages[curPage] = $.extend({}, $.cut.create({
@@ -109,18 +107,13 @@
 
       $.cut.bindKeys();
       {% end %}
-      {% end %}
 
       function save(submit) {
-        postPages = {};
-        pages.forEach(function(page, index) {
-          var boxes = JSON.stringify($.cut.exportBoxes());
-          postPages[page.name] = boxes;
-        });
-
-        $.post('/{{pos}}/{{kind}}', {
+        $.post('/{{pos}}/{{kind}}/all', {
           submit: submit,
-          pages: postPages
+          boxes: JSON.stringify(Object.keys(pages).map(function (name) {
+            return [name, $.cut.exportBoxes(pages[name])];
+          }))
         }, function (res) {
           if (/^error:/.test(res)) {
             swal('操作失败', res.replace(/^error:/, ''), 'error', { buttons: false, timer: 1500 });
@@ -129,7 +122,7 @@
               { buttons: false, timer: 1000 })
               .then(function () {
                 if (/^jump:/.test(res)) {
-                  window.location.href = '/{{pos}}/{{kind}}/' + res.replace(/^jump:/, '');
+                  location.reload();
                 }
               });
           }

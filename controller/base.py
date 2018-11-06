@@ -12,7 +12,7 @@ from datetime import datetime
 def load_json(filename):
     if path.exists(filename):
         try:
-            with open(filename) as f:
+            with open(filename, 'rb') as f:
                 return json.load(f)
         except Exception as e:
             logging.error('%s: %s' % (str(e), filename))

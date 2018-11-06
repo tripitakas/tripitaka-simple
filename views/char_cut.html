@@ -14,6 +14,16 @@
   <link href="{{ static_url('css/cut.css') }}" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+
+  <style>
+    #holder {
+      text-align: center;
+    }
+    #holder svg {
+      margin: auto;
+    }
+  </style>
+
 </head>
 
 <body>
@@ -27,7 +37,8 @@
       <span class="icon-bar"></span>
       <span class="icon-bar"></span>
     </button>
-    <a class="navbar-brand" href="/{{pos}}/{{kind}}">字切分校对 <span class="glyphicon glyphicon-th" aria-hidden="true"></span></a>
+    <a class="navbar-brand" href="/"><span class="glyphicon glyphicon-th" aria-hidden="true"></span></a>
+    <a class="navbar-brand" href="/{{pos}}/{{kind}}" style="padding-left: 0px;">切字校对</a>
   </div>
 
   <!-- Collect the nav links, forms, and other content for toggling -->

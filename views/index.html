@@ -14,8 +14,8 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
   <style>
-    .row img {
-      max-height: 160px;
+    li a {
+      font-size: 16px;
     }
   </style>
 </head>
@@ -44,14 +44,20 @@
   <div style="margin-left: 30px">
     <h4>切栏校对</h4>
     <ul>
-      {% for k, n in kinds.items() %}
-      <li><a href="/block/{{k}}">{{n}} ({{len(index.get(k, []))}})</a></li>
+      {% for k, n in kinds['block'].items() %}
+      <li><a href="/block/{{k}}">{{n}} ({{len(index['block'].get(k, []))}})</a></li>
+      {% end %}
+    </ul>
+    <h4>切列校对</h4>
+    <ul>
+      {% for k, n in kinds['column'].items() %}
+      <li><a href="/column/{{k}}">{{n}} ({{len(index['column'].get(k, []))}})</a></li>
       {% end %}
     </ul>
     <h4>切字校对</h4>
     <ul>
-      {% for k, n in kinds.items() %}
-      <li><a href="/char/{{k}}">{{n}} ({{len(index.get(k, []))}})</a></li>
+      {% for k, n in kinds['char'].items() %}
+      <li><a href="/char/{{k}}">{{n}} ({{len(index['char'].get(k, []))}})</a></li>
       {% end %}
     </ul>
   </div>
