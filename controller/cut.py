@@ -91,8 +91,7 @@ class PagesHandler(BaseHandler):
 
 
 class CutHandler(BaseHandler):
-    URL = [r'/(block|column|char)/([A-Z]{2})/(\w{4,20})',
-           r'/(block|column|char)/([A-Z]{2})/?']
+    URL = r'/(block|column|char)/([A-Z]{2})/(\w{4,20}|all)'
 
     def get(self, pos, kind, name):
         def get_img(p):
@@ -119,7 +118,7 @@ class CutHandler(BaseHandler):
                     pos_type='字切分' if pos == 'char' else '栏切分' if pos == 'block' else '列切分',
                     page=page, pos=pos, kind=kind, **page, get_img=get_img)
 
-    def post(self, pos, kind, name=None):
+    def post(self, pos, kind, name):
         """
         保存一个或多个页面的切分校对数据.
 
@@ -130,10 +129,9 @@ class CutHandler(BaseHandler):
         :param name: 页名，例如 GL_1047_1_5，请求体中需要有 boxes 框数组. 如果页名为空，则 boxes 为[[name,boxes], ...]数组
         :return: None
         """
-        submit = self.get_body_argument('submit') == 'true'
+        submit = self.get_body_argument('submit', 0) == 'true'
         boxes = json.loads(self.get_body_argument('boxes'))
-        assert name or type(boxes) == dict
-        if name:
+        if len(name) > 3:
             self.save(pos, name, boxes)
         else:
             for name, arr in boxes:
