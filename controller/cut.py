@@ -126,7 +126,7 @@ class CutHandler(BaseHandler):
                     pos_type = '切字' if pos == 'char' else '切栏' if pos == 'block' else '切列',
                     page=page, pos=pos, kind=kind, **page, get_img=get_img)
 
-    def post(self, pos, kind, name='all'):
+    def post(self, pos, kind, name):
         """
         保存一个或多个页面的切分校对数据.
         保存一个页面时 name 为页名，请求体中需要有 boxes 框数组. 保存多个页面时 name 为空，请求体的 boxes 为[页,框数组]的数组.
@@ -136,7 +136,7 @@ class CutHandler(BaseHandler):
         :param name: 页名，例如 GL_1047_1_5，请求体中需要有 boxes 框数组. 如果页名为空，则 boxes 为[[name,boxes], ...]数组
         :return: None
         """
-        submit = self.get_body_argument('submit') == 'true'
+        submit = self.get_body_argument('submit', 0) == 'true'
         boxes = json.loads(self.get_body_argument('boxes'))
         assert name or type(boxes) == dict
         if name=='all':
