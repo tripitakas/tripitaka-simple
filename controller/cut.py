@@ -10,10 +10,10 @@ import time
 
 BASE_DIR = path.dirname(path.dirname(__file__))
 kinds = {
-    'block': {'JX':'嘉兴藏'}, 
-    'column': {'JX':'嘉兴藏'}, 
-    'char': {'GL':'高丽藏', 'JX':'嘉兴藏', 'QL':'乾隆藏', 'YB':'永乐北藏'}
-    }
+    'block': {'JX': '嘉兴藏'},
+    'column': {'JX': '嘉兴藏'},
+    'char': {'GL': '高丽藏', 'JX': '嘉兴藏', 'QL': '乾隆藏', 'YB': '永乐北藏'}
+}
 
 class MainHandler(BaseHandler):
     URL = r'/'

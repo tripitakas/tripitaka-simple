@@ -8,7 +8,6 @@ from controller.base import BaseHandler
 
 
 data_path = path.join(path.dirname(path.dirname(__file__)), 'data')
-lock_path = path.join(data_path, 'lock', 'char')
 log_file = path.join(data_path, '..', 'log', 'app.log')
 ip_user = {}
 work = {}
@@ -23,9 +22,8 @@ def clean_log():
             f.writelines(rows)
 
 
-def scan_lock_files(callback, in_path=None):
+def scan_lock_files(callback, in_path):
     num = 0
-    in_path = in_path or lock_path
     if not path.exists(in_path):
         return
     for fn in listdir(in_path):
@@ -70,27 +68,27 @@ def callback_sum_work(num, fn, filename, text, rows):
             work[user] = work.get(user, 0) + 1
 
 
-def fix():
+def fix(in_path):
     work.clear()
-    scan_lock_files(callback_get_ip_users)
-    scan_lock_files(callback_anonymous)
-    scan_lock_files(callback_sum_work)
+    scan_lock_files(callback_get_ip_users, in_path)
+    scan_lock_files(callback_anonymous, in_path)
+    scan_lock_files(callback_sum_work, in_path)
     return [(u, c) for u, c in sorted(work.items(), key=itemgetter(1), reverse=True)]
 
 
 class RankingHandler(BaseHandler):
-    URL = r'/ranking'
+    URL = r'/ranking/(block|column|char)'
 
-    def get(self):
-        ranking = fix()
-        items = ['<li><a href="/char/me/{0}">{0}</a> {1}</li>'.format(n, c) for n, c in ranking]
+    def get(self, pos):
+        ranking = fix(path.join(data_path, 'lock', pos))
+        items = ['<li><a href="/{2}/me/{0}">{0}</a> {1}</li>'.format(n, c, pos) for n, c in ranking]
         self.write('<h3>校对排行榜</h3><ol>%s</ol>' % ''.join(items))
 
 
 class HistoryHandler(BaseHandler):
-    URL = r'/(h\d?)/([A-Za-z0-9-_ ]*)'
+    URL = r'/(block|column|char)/(h\d?)/([A-Za-z0-9-_ ]*)'
 
-    def get(self, h, name):
+    def get(self, pos, h, name):
         def callback_get(num, fn, filename, text, rows):
             if name in fn:
                 pairs = []
@@ -105,7 +103,7 @@ class HistoryHandler(BaseHandler):
 
         items = []
         name = name[:2].upper() + re.sub(r'-|\s', '_', name[2:])
-        scan_lock_files(callback_get, path.join(data_path, 'lock', 'char' + h[1:]))
+        scan_lock_files(callback_get, path.join(data_path, 'lock', pos + h[1:]))
         items.sort(key=itemgetter(2))
         items = ['<li><span>{0}</span> {1}</li>'.format(fn, s) for fn, s, t in items]
         css = 'li>span{display: inline-block; min-width: 120px; margin-right: 10px}'
@@ -113,5 +111,5 @@ class HistoryHandler(BaseHandler):
 
 
 if __name__ == '__main__':
-    print(fix())
+    print(fix(path.join(data_path, 'lock', 'char')))
     clean_log()
