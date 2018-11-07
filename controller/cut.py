@@ -54,8 +54,6 @@ class PagesHandler(BaseHandler):
         username = username or cur_user
         me = '\n' + username + '\n'
         self.unlock_timeout(pos, me)
-        # username = '我' if username == cur_user else username
-        
 
         if kind == 'me':
             pages = self.get_my_pages(pos, username)
@@ -65,6 +63,8 @@ class PagesHandler(BaseHandler):
         index = load_json(path.join('static', 'index.json'))
         pages, count = self.pick_pages(pos, index[pos][kind], 12)
         html = 'block_pages.html' if pos == 'block' else 'char_pages.html'
+        if pos != 'char':
+            [CutHandler.lock_page(self, pos, name) for name in pages]
 
         self.render(html, kinds=kinds, pages=pages, count=count, username=username,
                     pos_type=pos_type, pos=pos, kind=kind, get_icon=get_icon, get_info=get_info)
@@ -112,19 +112,25 @@ class CutHandler(BaseHandler):
         else:
             page[pos + 's'] = []
 
+        if self.lock_page(self, pos, name) != name:
+            return
+        self.render('char_cut.html' if pos == 'char' else 'block_cut.html',
+                    pos_type='切字' if pos == 'char' else '切栏' if pos == 'block' else '切列',
+                    page=page, pos=pos, kind=kind, **page, get_img=get_img)
+
+    @staticmethod
+    def lock_page(self, pos, name, fail_write=True):
         lock_file = PagesHandler.get_lock_file(pos, name)
         if path.exists(lock_file):
             with open(lock_file) as f:
                 text = f.read()
                 if text and self.get_ip() not in text and (self.current_user or '匿名') not in text \
                         and 'saved' not in text:
-                    return self.write('error:别人已锁定了本页面，请返回选择其他页面。')
+                    return fail_write and self.write('error:别人已锁定了本页面，请返回选择其他页面。')
         if not path.exists(lock_file):
             with open(lock_file, 'w') as f:
                 f.write('\n'.join([self.get_ip(), self.current_user, get_date_time()]))
-        self.render('char_cut.html' if pos == 'char' else 'block_cut.html',
-                    pos_type = '切字' if pos == 'char' else '切栏' if pos == 'block' else '切列',
-                    page=page, pos=pos, kind=kind, **page, get_img=get_img)
+        return name
 
     def post(self, pos, kind, name):
         """
