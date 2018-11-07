@@ -47,7 +47,6 @@ class PagesHandler(BaseHandler):
 
         def get_info(p):
             filename = path.join(BASE_DIR, 'static', 'pos', pos, *p.split('_')[:-1], p + '.json')
-            print(filename)
             return load_json(filename)
 
         pos_type = '切字' if pos == 'char' else '切栏' if pos == 'block' else '切列'
@@ -55,15 +54,16 @@ class PagesHandler(BaseHandler):
         username = username or cur_user
         me = '\n' + username + '\n'
         self.unlock_timeout(pos, me)
-        username = '我' if username == cur_user else username
+        # username = '我' if username == cur_user else username
+        
 
         if kind == 'me':
             pages = self.get_my_pages(pos, username)
-            return self.render('pages.html', kinds=kinds, pages=pages, count=len(pages), username=username,
+            return self.render('my_pages.html', kinds=kinds, pages=pages, count=len(pages), username=username,
                                pos_type=pos_type, pos=pos, kind=kind, get_icon=get_icon, get_info=get_info)
 
         index = load_json(path.join('static', 'index.json'))
-        pages, count = self.pick_pages(pos, index[pos][kind], 15)
+        pages, count = self.pick_pages(pos, index[pos][kind], 12)
         html = 'block_pages.html' if pos == 'block' else 'char_pages.html'
 
         self.render(html, kinds=kinds, pages=pages, count=count, username=username,

@@ -43,7 +43,7 @@ def export_icons(img_dir, icon_dir):
         if path.isdir(filename):
             export_icons(filename, path.join(icon_dir, fn))
         if '.jpg' in fn:
-            export_icon(filename, icon_dir, fn, 600)
+            export_icon(filename, icon_dir, fn, 450)
 
 
 def check_json(json_dir):

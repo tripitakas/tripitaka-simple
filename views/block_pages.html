@@ -15,7 +15,8 @@
 
   <style>
     .thumbnail .img {
-      min-height: 450px;
+      min-height: 500px;
+      max-height: 500px;
       text-align: center;
     }
     .thumbnail svg {
@@ -42,8 +43,8 @@
     <!-- Collect the nav links, forms, and other content for toggling -->
     <div class="collapse navbar-collapse" id="bs-navbar-collapse-1">
       <ul class="nav navbar-nav">
-        <button type="button" class="btn btn-sm btn-primary navbar-btn" id="save">保存</button>
-        <button type="button" class="btn btn-sm btn-primary navbar-btn" id="submit">提交</button>
+        <button type="button" class="btn btn-sm btn-primary navbar-btn" id="save">全部保存</button>
+        <button type="button" class="btn btn-sm btn-primary navbar-btn" id="submit">全部提交</button>
       </ul>
       {% include nav-right.html %}
     </div>
@@ -54,7 +55,6 @@
 
   <div id="body-content" style="padding-top: 80px;">
     <div class="rows container-fluid">
-
       <div class="panel panel-default">
         <div class="panel-heading">
           <h3 class="panel-title">
@@ -65,12 +65,13 @@
 
       {% for p in pages %}
       <div class="col-xs-4 col-md-3">
-        <div class="thumbnail" id="{{p}}">
+        <div class="thumbnail" id="{{p}}" style="margin-bottom: 5px;">
           <div class="img" id="holder-{{p}}"></div>
-          <div class="caption text-center" id="title-{{p}}">
-            <p>{{p}}</p>
-          </div>
         </div>
+        <div class="caption text-center" style="margin-bottom: 20px">
+          <a href="/{{pos}}/{{kind}}/{{p[3:]}}" target="blank">{{p}}</a>
+        </div>
+
       </div>
       {% end %}
 
@@ -87,10 +88,14 @@
     <script>
       var pages = {};
       var curPage;
-      $('.thumbnail').click(function () {
+
+      function click() {
         curPage = $(this).attr('id');
         $.cut.switchPage(curPage, pages[curPage]);
-      });
+        $('.thumbnail').unbind('click').click(click);
+        $(this).unbind('click');
+      }
+      $('.thumbnail').click(click);
 
       {% for p, info in zip(pages, [get_info(p) for p in pages]) %}
       {% if info %}
@@ -101,14 +106,16 @@
         width: {{ info["imgsize"]['width'] }},
         height: {{ info["imgsize"]['height'] }},
         holder: 'holder-{{p}}',
-        // image: "{{static_url(get_icon(p))}}",
         image: "{{static_url(get_icon(p))}}",
         chars: '{{info["blocks"] if pos=="block" else info["columns"]}}'
-          }));
-
+        }));
       $.cut.bindKeys();
       {% end %}
       {% end %}
+
+      curPage = Object.keys(pages)[0];
+      $.cut.switchPage(curPage, pages[curPage]);
+      $(document).ready(function(){ window.scrollTo(0, 0); });
 
       function save(submit) {
         $.post('/{{pos}}/{{kind}}/all', {

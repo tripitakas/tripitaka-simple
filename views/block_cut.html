@@ -42,7 +42,7 @@
     </div>
   </div>
 
-  <div id="body-content">
+  <div id="body-content" style="width:40%; margin-left: 30%;">
     <div id="holder"></div>
   </div>
 
@@ -67,7 +67,7 @@
       holder: 'holder',
       image: "{{static_url(get_img(imgname))}}",
       chars: '{{blocks if pos=="block" else columns}}'
-  });
+    });
 
     $.cut.bindKeys();
 
