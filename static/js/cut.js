@@ -134,7 +134,8 @@
       }
       return c;
     });
-    return s.replace(/'/g, '"');
+	s = s.replace(/'/g, '"').replace(/: True/g, ': 1').replace(/: (False|None)/g, ': 0');
+    return s;
   }
 
   var data = {
