@@ -61,7 +61,7 @@ class PagesHandler(BaseHandler):
                                pos_type=pos_type, pos=pos, kind=kind, get_icon=get_icon, get_info=get_info)
 
         index = load_json(path.join('static', 'index.json'))
-        pages, count = self.pick_pages(pos, index[pos][kind], 12)
+        pages, count = self.pick_pages(pos, index[pos][kind], 40)
         html = 'block_pages.html' if pos == 'block' else 'char_pages.html'
         if pos != 'char':
             [CutHandler.lock_page(self, pos, name) for name in pages]
@@ -114,7 +114,7 @@ class CutHandler(BaseHandler):
 
         if self.lock_page(self, pos, name) != name:
             return
-        self.render('char_cut.html' if pos == 'char' else 'block_cut.html',
+        self.render('char_cut.html' if pos == 'char' else 'column_cut.html' if pos == 'column' else 'block_cut.html',
                     pos_type='切字' if pos == 'char' else '切栏' if pos == 'block' else '切列',
                     page=page, pos=pos, kind=kind, **page, get_img=get_img)
 

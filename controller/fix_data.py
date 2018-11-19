@@ -85,6 +85,7 @@ class RankingHandler(BaseHandler):
         self.write('<h3>校对排行榜</h3><ol>%s</ol>' % ''.join(items))
 
 
+
 class HistoryHandler(BaseHandler):
     URL = r'/(block|column|char)/(h\d?)/([A-Za-z0-9-_ ]*)'
 
