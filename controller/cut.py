@@ -7,6 +7,8 @@ from os import path, listdir, remove
 import json
 import random
 import time
+import hashlib
+import codecs
 
 BASE_DIR = path.dirname(path.dirname(__file__))
 kinds = {
@@ -61,7 +63,7 @@ class PagesHandler(BaseHandler):
                                pos_type=pos_type, pos=pos, kind=kind, get_icon=get_icon, get_info=get_info)
 
         index = load_json(path.join('static', 'index.json'))
-        pages, count = self.pick_pages(pos, index[pos][kind], 40)
+        pages, count = self.pick_pages(pos, index[pos][kind], 12)
         html = 'block_pages.html' if pos == 'block' else 'char_pages.html'
         if pos != 'char':
             [CutHandler.lock_page(self, pos, name) for name in pages]
@@ -99,8 +101,19 @@ class CutHandler(BaseHandler):
     URL = r'/(block|column|char)/([A-Z]{2})/(\w{4,20}|all)'
 
     def get(self, pos, kind, name):
+        def get_txt(p):
+            with codecs.open('/'.join(['./static/txt', *p.split('_')[:-1], p + '.txt']), 'r', 'utf-8') as f:
+                return ''.join(f.readlines())
+        
+        def get_hash(p):
+            with open('./static/pagecode_hash.json', 'r') as f:
+                dct = json.load(f)
+            return dct.get(p)
+
         def get_img(p):
-            return '/'.join(['img', *p.split('_')[:-1], p + '.jpg'])
+            # return '/'.join(['img', *p.split('_')[:-1], p + '.jpg'])
+            baseurl = 'http://tripitaka-img.oss-cn-beijing.aliyuncs.com/page'
+            return '/'.join([baseurl, *p.split('_')[:-1], p+'_'+get_hash(p)+'.jpg'])
 
         name = kind + '_' + name
         filename = path.join(BASE_DIR, 'static', 'pos', pos, *name.split('_')[:-1], name + '.json')
@@ -116,7 +129,7 @@ class CutHandler(BaseHandler):
             return
         self.render('char_cut.html' if pos == 'char' else 'column_cut.html' if pos == 'column' else 'block_cut.html',
                     pos_type='切字' if pos == 'char' else '切栏' if pos == 'block' else '切列',
-                    page=page, pos=pos, kind=kind, **page, get_img=get_img)
+                    page=page, pos=pos, kind=kind, **page, get_img=get_img, txt=get_txt(name))
 
     @staticmethod
     def lock_page(self, pos, name, fail_write=True):
@@ -150,6 +163,11 @@ class CutHandler(BaseHandler):
                 self.save(kind, pos, name, arr)
         else:
             self.save(kind, pos, name, boxes)
+        
+        txt = json.loads(self.get_body_argument('txt'))
+        if txt:
+            with codecs.open('/'.join(['./static/txt/', *name.split('_')[:-1], name + '.txt']), 'w', 'utf-8') as f:
+                f.write(txt.strip('\n'))
 
         if submit:
             pages = PagesHandler.pick_pages(pos, load_json(path.join('static', 'index.json'))[pos][kind], 1)[0]

@@ -42,8 +42,28 @@
     </div>
   </div>
 
-  <div id="body-content" style="width:30%; margin-left: 35%;">
-    <div id="holder"></div>
+  <div id="body-content" style="margin-top: 65px">
+    <div id="help" class="col-md-4" style="font-size:16px;">
+      <p style="text-align:center">【说明】</p>
+      <ul>
+        <li>本次切列校对的是嘉兴藏的图文，从而为OCR引擎提供标注数据。</li>
+        <li>工作目标是将一列图像和一列文字对应。</li>
+        <li><span style="color:red">一、切列校对：</span>嘉兴藏的列与列之间有分隔线，按分隔线进行切分。</li>
+        <li style="margin-left:20px">注意：如果某列中有大字和夹注小字，不必切开。如果某列中包含两列小字，也不必切开。</li>
+        <li><span style="color:red">二、文字校对：</span>文本来自CBETA，有可能出现换行不对以及多余文字的错误。</li>
+        <li style="margin-left:20px">1. 换行不对：此时按照图像调整文本换行。</li>
+        <li style="margin-left:20px">2. 文字多余：删除多余文字。</li>
+        <li style="margin-left:20px">注意：不需要逐字校对，只需要检查上述两种情况即可。</li>
+      </ul>
+    </div>
+
+    <div id="holder" class="col-md-4"></div> 
+    <div id="txt" class="col-md-4" style="font-size:18px;">
+      <p style="text-align:center">【经文】</p>
+      <textarea class="form-control" rows="15" style="font-size: 18px;">
+        {{ txt }}
+      </textarea>
+    </div>
   </div>
 
   <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script> -->
@@ -66,7 +86,7 @@
       width: {{ imgsize['width'] }},
       height: {{ imgsize['height'] }},
       holder: 'holder',
-      image: "{{static_url(get_img(imgname))}}",
+      image: "{{get_img(imgname)}}",
       chars: '{{blocks if pos=="block" else columns}}'
     });
 
@@ -88,7 +108,8 @@
     function save(submit) {
       $.post('/{{pos}}/{{kind}}/{{imgname}}', {
         submit: submit,
-        boxes: JSON.stringify($.cut.exportBoxes())
+        boxes: JSON.stringify($.cut.exportBoxes()),
+        txt: JSON.stringify($('#txt textarea').val())
       }, function (res) {
         if (/^error:/.test(res)) {
           swal('操作失败', res.replace(/^error:/, ''), 'error', { buttons: false, timer: 1500 });
