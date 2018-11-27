@@ -1,7 +1,7 @@
 /*
  * cut.js
  *
- * Date: 2018-10-23
+ * Date: 2018-11-27
  */
 (function() {
   'use strict';
@@ -134,7 +134,7 @@
       }
       return c;
     });
-	s = s.replace(/'/g, '"').replace(/: True/g, ': 1').replace(/: (False|None)/g, ': 0');
+    s = s.replace(/'/g, '"').replace(/: True/g, ': 1').replace(/: (False|None)/g, ': 0');
     return s;
   }
 
@@ -236,6 +236,10 @@
     getDistance: getDistance,
     rgb_a: rgb_a,
 
+    decodeJSON: function (text) {
+      return JSON.parse(decodeHtml(text));
+    },
+
     showHandles: function(el, handle) {
       var i, pt, r;
       var size = data.handleSize;
@@ -281,6 +285,7 @@
         state.hoverHandle.index = -1;
         state.hoverStroke = box.attr('stroke');
         state.hoverHandle.fill = box.attr('fill');
+        state.hoverHandle.hidden = box.node.style.display === 'none';
         box.attr({
           stroke: rgb_a(data.hoverColor, data.boxOpacity)
         });
@@ -291,9 +296,15 @@
       if (box && state.hover === box && state.hoverHandle.fill) {
         box.attr({ stroke: state.hoverStroke, fill: state.hoverHandle.fill });
         state.hoverHandle.fill = 0;   // 设置此标志，暂不清除 box 变量，以便在框外也可点控制点
+        if (state.hoverHandle.hidden) {
+          box.hide();
+        }
       }
       else if (box && state.edit === box && state.editHandle.fill) {
         box.attr({ stroke: state.editStroke, fill: state.editHandle.fill });
+        if (state.editHandle.hidden) {
+          box.hide();
+        }
         state.editHandle.fill = 0;
       }
     },
@@ -365,11 +376,12 @@
       if (el) {
         state.editStroke = el.attr('stroke');
         state.editHandle.fill = el.attr('fill');
+        state.editHandle.hidden = el.node.style.display === 'none';
         el.attr({
           stroke: rgb_a(data.changedColor, data.boxOpacity),
           fill: rgb_a(data.hoverFill, data.activeFillOpacity)
         });
-        $(el.node).toggle(true);
+        el.show();
         this.scrollToVisible(el);
       }
       this.showHandles(state.edit, state.editHandle);
@@ -417,6 +429,10 @@
           return;
         }
         state.downOrigin = state.down = getPoint(e);
+        state.focus = true;
+        if ($.fn.mapKey) {
+          $.fn.mapKey.enabled = true;
+        }
 
         // 鼠标略过控制点时，当前字框的控制点不能被选中，则切换为另外已亮显热点控制点的字框
         var lockBox = e.altKey;
@@ -439,7 +455,7 @@
         }
 
         // 不能拖动当前字框的控制点，则画出一个新字框
-        if (!state.edit) {
+        if (!state.edit && !state.readonly) {
           state.editHandle.index = 2;  // 右下角为拖动位置
           state.edit = createRect(state.down, state.down, true);
         }
@@ -449,7 +465,7 @@
         var pt = getPoint(e);
 
         e.preventDefault();
-        if (!state.originBox && getDistance(pt, state.downOrigin) < 3) {
+        if (state.readonly || !state.originBox && getDistance(pt, state.downOrigin) < 3) {
           return;
         }
 
@@ -483,6 +499,7 @@
 
       data.paper = Raphael(p.holder, p.width, p.height).initZoom();
       data.holder = document.getElementById(p.holder);
+      state.focus = true;
 
       data.image = data.paper.image(p.image, 0, 0, p.width, p.height);
       data.paper.rect(0, 0, p.width, p.height)
@@ -495,19 +512,17 @@
       }
       data.ratioInitial = ($(data.holder).width() - 20) / p.width;
       data.scrollContainer = p.scrollContainer && $(p.scrollContainer);
-      if (!p.readonly) {
-        $(data.holder)
-          .mousedown(mouseDown)
-          .mouseup(mouseUp)
-          .mousemove(function(e) {
-            (state.down ? mouseDrag : mouseHover)(e);
-          });
-      }
+      $(data.holder)
+        .mousedown(mouseDown)
+        .mouseup(mouseUp)
+        .mousemove(function(e) {
+          (state.down ? mouseDrag : mouseHover)(e);
+        });
 
       var xMin = 1e5, yMin= 1e5, leftTop = null;
 
       if (typeof p.chars === 'string') {
-        p.chars = JSON.parse(decodeHtml(p.chars));
+        p.chars = self.decodeJSON(p.chars);
       }
 
       p.chars.forEach(function(b, idx) {
@@ -634,6 +649,8 @@
     findCharsByLine: function(block_no, line_no, cmp) {
       return data.chars.filter(function(box) {
         return box.block_no === block_no && box.line_no === line_no && (!cmp || cmp(box.ch, box));
+      }).sort(function(a, b) {
+        return a.char_no - b.char_no;
       });
     },
 
@@ -647,7 +664,7 @@
           pt.y < box.y + box.height + tol;
       };
 
-      if (state.edit && (isInRect(state.edit, 10) || lockBox)) {
+      if (state.edit && (isInRect(state.edit, state.readonly ? 1 : 10) || lockBox)) {
         return state.edit;
       }
       for (i = 0; i < data.chars.length; i++) {
@@ -678,6 +695,7 @@
       });
     },
 
+    // callback: function(info, box, reason)
     onBoxChanged: function(callback) {
       data.boxObservers.push(callback);
     },
@@ -698,6 +716,9 @@
           stroke: state.editStroke,
           fill: state.editHandle.fill
         });
+        if (state.editHandle.hidden) {
+          state.edit.hide();
+        }
         state.editHandle.fill = 0;
       }
       state.down = null;
@@ -735,6 +756,85 @@
           {x: box.x + box.width + dx, y: box.y + box.height + dy});
         return this._changeBox(null, newBox);
       }
+    },
+
+    showBandNumber: function (char, num, text) {
+      var el = char && char.shape;
+      var box = el && el.getBBox();
+
+      if (!box || !num || !text) {
+        return;
+      }
+      var s = data.ratio;
+      var x = box.x + box.width + 20 * s;
+      var y = box.y + box.height / 2;
+      data.texts = data.texts || {};
+      data.texts[el.data('cid')] = data.texts[el.data('cid')] || [
+          data.paper.text(x, y, '' + num)
+            .attr({'font-size': 11 * s, 'text-align': 'center'}),
+          data.paper.text(x + 15 * s, y, text)
+            .attr({'font-size': 17 * s, 'text-align': 'center', 'font-weight': 200, stroke: 'rgba(0,0,255,.7)'})];
+      el.data('order', num);
+      el.data('text', text);
+    },
+
+    removeBandNumber: function (char, all) {
+      if (!char) {
+        if (all && data.bandNumberBox) {
+          data.bandNumberBox.remove();
+          delete data.bandNumberBox;
+        }
+        return all && data.chars.forEach(function (c) {
+          if (c.shape) {
+            $.cut.removeBandNumber(c);
+          }
+        });
+      }
+      var el = char.shape;
+      var arr = el && (data.texts || {})[el.data('cid')];
+      if (arr) {
+        delete data.texts[char.shape.data('cid')];
+        arr.forEach(function (p) {
+          p.remove();
+        });
+        var text = el.data('text');
+        el.removeData('order');
+        el.removeData('text');
+        return text;
+      }
+    },
+
+    unionBandNumbers: function() {
+      if (data.bandNumberBox) {
+        data.bandNumberBox.remove();
+      }
+      var box, first;
+      data.chars.forEach(function (c) {
+        var arr = c.shape && data.texts[c.shape.data('cid')];
+        (arr || []).forEach(function(p) {
+          if (!box) {
+            box = p.getBBox();
+            first = p;
+          } else {
+            p = p.getBBox();
+            box.x = Math.min(box.x, p.x);
+            box.y = Math.min(box.y, p.y);
+            box.x2 = Math.max(box.x2, p.x2);
+            box.y2 = Math.max(box.y2, p.y2);
+          }
+        });
+      });
+      if (box && first) {
+        data.bandNumberBox = data.paper.rect(box.x, box.y - 5, box.x2 - box.x + 5, box.y2 - box.y + 10, 5)
+          .attr({fill: 'rgba(255,255,255,.8)', stroke: 'rgba(0,0,0,.5)'});
+        data.bandNumberBox.insertBefore(first);
+      }
+    },
+
+    findCharByData: function(key, value) {
+      return value && data.chars.filter(function (box) {
+        return box.shape && box.shape.data(key) === value;
+      })[0];
     },
 
     navigate: function(direction) {

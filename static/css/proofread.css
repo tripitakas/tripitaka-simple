@@ -1,0 +1,268 @@
+.fl{
+  float: left;
+}
+.fr{
+  float: right;
+}
+.tl{
+  text-align: left;
+}
+.tc{
+text-align: center;
+}
+.tr{
+  text-align: right;
+}
+.pfread {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.pfread-in {
+  padding-top: 15px;
+  padding-left: 15px;
+  width: calc(100% - 30px);
+}
+
+.pfread .bd {
+  overflow: auto;
+  height: calc(100% - 80px);
+}
+
+.pfread .left {
+  width: 49%;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-sizing: border-box;
+  margin-right: 1%;
+}
+
+.pfread .left .hd {
+  line-height: 50px;
+  border-bottom: 1px solid #ccc;
+  padding: 0 10px;
+}
+
+.pfread .left .hd span i {
+  top: 8px;
+  display: block;
+  position: relative;
+  background-position: center;
+  background-size: cover;
+  width: 25px;
+  height: 25px;
+}
+
+.pfread .left .hd .btns {
+  display: inline-block;
+}
+
+.pfread .left .hd .btns span {
+  display: inline-block;
+  width: auto;
+  border-radius: 18px;
+  text-align: center;
+  line-height: 30px;
+  border: 1px solid #fff;
+  font-size: 16px;
+  cursor: pointer;
+  color: #2e363f;
+  position: relative;
+}
+
+.pfread .left .bd {
+  overflow: auto;
+  height: calc(100% - 80px);
+}
+
+.pfread .right {
+  width: 49%;
+  margin-left: 1%;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-sizing: border-box;
+}
+
+.pfread .right .hd {
+  line-height: 50px;
+  border-bottom: 1px solid #ccc;
+  padding: 0 10px;
+  color: #2e363f;
+}
+
+.pfread .right .hd span i {
+  top: 8px;
+  display: block;
+  position: relative;
+  background-position: center;
+  background-size: cover;
+  width: 25px;
+  height: 25px;
+}
+
+.pfread .right .hd .btns {
+  display: inline-block;
+}
+
+.pfread .right .hd .btns span {
+  display: inline-block;
+  width: auto;
+  border-radius: 18px;
+  text-align: center;
+  line-height: 30px;
+  border: 1px solid #fff;
+  font-size: 16px;
+  cursor: pointer;
+  color: #2e363f;
+  position: relative;
+}
+
+/* naviagte buttons */
+.pfread .hd i.btn-reduce {
+  background-image: url(../images/proofread/reduce.png);
+}
+.pfread .hd i.btn-enlarge {
+  background-image: url(../images/proofread/enlarge.png);
+}
+.pfread .hd i.btn-fullscrean {
+  background-image: url(../images/proofread/fullscrean.png);
+}
+.pfread .hd i.btn-addupline {
+  background-image: url(../images/proofread/addline-up.png);
+}
+.pfread .hd i.btn-adddownline {
+  background-image: url(../images/proofread/addline-down.png);
+}
+.pfread .hd i.btn-previous {
+  background-image: url(../images/proofread/previous.png);
+}
+.pfread .hd i.btn-next {
+  background-image: url(../images/proofread/next.png);
+}
+.pfread .hd i.btn-variants-highlight {
+  background-image: url(../images/proofread/variants-highlight.png);
+}
+.pfread .hd i.btn-variants-normal {
+  background-image: url(../images/proofread/variants-normal.png);
+}
+.pfread .hd i.btn-emptyplaces-show {
+  background-image: url(../images/proofread/emptyplaces-show.png);
+}
+.pfread .hd i.btn-emptyplaces-hidden {
+  background-image: url(../images/proofread/emptyplaces-hidden.png);
+}
+.pfread .hd i.btn-deleteline {
+  background-image: url(../images/proofread/deleteline.png);
+}
+.pfread .hd i.btn-doubts {
+  background-image: url(../images/proofread/doubts.png);
+}
+.pfread .hd i.btn-check {
+  background-image: url(../images/proofread/check.png);
+}
+.pfread .hd i.btn-ok {
+  background-image: url(../images/proofread/ok.png);
+}
+.pfread .hd i.btn-help {
+  background-image: url(../images/proofread/help.png);
+}
+.pfread .hd i.btn-returnback {
+  background-image: url(../images/proofread/returnback.png);
+}
+
+.btn-reduce,.btn-enlarge,.btn-fullscrean,
+.btn-addupline,.btn-adddownline,.btn-previous,.btn-next,
+.btn-variants-highlight,.btn-variants-normal,.btn-deleteline,
+.btn-emptyplaces-show,.btn-emptyplaces-hidden,.btn-doubts,.btn-check,
+.btn-ok,.btn-help,.btn-returnback {
+  transition: all 0.2s;
+}
+
+.btn-reduce:hover,.btn-enlarge:hover,.btn-fullscrean:hover,
+.btn-addupline:hover,.btn-adddownline:hover,.btn-previous:hover,.btn-next:hover,
+.btn-variants-highlight:hover,.btn-variants-normal:hover,.btn-deleteline:hover,
+.btn-emptyplaces-show:hover,.btn-emptyplaces-hidden:hover,.btn-doubts:hover,.btn-check:hover,
+.btn-ok:hover,.btn-help:hover,.btn-returnback:hover {
+  transform: scale(1.2);
+}
+
+/*选择框*/
+.pfread .pfread-dialog {
+  padding: 10px;
+}
+
+.pfread .pfread-dialog:before {
+  left: 31%;
+}
+
+.pfread .pfread-dialog .item {
+  margin-bottom: 10px;
+}
+
+.pfread .pfread-dialog .item dt {
+  display: inline-block;
+  width: 72px;
+  text-align: right;
+  margin-right: 5px;
+  font-weight: normal;
+  font-size: 14px;
+  padding-top: 10px;
+}
+
+.pfread .pfread-dialog .item dd {
+  display: inline-block;
+}
+
+.pfread .pfread-dialog .item input[type="text"] {
+  display: inline-block;
+  border: 0;
+  width: 250px;
+  padding: 0 5px;
+  height: 36px;
+  border: 1px solid #ccc;
+  font-size: 16px;
+}
+
+.pfread .pfread-dialog .item .text {
+  display: inline-block;
+  width: 250px;
+  padding: 0 5px;
+  min-height: 36px;
+  line-height: 36px;
+  background: #f5f5f5;
+  cursor: pointer;
+  font-weight: 100;
+  white-space: normal;
+}
+
+.dialog-common {
+  position: absolute;
+  top: 0;
+  left: 0;
+  background-color: #fff;
+  box-shadow: 1px 1px 8px 0 rgba(0, 0, 0, .76);
+  padding: 10px;
+  z-index: 2;
+  height: auto;
+  white-space: nowrap;
+  border-radius: 5px;
+}
+
+.dialog-common:before {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  content: " ";
+  -webkit-transform: rotate(135deg);
+  -ms-transform: rotate(135deg);
+  transform: rotate(225deg);
+  border: 1px solid transparent;
+  background-color: #fff;
+  top: -6px;
+  left: 50%;
+  margin-left: -103px;
+  border-top: none;
+  border-left: none;
+  box-shadow: 1px 1px 1px 0 rgba(0, 0, 0, .3);
+}

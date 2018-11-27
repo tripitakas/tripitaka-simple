@@ -1,0 +1,233 @@
+<html>
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>文字校对</title>
+  <link href="{{ static_url('css/bootstrap.min.css') }}" type="text/css" rel="stylesheet">
+  <link href="{{ static_url('css/proof-base.css') }}" type="text/css" rel="stylesheet">
+  <link href="{{ static_url('css/proofread.css') }}" type="text/css" rel="stylesheet">
+
+  <style type="text/css">
+    .right .sutra-text {
+      font-size: 24px;
+      font-weight: 320;
+      margin-left: 10px;
+      letter-spacing: 1px;
+      line-height: 40px;
+    }
+
+    .right .not-same-info {
+      color: #28A0DE;
+      cursor: text;
+      line-height: 30px;
+    }
+
+    .right .diff {
+      color: red;
+      cursor: pointer;
+    }
+
+    .right .same {
+      color: black;
+    }
+
+    .right .variant {
+      color: black;
+      cursor: pointer;
+    }
+
+
+    .right span.emptyplace {
+      font-size: 20px;
+      width: 0px;
+      line-height: 24px;
+      padding: 0px 4px;
+      background-color: #00A7DE;
+      margin-left: 0px;
+    }
+
+    .right .current-span {
+      border: 1px solid #C1C1C1;
+    }
+
+    .right .variant-highlight {
+      color: blue;
+    }
+
+    .right .hidden {
+      display: none;
+    }
+
+    .right .delete {
+      display: none;
+    }
+
+    .mismatch span {
+      border-bottom: 1px solid red;
+    }
+  </style>
+
+</head>
+
+<body>
+  <div id="main">
+    <div class="wrapper">
+      <div id="pfread" class="pfread">
+        <div class="pfread-in">
+          <div class="left fl">
+            <div class="hd">
+              <div class="btns">
+                <div class="fr">
+                  <span><i title="缩小" class="btn-reduce"></i></span>
+                  <span><i title="放大" class="btn-enlarge"></i></span>
+                  <span><i title="全屏" class="btn-fullscrean"></i></span>
+                  <form style="margin-left: 20px; display: inline-block;" action="#" id="change-order">
+                    <input id="order" class="form-control" placeholder="序号" style="width: 60px; display: inline-block" maxlength="2">
+                    <input id="char" class="form-control" placeholder="字" style="width: 50px; display: inline-block" maxlength="1">
+                    <button type="submit" class="btn btn-default">修改</button>
+                  </form>
+                </div>
+              </div>
+            </div>
+            <div class="bd" id="canvas-bd">
+              <div class="bd-in">
+                <div id="canvas-pane">
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="right fr">
+            <div class="hd">
+              <div class="btns">
+                <div class="fl">
+                  <span><i title="上一条异文" class="btn-previous"></i></span>
+                  <span style="width: 55px;"><em title="异文" class="not-same-info" id="not-same-info">0 / 0</em></span>
+                  <span><i title="下一条异文" class="btn-next"></i></span>
+                  <span><i title="显隐空位符" class="btn-emptyplaces-show" id="emptyplaces"></i></span>
+                  <span><i title="显隐异体字" class="btn-variants-normal" id="variants"></i></span>
+                  <span><i title="删除该行" class="btn-deleteline" style="width: 50px"></i></span>
+                  <span><i title="向上增行" class="btn-addupline"></i></span>
+                  <span><i title="向下增行" class="btn-adddownline"></i></span>
+                  <span><i title="存疑" class="btn-doubts"></i></span>
+                  <span><i title="图文匹配检查" class="btn-check"></i></span>
+                </div>
+                <div class="fr">
+                  <span><i title="退回任务" class="btn-returnback"></i></span>
+                  <span><i title="完成" class="btn-ok"></i></span>
+                  <span><i title="帮助" class="btn-help"></i></span>
+                </div>
+              </div>
+            </div>
+            <div class="bd">
+              <div class="sutra-text" id="sutra-text">
+              </div>
+              <div class="pfread-dialog dialog-common" id="pfread-dialog" style="display:none">
+                <dl class="item">
+                  <dt>OCR</dt>
+                  <dd class="text" id="pfread-dialog-ocr">&nbsp;</dd>
+                </dl>
+                <dl class="item">
+                  <dt>比对本</dt>
+                  <dd class="text" id="pfread-dialog-cmp">&nbsp;</dd>
+                </dl>
+                <dl class="item">
+                  <dt>选择结果</dt>
+                  <dd class="text"><span id="pfread-dialog-slct" type="text" placeholder="请选择或输入……" contenteditable="true"></span></dd>
+                </dl>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel-body" style="padding: 0;">
+    <!-- modal content -->
+    <div id="cutModal" class="modal fade" tabindex="-1" role="dialog"
+         aria-labelledby="cutModalLabel" aria-hidden="true">
+      <div class="modal-dialog" style="width: 1050px">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+            <h4 class="modal-title" id="cutModalLabel">校对字框
+              <button type="button" class="btn btn-primary pull-right" style="margin-right: 20px">保存</button>
+            </h4>
+          </div>
+          <div class="modal-body">
+            <div id="cut-canvas-bd" style="width: 1020px; height: 720px; overflow: auto">
+              <div id="cut-canvas" style="width: 1000px; height: 700px;"></div>
+            </div>
+          </div>
+        </div>
+        <!-- /.modal-content -->
+      </div>
+      <!-- /.modal-dialog -->
+    </div>
+    <!-- /.modal -->
+  </div>
+
+  <script src="{{ static_url('js/vendor/jquery.js') }}" type="text/javascript"></script>
+  <script src="{{ static_url('js/vendor/bootstrap.min.js') }}" type="text/javascript"></script>
+  <script src="{{ static_url('js/vendor/raphael.js') }}" type="text/javascript"></script>
+  <script src="{{ static_url('js/vendor/raphael.zoom.js') }}" type="text/javascript"></script>
+  <script src="{{ static_url('js/vendor/jquery.mapkey.js') }}" type="text/javascript"></script>
+  <script src="{{ static_url('js/cut.js') }}" type="text/javascript"></script>
+  <script src="{{ static_url('js/proof_keys.js') }}" type="text/javascript"></script>
+  <script src="{{ static_url('js/cut_keys.js') }}" type="text/javascript"></script>
+  <script src="{{ static_url('js/proofread.js') }}" type="text/javascript"></script>
+
+  <script>
+    var char_data = $.cut.decodeJSON('{{cutdata}}').char_data;
+    var cmpdata = $.cut.decodeJSON('{{cmpdata}}');
+
+    function createPage() {
+      $.cut.create({
+        readonly: true,
+        scrollContainer: '#canvas-bd',
+        name: '{{name}}',
+        width: {{width}},
+        height: {{height}},
+        holder: 'canvas-pane',
+        image: '{{image}}',
+        chars: char_data
+      });
+      $.cut.bindMatchingKeys();
+      $.cut.toggleBox(false);
+      $.cut.switchCurrentBox(null);
+    }
+    createPage();
+
+    $('.btn-fullscrean').click(function() {
+      var $modal = $('#cutModal');
+      var bindings = $.fn.mapKey.bindings;
+
+      $modal.modal().on('hidden.bs.modal', function() {
+        $.fn.mapKey.bindings = bindings;
+        createPage();
+      });
+
+      $.cut.create({
+        name: '{{name}}-',
+        width: {{width}},
+        height: {{height}},
+        scrollContainer: '#cut-canvas-bd',
+        holder: 'cut-canvas',
+        image: '{{image}}',
+        chars: char_data
+      });
+
+      $.fn.mapKey.bindings = { up: {}, down: {}};
+      $.cut.bindKeys();
+
+      $modal.find('button.btn-primary').unbind('click').click(function() {
+        $modal.find('[data-dismiss="modal"]').click();
+        cutdata.char_data = $.cut.exportBoxes();
+      });
+    });
+  </script>
+</body>
+
+</html>
