@@ -147,7 +147,7 @@
 
   <script>
     var char_data = $.cut.decodeJSON('{{chars}}');
-    var cmpdata = {segments: []};
+    var cmpdata = $.cut.decodeJSON('{{txt}}');
 
     function createPage() {
       $.cut.create({

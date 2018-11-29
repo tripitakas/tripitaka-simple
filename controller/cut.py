@@ -113,7 +113,15 @@ class CutHandler(BaseHandler):
     def get(self, pos, kind, name):
         def get_txt(p):
             with codecs.open('/'.join(['./static/txt', *p.split('_')[:-1], p + '.txt']), 'r', 'utf-8') as f:
-                return ''.join(f.readlines())
+                txt = ''.join(f.readlines())
+            if pos == 'proof':
+                segments = []
+                for blk_i, block in enumerate(txt.split('\n\n\n')):
+                    for col_i, column in enumerate(block.strip().split('\n')):
+                        ln = dict(block_no=1 + blk_i, line_no=1 + col_i, type='same', ocr=column)
+                        segments.append(ln)
+                return {'segments': segments}
+            return txt
         
         def get_hash(p):
             with open('./static/pagecode_hash.json', 'r') as f:
