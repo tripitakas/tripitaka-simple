@@ -7,27 +7,36 @@ from os import path, listdir, remove
 import json
 import random
 import time
-import hashlib
 import codecs
 
 BASE_DIR = path.dirname(path.dirname(__file__))
+pos_types = dict(block='切栏', column='切列', char='切字', proof='文字')
 kinds = {
     'block': {'JX': '嘉兴藏'},
     'column': {'JX': '嘉兴藏'},
-    'char': {'GL': '高丽藏', 'JX': '嘉兴藏', 'QL': '乾隆藏', 'YB': '永乐北藏'}
+    'char': {'GL': '高丽藏', 'JX': '嘉兴藏', 'QL': '乾隆藏', 'YB': '永乐北藏'},
+    'proof': {'QL': '乾隆藏', 'YB': '永乐北藏'}
 }
+
 
 class MainHandler(BaseHandler):
     URL = r'/'
 
     def get(self):
+        if 0:
+            with open('page_codes.txt') as f:
+                lines = f.read().split('\n')
+            proof = {"QL": [], "YB": []}
+            for t in lines:
+                proof[t[:2]].append(t)
+            save_json(proof, 'proof.json')
         index = load_json(path.join('static', 'index.json'))
         self.render('index.html', kinds=kinds, index=index, pos='char')
 
 
 class PagesHandler(BaseHandler):
-    URL = [r'/(block|column|char)/([A-Z]{2}|me)/?',
-           r'/(block|column|char)/(me)/(\w+)']
+    URL = [r'/(block|column|char|proof)/([A-Z]{2}|me)/?',
+           r'/(block|column|char|proof)/(me)/(\w+)']
 
     @staticmethod
     def get_my_pages(pos, username):
@@ -51,7 +60,7 @@ class PagesHandler(BaseHandler):
             filename = path.join(BASE_DIR, 'static', 'pos', pos, *p.split('_')[:-1], p + '.json')
             return load_json(filename)
 
-        pos_type = '切字' if pos == 'char' else '切栏' if pos == 'block' else '切列'
+        pos_type = pos_types[pos]
         cur_user = self.current_user or self.get_ip()
         username = username or cur_user
         me = '\n' + username + '\n'
@@ -65,7 +74,7 @@ class PagesHandler(BaseHandler):
         index = load_json(path.join('static', 'index.json'))
         pages, count = self.pick_pages(pos, index[pos][kind], 12)
         html = 'block_pages.html' if pos == 'block' else 'char_pages.html'
-        if pos != 'char':
+        if pos == 'block':
             [CutHandler.lock_page(self, pos, name) for name in pages]
 
         self.render(html, kinds=kinds, pages=pages, count=count, username=username,
@@ -98,7 +107,8 @@ class PagesHandler(BaseHandler):
 
 
 class CutHandler(BaseHandler):
-    URL = r'/(block|column|char)/([A-Z]{2})/(\w{4,20}|all)'
+    URL = r'/(block|column|char|proof)/([A-Z]{2})/(\w{4,20}|all)'
+    html_files = dict(block='block_cut.html', column='column_cut.html', char='char_cut.html', proof='proofread.html')
 
     def get(self, pos, kind, name):
         def get_txt(p):
@@ -111,7 +121,8 @@ class CutHandler(BaseHandler):
             return dct.get(p)
 
         def get_img(p):
-            # return '/'.join(['img', *p.split('_')[:-1], p + '.jpg'])
+            if pos == 'proof':
+                return '/static/' + '/'.join(['img', *p.split('_')[:-1], p + '.jpg'])
             baseurl = 'http://tripitaka-img.oss-cn-beijing.aliyuncs.com/page'
             return '/'.join([baseurl, *p.split('_')[:-1], p+'_'+get_hash(p)+'.jpg'])
 
@@ -127,8 +138,7 @@ class CutHandler(BaseHandler):
 
         if self.lock_page(self, pos, name) != name:
             return
-        self.render('char_cut.html' if pos == 'char' else 'column_cut.html' if pos == 'column' else 'block_cut.html',
-                    pos_type='切字' if pos == 'char' else '切栏' if pos == 'block' else '切列',
+        self.render(self.html_files[pos], pos_type=pos_types[pos],
                     page=page, pos=pos, kind=kind, **page, get_img=get_img, txt=get_txt(name))
 
     @staticmethod
@@ -158,7 +168,7 @@ class CutHandler(BaseHandler):
         submit = self.get_body_argument('submit', 0) == 'true'
         boxes = json.loads(self.get_body_argument('boxes'))
         assert name or type(boxes) == dict
-        if name=='all':
+        if name == 'all':
             for name, arr in boxes:
                 self.save(kind, pos, name, arr)
         else:
