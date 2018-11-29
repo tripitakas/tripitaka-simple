@@ -36,6 +36,13 @@ function findBestBoxes(offset, block_no, line_no, cmp) {
 
 // 高亮一行中字组元素对应的字框
 function highlightBox($span, first) {
+    if (!$span) {
+        $span = currentSpan[0];
+        first = currentSpan[1];
+        if (!$span) {
+            return;
+        }
+    }
     var $line = $span.parent(), $block = $line.parent();
     var block_no = parseInt($block.attr('id').replace(/^.+-/, ''));
     var line_no = parseInt($line.attr('id').replace(/^.+-/, ''));
@@ -71,21 +78,20 @@ function highlightBox($span, first) {
         }
     }
 
-    $.cut.toggleBox(false);
     $.cut.removeBandNumber(0, true);
     $.cut.state.focus = false;
     $.fn.mapKey.enabled = false;
     $.cut.data.block_no = block_no;
     $.cut.data.line_no = line_no;
+    currentSpan = [$span, first];
 
     // 按字序号浮动亮显当前行的字框
     text = $line.text().replace(/\s/g, '');
     all = $.cut.findCharsByLine(block_no, line_no);
-    all.forEach(function(box, i) {
-        box.char_no = i + 1;
-        $.cut.showBandNumber(box, i + 1, text[i]);
-    });
-    $.cut.unionBandNumbers();
+    $.cut.showFloatingPanel((showOrder || showText) ? all : [],
+      function(char, index) {
+          return (showOrder ? char.char_no : '') + (showText ? text[index] : '');
+      }, highlightBox);
 
     $.cut.switchCurrentBox(((boxes.length ? boxes : all)[0] || {}).shape);
 }
@@ -118,6 +124,9 @@ function getCursorPosition(element) {
 }
 
 var lineNos = [];
+var showOrder = true;
+var showText = false;
+var currentSpan = [];
 
 $(document).ready(function () {
     // 根据json生成html
@@ -176,15 +185,38 @@ $(document).ready(function () {
 });
 
 // 对字数不匹配的行加下划线
-function checkMismatch() {
+function checkMismatch(report) {
+  var mismatch = [];
+  var total, ocrColumns = [];
+
+  $.cut.data.chars.forEach(function (c) {
+      if (c.shape && c.line_no) {
+          var t = c.block_no + ',' + c.line_no;
+          if (ocrColumns.indexOf(t) < 0) {
+            ocrColumns.push(t);
+          }
+      }
+  });
+  if (ocrColumns.length !== lineNos.length) {
+    total = '行数不匹配，文本 ' + lineNos.length + ' 行，图像 ' + ocrColumns.length + ' 行。';
+  }
   lineNos.forEach(function(no) {
     var boxes = $.cut.findCharsByLine(no[0], no[1]);
     var $line = $('#block-' + no[0] + ' #line-' + no[1]);
-    $line.toggleClass('mismatch', boxes.length != $line.text().replace(/\s/g, '').length);
+    var text = $line.text().replace(/\s/g, '');
+    $line.toggleClass('mismatch', boxes.length != text.length);
+    if (boxes.length != text.length) {
+      mismatch.push('第 ' + no[1] + ' 行，文本 ' + text.length + ' 字，图像 ' + boxes.length + ' 字。');
+    }
   });
+  if (report && total && mismatch.length) {
+      alert(total + '\n' + mismatch.join('\n'));
+  }
 }
 
-$('.btn-check').click(checkMismatch);
+$('.btn-check').click(function() {
+  checkMismatch(true);
+});
 
 // 单击异文
 $(document).on('click', '.not-same', function (e) {
@@ -373,11 +405,58 @@ $(document).on('click', '.btn-emptyplaces-hidden', function () {
 $(document).on('click', '.btn-reduce', function () {
   if ($.cut.data.ratio > 0.5) {
     $.cut.setRatio($.cut.data.ratio * 0.9);
+    highlightBox();
   }
 });
 // 放大画布
 $(document).on('click', '.btn-enlarge', function () {
   if ($.cut.data.ratio < 5) {
     $.cut.setRatio($.cut.data.ratio * 1.5);
+    highlightBox();
   }
+});
+window.showAllBoxes = function() {
+  var $this = $('.btn-cut-show');
+  $this.removeClass("btn-cut-show");
+  $this.addClass("btn-cut-hidden")
+  $.cut.toggleBox(true);
+  $.fn.mapKey.bindings = {up: {}, down: {}};
+  $.cut.bindKeys();
+};
+// 显隐字框
+$(document).on('click', '.btn-cut-show', window.showAllBoxes);
+$(document).on('click', '.btn-cut-hidden', function () {
+    $(this).removeClass("btn-cut-hidden")
+    $(this).addClass("btn-cut-show")
+    $.cut.toggleBox(false);
+    $.fn.mapKey.bindings = {up: {}, down: {}};
+    $.cut.bindMatchingKeys();
+});
+// 显隐序号
+$(document).on('click', '.btn-num-show', function () {
+    $(this).removeClass("btn-num-show")
+    $(this).addClass("btn-num-hidden")
+    showOrder = !showOrder;
+    highlightBox();
+    $('#order').toggle(showOrder);
+});
+$(document).on('click', '.btn-num-hidden', function () {
+    $(this).removeClass("btn-num-hidden")
+    $(this).addClass("btn-num-show")
+    showOrder = !showOrder;
+    highlightBox();
+    $('#order').toggle(showOrder);
+});
+// 显隐文本
+$(document).on('click', '.btn-txt-show', function () {
+    $(this).removeClass("btn-txt-show")
+    $(this).addClass("btn-txt-hidden")
+    showText = !showText;
+    highlightBox();
+});
+$(document).on('click', '.btn-txt-hidden', function () {
+    $(this).removeClass("btn-txt-hidden")
+    $(this).addClass("btn-txt-show")
+    showText = !showText;
+    highlightBox();
 });

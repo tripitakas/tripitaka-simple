@@ -1,7 +1,7 @@
 /*
  * cut.js
  *
- * Date: 2018-11-27
+ * Date: 2018-10-29
  */
 (function() {
   'use strict';
@@ -497,12 +497,13 @@
         }
       };
 
+      self.destroy();
       data.paper = Raphael(p.holder, p.width, p.height).initZoom();
       data.holder = document.getElementById(p.holder);
       state.focus = true;
 
       data.image = data.paper.image(p.image, 0, 0, p.width, p.height);
-      data.paper.rect(0, 0, p.width, p.height)
+      data.board = data.paper.rect(0, 0, p.width, p.height)
         .attr({'stroke': 'transparent', fill: data.boxFill});
 
       state.readonly = p.readonly;
@@ -551,6 +552,29 @@
       undoData.load(p.name, self._apply.bind(self));
 
       return data;
+    },
+
+    // 销毁所有图形
+    destroy: function() {
+      this.removeBandNumber(0, true);
+      if (data.image) {
+        data.image.remove();
+        delete data.image;
+      }
+      if (data.board) {
+        data.board.remove();
+        delete data.board;
+      }
+      data.chars.forEach(function(b) {
+        if (b.shape) {
+          b.shape.remove();
+          delete b.shape;
+        }
+      });
+      if (data.paper) {
+        data.paper.remove();
+        delete data.paper;
+      }
     },
 
     switchPage: function (name, pageData) {
@@ -607,13 +631,13 @@
       }
 
       var info = src && this.findCharById(src.data('cid')) || {};
+      var added = !info.char_id;
 
-      if (!info.char_id) {
+      if (added) {
         for (var i = 1; i < 999; i++) {
           info.char_id = 'new' + i;
           if (!this.findCharById(info.char_id)) {
             data.chars.push(info);
-            notifyChanged(dst, 'added');
             break;
           }
         }
@@ -622,6 +646,9 @@
       }
       dst.data('cid', info.char_id).data('char', dst.ch);
       info.shape = dst;
+      if (added) {
+        notifyChanged(dst, 'added');
+      }
 
       if (src) {
         dst.insertBefore(src);
@@ -726,7 +753,7 @@
 
     removeBox: function() {
       this.cancelDrag();
-      if (state.edit) {
+      if (state.edit && !state.readonly) {
         var el = state.edit;
         var info = this.findCharById(el.data('cid'));
         var hi = /small|narrow|flat/.test(data.hlType) && this.switchNextHighlightBox;
@@ -755,79 +782,6 @@
         var newBox = createRect({x: box.x + dx, y: box.y + dy},
           {x: box.x + box.width + dx, y: box.y + box.height + dy});
         return this._changeBox(null, newBox);
-      }
-    },
-
-    showBandNumber: function (char, num, text) {
-      var el = char && char.shape;
-      var box = el && el.getBBox();
-
-      if (!box || !num || !text) {
-        return;
-      }
-      var s = data.ratio;
-      var x = box.x + box.width + 20 * s;
-      var y = box.y + box.height / 2;
-      data.texts = data.texts || {};
-      data.texts[el.data('cid')] = data.texts[el.data('cid')] || [
-          data.paper.text(x, y, '' + num)
-            .attr({'font-size': 11 * s, 'text-align': 'center'}),
-          data.paper.text(x + 15 * s, y, text)
-            .attr({'font-size': 17 * s, 'text-align': 'center', 'font-weight': 200, stroke: 'rgba(0,0,255,.7)'})];
-      el.data('order', num);
-      el.data('text', text);
-    },
-
-    removeBandNumber: function (char, all) {
-      if (!char) {
-        if (all && data.bandNumberBox) {
-          data.bandNumberBox.remove();
-          delete data.bandNumberBox;
-        }
-        return all && data.chars.forEach(function (c) {
-          if (c.shape) {
-            $.cut.removeBandNumber(c);
-          }
-        });
-      }
-      var el = char.shape;
-      var arr = el && (data.texts || {})[el.data('cid')];
-      if (arr) {
-        delete data.texts[char.shape.data('cid')];
-        arr.forEach(function (p) {
-          p.remove();
-        });
-        var text = el.data('text');
-        el.removeData('order');
-        el.removeData('text');
-        return text;
-      }
-    },
-
-    unionBandNumbers: function() {
-      if (data.bandNumberBox) {
-        data.bandNumberBox.remove();
-      }
-      var box, first;
-      data.chars.forEach(function (c) {
-        var arr = c.shape && data.texts[c.shape.data('cid')];
-        (arr || []).forEach(function(p) {
-          if (!box) {
-            box = p.getBBox();
-            first = p;
-          } else {
-            p = p.getBBox();
-            box.x = Math.min(box.x, p.x);
-            box.y = Math.min(box.y, p.y);
-            box.x2 = Math.max(box.x2, p.x2);
-            box.y2 = Math.max(box.y2, p.y2);
-          }
-        });
-      });
-      if (box && first) {
-        data.bandNumberBox = data.paper.rect(box.x, box.y - 5, box.x2 - box.x + 5, box.y2 - box.y + 10, 5)
-          .attr({fill: 'rgba(255,255,255,.8)', stroke: 'rgba(0,0,0,.5)'});
-        data.bandNumberBox.insertBefore(first);
       }
     },
 

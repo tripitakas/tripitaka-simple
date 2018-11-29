@@ -9,85 +9,51 @@
   <link href="{{ static_url('css/proof-base.css') }}" type="text/css" rel="stylesheet">
   <link href="{{ static_url('css/proofread.css') }}" type="text/css" rel="stylesheet">
 
-  <style type="text/css">
-    .right .sutra-text {
-      font-size: 24px;
-      font-weight: 320;
-      margin-left: 10px;
-      letter-spacing: 1px;
-      line-height: 40px;
-    }
-
-    .right .not-same-info {
-      color: #28A0DE;
-      cursor: text;
-      line-height: 30px;
-    }
-
-    .right .diff {
-      color: red;
-      cursor: pointer;
-    }
-
-    .right .same {
-      color: black;
-    }
-
-    .right .variant {
-      color: black;
-      cursor: pointer;
-    }
-
-
-    .right span.emptyplace {
-      font-size: 20px;
-      width: 0px;
-      line-height: 24px;
-      padding: 0px 4px;
-      background-color: #00A7DE;
-      margin-left: 0px;
-    }
-
-    .right .current-span {
-      border: 1px solid #C1C1C1;
-    }
-
-    .right .variant-highlight {
-      color: blue;
-    }
-
-    .right .hidden {
-      display: none;
-    }
-
-    .right .delete {
-      display: none;
-    }
-
-    .mismatch span {
-      border-bottom: 1px solid red;
-    }
-  </style>
-
 </head>
 
 <body>
   <div id="main">
-    <div class="wrapper">
+    <div id="top-nav" class="container-fluid navbar navbar-xs navbar-normal navbar-fixed-top">
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-navbar-collapse-1"
+          aria-expanded="false">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" style="color: #e4c3a8"><span class="glyphicon glyphicon-th" aria-hidden="true"></span>
+          文字校对 </a>
+      </div>
+
+      <!-- Collect the nav links, forms, and other content for toggling -->
+      <div class="collapse navbar-collapse" id="bs-navbar-collapse-1">
+        <ul class="nav navbar-nav">
+          <button type="button" class="btn btn-normal navbar-btn" id="save">保存</button>
+          <button type="button" class="btn btn-normal navbar-btn" id="submit">提交</button>
+        </ul>
+      </div>
+    </div>
+
+    <div class="wrapper" style="padding-top: 50px">
       <div id="pfread" class="pfread">
         <div class="pfread-in">
           <div class="left fl">
             <div class="hd">
-              <div class="btns">
-                <div class="fr">
+              <div class="btns" style="width:100%">
+                <div class="fl">
                   <span><i title="缩小" class="btn-reduce"></i></span>
                   <span><i title="放大" class="btn-enlarge"></i></span>
+                  <span><i title="显隐字框" class="btn-cut-show"></i></span>
+                  <span><i title="显隐序号" class="btn-num-show"></i></span>
+                  <span><i title="显隐文本" class="btn-txt-hidden"></i></span>
                   <span><i title="全屏" class="btn-fullscrean"></i></span>
-                  <form style="margin-left: 20px; display: inline-block;" action="#" id="change-order">
-                    <input id="order" class="form-control" placeholder="序号" style="width: 60px; display: inline-block" maxlength="2">
-                    <input id="char" class="form-control" placeholder="字" style="width: 50px; display: inline-block" maxlength="1">
-                    <button type="submit" class="btn btn-default">修改</button>
-                  </form>
+                  <button type="button" class="btn btn-default btn-sm" style="margin-left: 10px;" id="undo">撤销</button>
+                  <button type="button" class="btn btn-default btn-sm" id="redo">重做</button>
+                </div>
+                <div class="fr">
+                  <input id="order" class="form-control input-sm" placeholder="序号" style="width: 50px; margin: 8 8 0 0;"
+                    maxlength="2">
                 </div>
               </div>
             </div>
@@ -103,10 +69,10 @@
               <div class="btns">
                 <div class="fl">
                   <span><i title="上一条异文" class="btn-previous"></i></span>
-                  <span style="width: 55px;"><em title="异文" class="not-same-info" id="not-same-info">0 / 0</em></span>
+                  <span style="width: 45px;"><em title="异文" class="not-same-info" id="not-same-info">0 / 0</em></span>
                   <span><i title="下一条异文" class="btn-next"></i></span>
                   <span><i title="显隐空位符" class="btn-emptyplaces-show" id="emptyplaces"></i></span>
-                  <span><i title="显隐异体字" class="btn-variants-normal" id="variants"></i></span>
+                  <!-- <span><i title="显隐异体字" class="btn-variants-normal" id="variants"></i></span> -->
                   <span><i title="删除该行" class="btn-deleteline" style="width: 50px"></i></span>
                   <span><i title="向上增行" class="btn-addupline"></i></span>
                   <span><i title="向下增行" class="btn-adddownline"></i></span>
@@ -146,19 +112,19 @@
 
   <div class="panel-body" style="padding: 0;">
     <!-- modal content -->
-    <div id="cutModal" class="modal fade" tabindex="-1" role="dialog"
-         aria-labelledby="cutModalLabel" aria-hidden="true">
+    <div id="cutModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="cutModalLabel" aria-hidden="true">
       <div class="modal-dialog" style="width: 1050px">
         <div class="modal-content">
           <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-            <h4 class="modal-title" id="cutModalLabel">校对字框
-              <button type="button" class="btn btn-primary pull-right" style="margin-right: 20px">保存</button>
-            </h4>
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true" style="color: blue">×</button>
+            <h4 class="modal-title" id="cutModalLabel">字框校对</h4>
+            <button type="button" class="btn btn-primary pull-right" style="margin-right: 30px; margin-top:-30px;">保存</button>
+            <button type="button" class="btn btn-default pull-right" style="margin-right: 15px; margin-top:-30px;" id="redo">重做</button>
+            <button type="button" class="btn btn-default pull-right" style="margin-right: 5px; margin-top:-30px;" id="undo">撤销</button>
           </div>
           <div class="modal-body">
-            <div id="cut-canvas-bd" style="width: 1020px; height: 720px; overflow: auto">
-              <div id="cut-canvas" style="width: 1000px; height: 700px;"></div>
+            <div id="cut-canvas-bd" style="width: 1020px; height: calc(100% - 150px); overflow: auto">
+              <div id="cut-canvas" style="width: 1000px; height: calc(100% - 150px);"></div>
             </div>
           </div>
         </div>
@@ -197,16 +163,20 @@
       $.cut.bindMatchingKeys();
       $.cut.toggleBox(false);
       $.cut.switchCurrentBox(null);
+      updateUndo();
     }
     createPage();
 
-    $('.btn-fullscrean').click(function() {
+    $('.btn-fullscrean').click(function () {
       var $modal = $('#cutModal');
       var bindings = $.fn.mapKey.bindings;
 
-      $modal.modal().on('hidden.bs.modal', function() {
+      cutdata.char_data = $.cut.exportBoxes();
+      $modal.modal().on('hidden.bs.modal', function () {
         $.fn.mapKey.bindings = bindings;
         createPage();
+        showAllBoxes();
+        highlightBox();
       });
 
       $.cut.create({
@@ -219,13 +189,33 @@
         chars: char_data
       });
 
-      $.fn.mapKey.bindings = { up: {}, down: {}};
+      $.fn.mapKey.bindings = {
+        up: {},
+        down: {}
+      };
       $.cut.bindKeys();
+      updateUndo();
 
-      $modal.find('button.btn-primary').unbind('click').click(function() {
-        $modal.find('[data-dismiss="modal"]').click();
+      $modal.find('button.btn-primary').unbind('click').click(function () {
         cutdata.char_data = $.cut.exportBoxes();
+        $modal.find('[data-dismiss="modal"]').click();
       });
+    });
+
+    function updateUndo() {
+      $('#undo').toggleClass('disabled', !$.cut.canUndo());
+      $('#redo').toggleClass('disabled', !$.cut.canRedo());
+    }
+    $('#undo').click(function () {
+      $.cut.undo();
+      updateUndo();
+    });
+    $('#redo').click(function () {
+      $.cut.redo();
+      updateUndo();
+    });
+    $.cut.onBoxChanged(function () {
+      updateUndo();
     });
   </script>
 </body>

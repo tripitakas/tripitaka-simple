@@ -1,33 +1,36 @@
-.fl{
+.fl {
   float: left;
 }
-.fr{
+
+.fr {
   float: right;
 }
-.tl{
+
+.tl {
   text-align: left;
 }
-.tc{
-text-align: center;
+
+.tc {
+  text-align: center;
 }
-.tr{
+
+.tr {
   text-align: right;
 }
+
 .pfread {
   width: 100%;
-  height: 100%;
+  /* height: 100%; */
   position: relative;
 }
 
 .pfread-in {
-  padding-top: 15px;
-  padding-left: 15px;
-  width: calc(100% - 30px);
+  padding: 15 15 0 15;
 }
 
 .pfread .bd {
   overflow: auto;
-  height: calc(100% - 80px);
+  height: calc(100% - 130px);
 }
 
 .pfread .left {
@@ -39,7 +42,7 @@ text-align: center;
 }
 
 .pfread .left .hd {
-  line-height: 50px;
+  line-height: 45px;
   border-bottom: 1px solid #ccc;
   padding: 0 10px;
 }
@@ -73,7 +76,7 @@ text-align: center;
 
 .pfread .left .bd {
   overflow: auto;
-  height: calc(100% - 80px);
+  height: calc(100% - 130px);
 }
 
 .pfread .right {
@@ -85,7 +88,7 @@ text-align: center;
 }
 
 .pfread .right .hd {
-  line-height: 50px;
+  line-height: 45px;
   border-bottom: 1px solid #ccc;
   padding: 0 10px;
   color: #2e363f;
@@ -119,75 +122,109 @@ text-align: center;
 }
 
 /* naviagte buttons */
+
 .pfread .hd i.btn-reduce {
   background-image: url(../images/proofread/reduce.png);
 }
+
 .pfread .hd i.btn-enlarge {
   background-image: url(../images/proofread/enlarge.png);
 }
+
+.pfread .hd i.btn-cut-show {
+  background-image: url(../images/proofread/cut-show.png);
+}
+
+.pfread .hd i.btn-cut-hidden {
+  background-image: url(../images/proofread/cut-hidden.png);
+}
+
+.pfread .hd i.btn-num-show {
+  background-image: url(../images/proofread/num-show.png);
+}
+
+.pfread .hd i.btn-num-hidden {
+  background-image: url(../images/proofread/num-hidden.png);
+}
+
+.pfread .hd i.btn-txt-show {
+  background-image: url(../images/proofread/txt-show.png);
+}
+
+.pfread .hd i.btn-txt-hidden {
+  background-image: url(../images/proofread/txt-hidden.png);
+}
+
 .pfread .hd i.btn-fullscrean {
   background-image: url(../images/proofread/fullscrean.png);
 }
+
 .pfread .hd i.btn-addupline {
   background-image: url(../images/proofread/addline-up.png);
 }
+
 .pfread .hd i.btn-adddownline {
   background-image: url(../images/proofread/addline-down.png);
 }
+
 .pfread .hd i.btn-previous {
   background-image: url(../images/proofread/previous.png);
 }
+
 .pfread .hd i.btn-next {
   background-image: url(../images/proofread/next.png);
 }
+
 .pfread .hd i.btn-variants-highlight {
   background-image: url(../images/proofread/variants-highlight.png);
 }
+
 .pfread .hd i.btn-variants-normal {
   background-image: url(../images/proofread/variants-normal.png);
 }
+
 .pfread .hd i.btn-emptyplaces-show {
   background-image: url(../images/proofread/emptyplaces-show.png);
 }
+
 .pfread .hd i.btn-emptyplaces-hidden {
   background-image: url(../images/proofread/emptyplaces-hidden.png);
 }
+
 .pfread .hd i.btn-deleteline {
   background-image: url(../images/proofread/deleteline.png);
 }
+
 .pfread .hd i.btn-doubts {
   background-image: url(../images/proofread/doubts.png);
 }
+
 .pfread .hd i.btn-check {
   background-image: url(../images/proofread/check.png);
 }
+
 .pfread .hd i.btn-ok {
   background-image: url(../images/proofread/ok.png);
 }
+
 .pfread .hd i.btn-help {
   background-image: url(../images/proofread/help.png);
 }
+
 .pfread .hd i.btn-returnback {
   background-image: url(../images/proofread/returnback.png);
 }
 
-.btn-reduce,.btn-enlarge,.btn-fullscrean,
-.btn-addupline,.btn-adddownline,.btn-previous,.btn-next,
-.btn-variants-highlight,.btn-variants-normal,.btn-deleteline,
-.btn-emptyplaces-show,.btn-emptyplaces-hidden,.btn-doubts,.btn-check,
-.btn-ok,.btn-help,.btn-returnback {
+.btn-cut-show, .btn-cut-hidden, .btn-num-show, .btn-num-hidden, .btn-txt-show, .btn-txt-hidden, .btn-reduce, .btn-enlarge, .btn-fullscrean, .btn-addupline, .btn-adddownline, .btn-previous, .btn-next, .btn-variants-highlight, .btn-variants-normal, .btn-deleteline, .btn-emptyplaces-show, .btn-emptyplaces-hidden, .btn-doubts, .btn-check, .btn-ok, .btn-help, .btn-returnback {
   transition: all 0.2s;
 }
 
-.btn-reduce:hover,.btn-enlarge:hover,.btn-fullscrean:hover,
-.btn-addupline:hover,.btn-adddownline:hover,.btn-previous:hover,.btn-next:hover,
-.btn-variants-highlight:hover,.btn-variants-normal:hover,.btn-deleteline:hover,
-.btn-emptyplaces-show:hover,.btn-emptyplaces-hidden:hover,.btn-doubts:hover,.btn-check:hover,
-.btn-ok:hover,.btn-help:hover,.btn-returnback:hover {
+.btn-cut-show:hover, .btn-cut-hidden:hover, .btn-num-show:hover, .btn-num-hidden:hover, .btn-txt-show:hover, .btn-txt-hidden:hover, .btn-reduce:hover, .btn-enlarge:hover, .btn-fullscrean:hover, .btn-addupline:hover, .btn-adddownline:hover, .btn-previous:hover, .btn-next:hover, .btn-variants-highlight:hover, .btn-variants-normal:hover, .btn-deleteline:hover, .btn-emptyplaces-show:hover, .btn-emptyplaces-hidden:hover, .btn-doubts:hover, .btn-check:hover, .btn-ok:hover, .btn-help:hover, .btn-returnback:hover {
   transform: scale(1.2);
 }
 
 /*选择框*/
+
 .pfread .pfread-dialog {
   padding: 10px;
 }
@@ -265,4 +302,74 @@ text-align: center;
   border-top: none;
   border-left: none;
   box-shadow: 1px 1px 1px 0 rgba(0, 0, 0, .3);
+}
+
+/* add by xiandu */
+
+.right .sutra-text {
+  font-size: 24px;
+  font-weight: 320;
+  margin-left: 10px;
+  letter-spacing: 1px;
+  line-height: 40px;
+}
+
+.right .not-same-info {
+  color: #28A0DE;
+  cursor: text;
+  line-height: 30px;
+}
+
+.right .diff {
+  color: red;
+  cursor: pointer;
+}
+
+.right .same {
+  color: black;
+}
+
+.right .variant {
+  color: black;
+  cursor: pointer;
+}
+
+.right span.emptyplace {
+  font-size: 20px;
+  width: 0px;
+  line-height: 24px;
+  padding: 0px 4px;
+  background-color: #00A7DE;
+  margin-left: 0px;
+}
+
+.right .current-span {
+  border: 1px solid #C1C1C1;
+}
+
+.right .variant-highlight {
+  color: blue;
+}
+
+.right .hidden {
+  display: none;
+}
+
+.right .delete {
+  display: none;
+}
+
+.mismatch span {
+  border-bottom: 1px solid red;
+}
+
+.btn-normal {
+  color: #fff;
+  background-color: #b8906f;
+  border-color: #bf9f7f;
+}
+
+.navbar-normal {
+  background-color: #333;
+  border-color: #555555;
 }
