@@ -190,12 +190,6 @@ function checkMismatch(report) {
   var total, ocrColumns = [];
 
   $.cut.data.chars.forEach(function (c) {
-      if (c.shape && !c.line_no && c.char_id) {
-          var ids = c.char_id.replace('b', 'c').split('c');
-          c.block_no = parseInt(ids[1]);
-          c.line_no = parseInt(ids[2]);
-          c.char_no = parseInt(ids[3]);
-      }
       if (c.shape && c.line_no) {
           var t = c.block_no + ',' + c.line_no;
           if (ocrColumns.indexOf(t) < 0) {
