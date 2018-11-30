@@ -31,7 +31,7 @@
       <span class="icon-bar"></span>
       <span class="icon-bar"></span>
     </button>
-    <a class="navbar-brand" href="/">藏经切分校对</a>
+    <a class="navbar-brand" href="/">大藏经图文校对</a>
   </div>
 
   <!-- Collect the nav links, forms, and other content for toggling -->
@@ -58,6 +58,12 @@
     <ul>
       {% for k, n in kinds['char'].items() %}
       <li><a href="/char/{{k}}">{{n}} ({{len(index['char'].get(k, []))}})</a></li>
+      {% end %}
+    </ul>
+    <h4>文字校对</h4>
+    <ul>
+      {% for k, n in kinds['proof'].items() %}
+      <li><a href="/proof/{{k}}">{{n}} ({{len(index['proof'].get(k, []))}})</a></li>
       {% end %}
     </ul>
   </div>
