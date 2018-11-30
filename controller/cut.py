@@ -107,21 +107,13 @@ class PagesHandler(BaseHandler):
 
 
 class CutHandler(BaseHandler):
-    URL = r'/(block|column|char|proof)/([A-Z]{2})/(\w{4,20}|all)'
+    URL = r'/(block|column|char)/([A-Z]{2})/(\w{4,20}|all)'
     html_files = dict(block='block_cut.html', column='column_cut.html', char='char_cut.html', proof='proofread.html')
 
     def get(self, pos, kind, name):
         def get_txt(p):
             with codecs.open('/'.join(['./static/txt', *p.split('_')[:-1], p + '.txt']), 'r', 'utf-8') as f:
-                txt = ''.join(f.readlines())
-            if pos == 'proof':
-                segments = []
-                for blk_i, block in enumerate(txt.split('\n\n\n')):
-                    for col_i, column in enumerate(block.strip().split('\n')):
-                        ln = dict(block_no=1 + blk_i, line_no=1 + col_i, type='same', ocr=column)
-                        segments.append(ln)
-                return {'segments': segments}
-            return txt
+                return ''.join(f.readlines())
         
         def get_hash(p):
             with open('./static/pagecode_hash.json', 'r') as f:
@@ -129,8 +121,6 @@ class CutHandler(BaseHandler):
             return dct.get(p)
 
         def get_img(p):
-            if pos == 'proof':
-                return '/static/' + '/'.join(['img', *p.split('_')[:-1], p + '.jpg'])
             baseurl = 'http://tripitaka-img.oss-cn-beijing.aliyuncs.com/page'
             return '/'.join([baseurl, *p.split('_')[:-1], p+'_'+get_hash(p)+'.jpg'])
 
@@ -146,8 +136,11 @@ class CutHandler(BaseHandler):
 
         if self.lock_page(self, pos, name) != name:
             return
-        self.render(self.html_files[pos], pos_type=pos_types[pos],
-                    page=page, pos=pos, kind=kind, **page, get_img=get_img, txt=get_txt(name))
+        self.do_render(name, self.html_files[pos], pos_type=pos_types[pos],
+                       page=page, pos=pos, kind=kind, **page, get_img=get_img, txt=get_txt(name))
+
+    def do_render(self, name, template_name, **params):
+        self.render(template_name, **params)
 
     @staticmethod
     def lock_page(self, pos, name, fail_write=True):
