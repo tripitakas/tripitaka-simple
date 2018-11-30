@@ -74,7 +74,9 @@
       });
       on('esc', function() {
         self.cancelDrag();
-        self.showHandles(hover.edit);
+        if (self.state.edit) {
+          self.showHandles(self.state.edit, self.state.editHandle);
+        }
       });
 
       // 1~5 页面缩放

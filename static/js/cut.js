@@ -1,7 +1,7 @@
 /*
  * cut.js
  *
- * Date: 2018-10-23
+ * Date: 2018-10-29
  */
 (function() {
   'use strict';
@@ -134,7 +134,7 @@
       }
       return c;
     });
-	s = s.replace(/'/g, '"').replace(/: True/g, ': 1').replace(/: (False|None)/g, ': 0');
+    s = s.replace(/'/g, '"').replace(/: True/g, ': 1').replace(/: (False|None)/g, ': 0');
     return s;
   }
 
@@ -236,6 +236,10 @@
     getDistance: getDistance,
     rgb_a: rgb_a,
 
+    decodeJSON: function (text) {
+      return JSON.parse(decodeHtml(text));
+    },
+
     showHandles: function(el, handle) {
       var i, pt, r;
       var size = data.handleSize;
@@ -281,6 +285,7 @@
         state.hoverHandle.index = -1;
         state.hoverStroke = box.attr('stroke');
         state.hoverHandle.fill = box.attr('fill');
+        state.hoverHandle.hidden = box.node.style.display === 'none';
         box.attr({
           stroke: rgb_a(data.hoverColor, data.boxOpacity)
         });
@@ -291,9 +296,15 @@
       if (box && state.hover === box && state.hoverHandle.fill) {
         box.attr({ stroke: state.hoverStroke, fill: state.hoverHandle.fill });
         state.hoverHandle.fill = 0;   // 设置此标志，暂不清除 box 变量，以便在框外也可点控制点
+        if (state.hoverHandle.hidden) {
+          box.hide();
+        }
       }
       else if (box && state.edit === box && state.editHandle.fill) {
         box.attr({ stroke: state.editStroke, fill: state.editHandle.fill });
+        if (state.editHandle.hidden) {
+          box.hide();
+        }
         state.editHandle.fill = 0;
       }
     },
@@ -365,11 +376,12 @@
       if (el) {
         state.editStroke = el.attr('stroke');
         state.editHandle.fill = el.attr('fill');
+        state.editHandle.hidden = el.node.style.display === 'none';
         el.attr({
           stroke: rgb_a(data.changedColor, data.boxOpacity),
           fill: rgb_a(data.hoverFill, data.activeFillOpacity)
         });
-        $(el.node).toggle(true);
+        el.show();
         this.scrollToVisible(el);
       }
       this.showHandles(state.edit, state.editHandle);
@@ -417,6 +429,10 @@
           return;
         }
         state.downOrigin = state.down = getPoint(e);
+        state.focus = true;
+        if ($.fn.mapKey) {
+          $.fn.mapKey.enabled = true;
+        }
 
         // 鼠标略过控制点时，当前字框的控制点不能被选中，则切换为另外已亮显热点控制点的字框
         var lockBox = e.altKey;
@@ -439,7 +455,7 @@
         }
 
         // 不能拖动当前字框的控制点，则画出一个新字框
-        if (!state.edit) {
+        if (!state.edit && !state.readonly) {
           state.editHandle.index = 2;  // 右下角为拖动位置
           state.edit = createRect(state.down, state.down, true);
         }
@@ -449,7 +465,7 @@
         var pt = getPoint(e);
 
         e.preventDefault();
-        if (!state.originBox && getDistance(pt, state.downOrigin) < 3) {
+        if (state.readonly || !state.originBox && getDistance(pt, state.downOrigin) < 3) {
           return;
         }
 
@@ -481,11 +497,13 @@
         }
       };
 
+      self.destroy();
       data.paper = Raphael(p.holder, p.width, p.height).initZoom();
       data.holder = document.getElementById(p.holder);
+      state.focus = true;
 
       data.image = data.paper.image(p.image, 0, 0, p.width, p.height);
-      data.paper.rect(0, 0, p.width, p.height)
+      data.board = data.paper.rect(0, 0, p.width, p.height)
         .attr({'stroke': 'transparent', fill: data.boxFill});
 
       state.readonly = p.readonly;
@@ -495,23 +513,27 @@
       }
       data.ratioInitial = ($(data.holder).width() - 20) / p.width;
       data.scrollContainer = p.scrollContainer && $(p.scrollContainer);
-      if (!p.readonly) {
-        $(data.holder)
-          .mousedown(mouseDown)
-          .mouseup(mouseUp)
-          .mousemove(function(e) {
-            (state.down ? mouseDrag : mouseHover)(e);
-          });
-      }
+      $(data.holder)
+        .mousedown(mouseDown)
+        .mouseup(mouseUp)
+        .mousemove(function(e) {
+          (state.down ? mouseDrag : mouseHover)(e);
+        });
 
       var xMin = 1e5, yMin= 1e5, leftTop = null;
 
       if (typeof p.chars === 'string') {
-        p.chars = JSON.parse(decodeHtml(p.chars));
+        p.chars = self.decodeJSON(p.chars);
       }
 
       p.chars.forEach(function(b, idx) {
-        if (b.block_no && b.line_no && b.char_no) {
+        if (!b.line_no && b.char_id) {
+          var ids = b.char_id.replace('b', 'c').split('c');
+          b.block_no = parseInt(ids[1]);
+          b.line_no = parseInt(ids[2]);
+          b.char_no = parseInt(ids[3]);
+        }
+        if (b.block_no && b.line_no && b.char_no && !b.char_id) {
           b.char_id = (b.block_no * 1000 + b.line_no) + 'n' + (b.char_no > 9 ? b.char_no : '0' + b.char_no);
         }
         if (!b.char_id) {
@@ -536,6 +558,28 @@
       undoData.load(p.name, self._apply.bind(self));
 
       return data;
+    },
+
+    // 销毁所有图形
+    destroy: function() {
+      if (data.image) {
+        data.image.remove();
+        delete data.image;
+      }
+      if (data.board) {
+        data.board.remove();
+        delete data.board;
+      }
+      data.chars.forEach(function(b) {
+        if (b.shape) {
+          b.shape.remove();
+          delete b.shape;
+        }
+      });
+      if (data.paper) {
+        data.paper.remove();
+        delete data.paper;
+      }
     },
 
     switchPage: function (name, pageData) {
@@ -592,13 +636,13 @@
       }
 
       var info = src && this.findCharById(src.data('cid')) || {};
+      var added = !info.char_id;
 
-      if (!info.char_id) {
+      if (added) {
         for (var i = 1; i < 999; i++) {
           info.char_id = 'new' + i;
           if (!this.findCharById(info.char_id)) {
             data.chars.push(info);
-            notifyChanged(dst, 'added');
             break;
           }
         }
@@ -607,6 +651,9 @@
       }
       dst.data('cid', info.char_id).data('char', dst.ch);
       info.shape = dst;
+      if (added) {
+        notifyChanged(dst, 'added');
+      }
 
       if (src) {
         dst.insertBefore(src);
@@ -634,6 +681,8 @@
     findCharsByLine: function(block_no, line_no, cmp) {
       return data.chars.filter(function(box) {
         return box.block_no === block_no && box.line_no === line_no && (!cmp || cmp(box.ch, box));
+      }).sort(function(a, b) {
+        return a.char_no - b.char_no;
       });
     },
 
@@ -647,7 +696,7 @@
           pt.y < box.y + box.height + tol;
       };
 
-      if (state.edit && (isInRect(state.edit, 10) || lockBox)) {
+      if (state.edit && (isInRect(state.edit, state.readonly ? 1 : 10) || lockBox)) {
         return state.edit;
       }
       for (i = 0; i < data.chars.length; i++) {
@@ -678,6 +727,7 @@
       });
     },
 
+    // callback: function(info, box, reason)
     onBoxChanged: function(callback) {
       data.boxObservers.push(callback);
     },
@@ -698,6 +748,9 @@
           stroke: state.editStroke,
           fill: state.editHandle.fill
         });
+        if (state.editHandle.hidden) {
+          state.edit.hide();
+        }
         state.editHandle.fill = 0;
       }
       state.down = null;
@@ -705,7 +758,7 @@
 
     removeBox: function() {
       this.cancelDrag();
-      if (state.edit) {
+      if (state.edit && !state.readonly) {
         var el = state.edit;
         var info = this.findCharById(el.data('cid'));
         var hi = /small|narrow|flat/.test(data.hlType) && this.switchNextHighlightBox;
@@ -735,6 +788,12 @@
           {x: box.x + box.width + dx, y: box.y + box.height + dy});
         return this._changeBox(null, newBox);
       }
+    },
+
+    findCharByData: function(key, value) {
+      return value && data.chars.filter(function (box) {
+        return box.shape && box.shape.data(key) === value;
+      })[0];
     },
 
     navigate: function(direction) {

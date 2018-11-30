@@ -42,6 +42,12 @@
 
 <div id="body-content" style="padding-top: 80px;">
   <div style="margin-left: 30px">
+    <h4>文字校对</h4>
+    <ul>
+      {% for k, n in kinds['proof'].items() %}
+      <li><a href="/proof/{{k}}">{{n}} ({{len(index['proof'].get(k, []))}})</a></li>
+      {% end %}
+    </ul>
     <h4>切栏校对</h4>
     <ul>
       {% for k, n in kinds['block'].items() %}
