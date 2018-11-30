@@ -5,7 +5,7 @@ from controller.cut import CutHandler
 
 
 class ProofreadHandler(CutHandler):
-    URL = r'/(proof)/([A-Z]{2})/(\w{4,20}|all)'
+    URL = r'/(proof)/([A-Z]{2})/(\w{4,20})'
 
     def do_render(self, name, template_name, **params):
         def gen_segments(txt):

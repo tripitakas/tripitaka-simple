@@ -198,7 +198,7 @@ function checkMismatch(report) {
       }
   });
   if (ocrColumns.length !== lineNos.length) {
-    total = '行数不匹配，文本 ' + lineNos.length + ' 行，图像 ' + ocrColumns.length + ' 行。';
+    total = '文本 ' + lineNos.length + ' 行，图像 ' + ocrColumns.length + ' 行。';
   }
   lineNos.forEach(function(no) {
     var boxes = $.cut.findCharsByLine(no[0], no[1]);
@@ -210,7 +210,7 @@ function checkMismatch(report) {
     }
   });
   if (report && total && mismatch.length) {
-      alert(total + '\n' + mismatch.join('\n'));
+      swal('行数不匹配', total + '\n' + mismatch.join('\n'));
   }
 }
 
