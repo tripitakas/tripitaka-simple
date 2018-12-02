@@ -35,7 +35,9 @@
     <div class="collapse navbar-collapse" id="bs-navbar-collapse-1">
       <ul class="nav navbar-nav">
         <button type="button" class="btn btn-default" id="hl-all">高亮<sup class="count"></sup></button>
-        <button type="button" class="btn btn-primary navbar-btn" id="save">保存</button>
+        <button type="button" class="btn btn-default navbar-btn" style="margin-left: 10px;" id="undo">撤销</button>
+        <button type="button" class="btn btn-default navbar-btn" id="redo">重做</button>
+        <button type="button" class="btn btn-primary navbar-btn" style="margin-left: 10px;"  id="save">保存</button>
         <button type="button" class="btn btn-primary navbar-btn" id="submit">提交</button>
       </ul>
       {% include nav-right.html %}
@@ -126,6 +128,23 @@
     }
     $('#save').click(save.bind(null, false));
     $('#submit').click(save.bind(null, true));
+
+    function updateUndo() {
+      $('#undo').toggleClass('disabled', !$.cut.canUndo());
+      $('#redo').toggleClass('disabled', !$.cut.canRedo());
+    }
+    updateUndo();
+    $('#undo').click(function () {
+      $.cut.undo();
+      updateUndo();
+    });
+    $('#redo').click(function () {
+      $.cut.redo();
+      updateUndo();
+    });
+    $.cut.onBoxChanged(function () {
+      updateUndo();
+    });
   </script>
 
 </body>
