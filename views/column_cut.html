@@ -109,7 +109,7 @@
       $.post('/{{pos}}/{{kind}}/{{imgname}}', {
         submit: submit,
         boxes: JSON.stringify($.cut.exportBoxes()),
-        txt: JSON.stringify($('#txt textarea').val())
+        txt: $('#txt textarea').val()
       }, function (res) {
         if (/^error:/.test(res)) {
           swal('操作失败', res.replace(/^error:/, ''), 'error', { buttons: false, timer: 1500 });

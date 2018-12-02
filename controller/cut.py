@@ -183,7 +183,6 @@ class CutHandler(BaseHandler):
             self.save(kind, pos, name, boxes)
 
         txt = self.get_body_argument('txt', '0')
-        txt = json.loads(txt) if txt and txt.startswith('{') else txt
         if txt:
             with codecs.open('/'.join(['./static/txt/', *name.split('_')[:-1], name + '.txt']), 'w', 'utf-8') as f:
                 f.write(txt.strip('\n'))
