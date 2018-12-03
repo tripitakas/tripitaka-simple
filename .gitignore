@@ -59,15 +59,10 @@ coverage.xml
 *.db
 *.rdb
 static/*.json
-!static/index_d.json
-static/pos/
-!static/pos/EX
+static/*pos/
 static/txt/
-!static/txt/EX
-static/img/
-!static/img/EX
 static/icon/
-!static/icon/EX
+static/img*/
 data/*pos*/
 data/lock*/
 data/*.txt
