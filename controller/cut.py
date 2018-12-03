@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from controller.base import load_json, save_json, get_date_time, BaseHandler
+from tornado.options import options
 import logging
 from os import path, listdir, remove
 import json
@@ -30,7 +31,8 @@ class MainHandler(BaseHandler):
             for t in lines:
                 proof[t[:2]].append(t)
             save_json(proof, 'proof.json')
-        index = load_json(path.join('static', 'index.json'))
+        index_file = 'index_d.json' if options.debug else 'index.json'
+        index = load_json(path.join('static', index_file))
         self.render('index.html', kinds=kinds, index=index, pos='char')
 
 
@@ -54,7 +56,7 @@ class PagesHandler(BaseHandler):
 
     def get(self, pos, kind, username=None):
         def get_icon(p):
-            return '/'.join(['icon', *p.split('_')[:-1], p + '.jpg'])
+            return '/'.join(['img', *p.split('_')[:-1], p + '.jpg'])
 
         def get_info(p):
             filename = path.join(BASE_DIR, 'static', 'pos', pos, *p.split('_')[:-1], p + '.json')
@@ -71,8 +73,9 @@ class PagesHandler(BaseHandler):
             return self.render('my_pages.html', kinds=kinds, pages=pages, count=len(pages), username=username,
                                pos_type=pos_type, pos=pos, kind=kind, get_icon=get_icon, get_info=get_info)
 
-        index = load_json(path.join('static', 'index.json'))
-        pages, count = self.pick_pages(pos, index[pos][kind], 12)
+        index_file = 'index_d.json' if options.debug else 'index.json'
+        index = load_json(path.join('static', index_file))
+        pages, count = self.pick_pages(pos, index[pos].get(kind, []), 12)
         html = 'block_pages.html' if pos == 'block' else 'char_pages.html'
         if pos == 'block':
             [CutHandler.lock_page(self, pos, name) for name in pages]
@@ -127,6 +130,8 @@ class CutHandler(BaseHandler):
 
         # 获取page_code对应的图像路径
         def get_img(p):
+            if options.debug:
+                return '/static/' + '/'.join(['img', *p.split('_')[:-1], p + '.jpg'])
             baseurl = 'http://tripitaka-img.oss-cn-beijing.aliyuncs.com/page'
             return '/'.join([baseurl, *p.split('_')[:-1], p+'_'+get_hash(p)+'.jpg'])
 
@@ -188,7 +193,8 @@ class CutHandler(BaseHandler):
                 f.write(txt.strip('\n'))
 
         if submit:
-            pages = PagesHandler.pick_pages(pos, load_json(path.join('static', 'index.json'))[pos][kind], 1)[0]
+            index_file = 'index_d.json' if options.debug else 'index.json'
+            pages = PagesHandler.pick_pages(pos, load_json(path.join('static', index_file))[pos][kind], 1)[0]
             self.write('jump:' + pages[0][3:] if pages else 'error:本类切分已全部校对完成。')
         self.write('')
 

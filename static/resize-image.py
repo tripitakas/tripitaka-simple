@@ -78,5 +78,5 @@ def set_char_img_size(img_dir, json_dir):
 if __name__ == "__main__":
     base_dir = path.dirname(__file__)
     # check_json(path.join(base_dir, 'block_pos'))
-    export_icons(path.join(base_dir, 'img'), path.join(base_dir, 'icon'))
+    # export_icons(path.join(base_dir, 'img'), path.join(base_dir, 'icon'))
     # set_char_img_size(path.join(base_dir, 'img'), path.join(base_dir, 'char_pos'))

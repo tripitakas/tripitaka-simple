@@ -59,7 +59,7 @@ coverage.xml
 *.db
 *.rdb
 static/*.json
-!static/index.json
+!static/index_d.json
 static/pos/
 !static/pos/EX
 static/txt/
