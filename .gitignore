@@ -70,4 +70,5 @@ static/icon/
 !static/icon/EX
 data/*pos*/
 data/lock*/
+data/*.txt
 log/
