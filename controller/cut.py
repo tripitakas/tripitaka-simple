@@ -56,12 +56,16 @@ class PagesHandler(BaseHandler):
 
     def get(self, pos, kind, username=None):
         def get_icon(p):
-            return '/'.join(['img', *p.split('_')[:-1], p + '.jpg'])
+            if options.debug:
+                return '/static/' + '/'.join(['img', *p.split('_')[:-1], p + '.jpg'])
+            base_url = 'http://tripitaka-img.oss-cn-beijing.aliyuncs.com/page'
+            return '/'.join([base_url, *p.split('_')[:-1], p + '_' + page_codes.get(p) + '.jpg'])
 
         def get_info(p):
             filename = path.join(BASE_DIR, 'static', 'pos', pos, *p.split('_')[:-1], p + '.json')
             return load_json(filename)
 
+        page_codes = load_json(path.join(BASE_DIR, 'static/pagecode_hash.json'))
         pos_type = pos_types[pos]
         cur_user = self.current_user or self.get_ip()
         username = username or cur_user
@@ -132,8 +136,8 @@ class CutHandler(BaseHandler):
         def get_img(p):
             if options.debug:
                 return '/static/' + '/'.join(['img', *p.split('_')[:-1], p + '.jpg'])
-            baseurl = 'http://tripitaka-img.oss-cn-beijing.aliyuncs.com/page'
-            return '/'.join([baseurl, *p.split('_')[:-1], p+'_'+get_hash(p)+'.jpg'])
+            base_url = 'http://tripitaka-img.oss-cn-beijing.aliyuncs.com/page'
+            return '/'.join([base_url, *p.split('_')[:-1], p+'_'+get_hash(p)+'.jpg'])
 
         name = kind + '_' + name
         filename = path.join(BASE_DIR, 'static', 'pos', pos, *name.split('_')[:-1], name + '.json')
@@ -177,20 +181,32 @@ class CutHandler(BaseHandler):
         :param name: 页名，例如 GL_1047_1_5，请求体中需要有 boxes 框数组. 如果页名为空，则 boxes 为[[name,boxes], ...]数组
         :return: None
         """
-        submit = self.get_body_argument('submit', 0) == 'true'
-        boxes = json.loads(self.get_body_argument('boxes'))
-        assert name or type(boxes) == dict
-        if name == 'all':
-            for name, arr in boxes:
-                self.save(kind, pos, name, arr)
-        else:
-            self.save(kind, pos, name, boxes)
+        submit = self.get_body_argument('submit', 0)
+        rollback = submit == 'rollback'
+        submit = submit == 'true'
 
-        txt = self.get_body_argument('txt', '0')
-        txt = json.loads(txt) if txt and txt.startswith('"') else txt
-        if txt:
-            with codecs.open('/'.join(['./static/txt/', *name.split('_')[:-1], name + '.txt']), 'w', 'utf-8') as f:
-                f.write(txt.strip('\n'))
+        if rollback:
+            lock_file = PagesHandler.get_lock_file(pos, name)
+            if path.exists(lock_file):
+                with open(lock_file) as f:
+                    text = f.read()
+                if 'saved' not in text:
+                    remove(lock_file)
+                    logging.info('%s unlocked' % lock_file)
+        else:
+            boxes = json.loads(self.get_body_argument('boxes'))
+            assert name or type(boxes) == dict
+            if name == 'all':
+                for name, arr in boxes:
+                    self.save(kind, pos, name, arr)
+            else:
+                self.save(kind, pos, name, boxes)
+
+            txt = self.get_body_argument('txt', '0')
+            txt = json.loads(txt) if txt and txt.startswith('"') else txt
+            if txt:
+                with codecs.open('/'.join(['./static/txt/', *name.split('_')[:-1], name + '.txt']), 'w', 'utf-8') as f:
+                    f.write(txt.strip('\n'))
 
         if submit:
             index_file = 'index_d.json' if options.debug else 'index.json'

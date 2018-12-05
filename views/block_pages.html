@@ -106,7 +106,7 @@
         width: {{ info["imgsize"]['width'] }},
         height: {{ info["imgsize"]['height'] }},
         holder: 'holder-{{p}}',
-        image: "{{static_url(get_icon(p))}}",
+        image: "{{get_icon(p)}}",
         chars: '{{info["blocks"] if pos=="block" else info["columns"]}}'
         }));
       $.cut.bindKeys();
