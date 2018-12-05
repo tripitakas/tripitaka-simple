@@ -222,15 +222,15 @@
     });
 
     function save(submit) {
-      var blocks = $('#sutra-text').find('.block').map(function (i, block) {
+      var txt = $('#sutra-text').find('.block').map(function (i, block) {
         return $(block).find('.line').map(function (line, el) {
           return $(el).text();
         }).get().join('\n');
       }).get().join('\n\n\n');
       $.post('/{{pos}}/{{kind}}/{{imgname}}', {
         submit: submit,
-        txt: blocks,
-        boxes: JSON.stringify($.cut.exportBoxes())
+        txt: JSON.stringify(txt),
+        boxes: [] // JSON.stringify($.cut.exportBoxes())
       }, function (res) {
         if (/^error:/.test(res)) {
           swal('操作失败', res.replace(/^error:/, ''), 'error', {buttons: false, timer: 1500});

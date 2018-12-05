@@ -194,7 +194,7 @@ class CutHandler(BaseHandler):
                     remove(lock_file)
                     logging.info('%s unlocked' % lock_file)
         else:
-            boxes = json.loads(self.get_body_argument('boxes'))
+            boxes = json.loads(self.get_body_argument('boxes', '[]'))
             assert name or type(boxes) == dict
             if name == 'all':
                 for name, arr in boxes:
@@ -219,7 +219,7 @@ class CutHandler(BaseHandler):
         page = load_json(filename)
         assert page and isinstance(boxes, list)
         field = 'chars' if pos == 'proof' else pos + 's'
-        if page[field] != boxes:
+        if page[field] != boxes and boxes:
             page[field] = boxes
             save_json(page, filename)
             logging.info('%d boxes saved: %s' % (len(boxes), name))
