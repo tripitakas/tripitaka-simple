@@ -36,13 +36,14 @@
         $('#order').val(oldChar[0] || '');
 
         if (reason === 'navigate') {
+          var curId = info && info.shape && info.shape.data('cid') || '?';
           for (var cid in data.texts) {
             if (data.texts.hasOwnProperty(cid)) {
               var rect = data.texts[cid][0];
               rect.attr({
-                stroke: cid !== info.shape.data('cid') ? 'rgba(0,0,0,.1)'
+                stroke: cid !== curId ? 'rgba(0,0,0,.1)'
                   : self.rgb_a(data.changedColor, data.boxOpacity),
-                fill: cid !== info.shape.data('cid') ? 'none' : self.rgb_a(data.hoverFill, 0.2)
+                fill: cid !== curId ? 'none' : self.rgb_a(data.hoverFill, 0.2)
               });
             }
           }

@@ -200,7 +200,7 @@
       updateUndo();
 
       $modal.find('button.btn-primary').unbind('click').click(function () {
-        cutdata.char_data = $.cut.exportBoxes();
+        char_data = $.cut.exportBoxes();
         $modal.find('[data-dismiss="modal"]').click();
       });
     });
