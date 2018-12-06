@@ -1,4 +1,4 @@
-# tripitaka-local
+# tripitaka-simple
 
 基于 tornado 的切栏校对应用（本地版，无云服务存储和任务管理）。
 
