@@ -345,7 +345,10 @@
 
 .right .current-span {
   border: 1px solid #C1C1C1;
+  display: block;
+  margin-right: 10px;
 }
+
 
 .right .variant-highlight {
   color: blue;

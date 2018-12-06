@@ -210,7 +210,7 @@ function checkMismatch(report) {
     }
   });
   if (report && total && mismatch.length) {
-      swal('行数不匹配', total + '\n' + mismatch.join('\n'));
+      swal('图文不匹配', total + '\n' + mismatch.join('\n'));
   }
 }
 
@@ -354,7 +354,7 @@ $(document).on('click', '.btn-addupline', function (e) {
     }
     var $currentLine = $(".current-span").parent(".line");
     $(".current-span").removeClass("current-span");
-    var newline = "<li class='line'><span contentEditable='true' class='same add current-span'>&nbsp;</span></lis>";
+    var newline = "<li class='line'><span contentEditable='true' class='same add current-span'></span></lis>";
     $currentLine.before(newline);
 });
 
@@ -366,7 +366,7 @@ $(document).on('click', '.btn-adddownline', function (e) {
     }
     var $currentLine = $(".current-span").parent(".line");
     $(".current-span").removeClass("current-span");
-    var newline = "<li class='line'><span contentEditable='true' class='same add current-span'>&nbsp;</span></lis>";
+    var newline = "<li class='line'><span contentEditable='true' class='same add current-span'></span></lis>";
     $currentLine.after(newline);
 });
 
@@ -459,4 +459,8 @@ $(document).on('click', '.btn-txt-hidden', function () {
     $(this).addClass("btn-txt-show")
     showText = !showText;
     highlightBox();
+});
+// 帮助
+$(document).on('click', '.btn-help', function () {
+    window.open('/proofread/help','_blank');
 });

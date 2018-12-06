@@ -111,6 +111,13 @@ class HistoryHandler(BaseHandler):
         self.write('<style>%s</style><h3>页面校对历史 (%d 个页面)</h3><ol>%s</ol>' % (css, len(items), ''.join(items)))
 
 
+class HelpHandler(BaseHandler):
+    URL = r'/proofread/help'
+
+    def get(self):
+        self.render('proofread-help.html')
+
+
 if __name__ == '__main__':
     print(fix(path.join(data_path, 'lock', 'char')))
     clean_log()

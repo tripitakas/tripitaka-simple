@@ -10,7 +10,7 @@ import logging
 from os import path
 import controller.cut as cut
 from controller.proofread import ProofreadHandler
-from controller.fix_data import RankingHandler, HistoryHandler
+from controller.fix_data import HelpHandler, RankingHandler, HistoryHandler
 
 
 BASE_DIR = path.dirname(__file__)
@@ -20,7 +20,7 @@ define('num_processes', default=4, help='sub-processes count', type=int)
 
 
 def make_app():
-    classes = [cut.MainHandler, cut.PagesHandler, cut.CutHandler, RankingHandler, HistoryHandler, ProofreadHandler]
+    classes = [cut.MainHandler, cut.PagesHandler, cut.CutHandler, HelpHandler, RankingHandler, HistoryHandler, ProofreadHandler]
     handlers = []
     for cls in classes:
         if isinstance(cls.URL, list):
