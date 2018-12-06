@@ -59,7 +59,8 @@ class PagesHandler(BaseHandler):
             if options.debug:
                 return '/static/' + '/'.join(['img', *p.split('_')[:-1], p + '.jpg'])
             base_url = 'http://tripitaka-img.oss-cn-beijing.aliyuncs.com/page'
-            return '/'.join([base_url, *p.split('_')[:-1], p + '_' + page_codes.get(p) + '.jpg'])
+            url = '/'.join([base_url, *p.split('_')[:-1], p + '_' + page_codes.get(p) + '.jpg'])
+            return url + '?x-oss-process=image/resize,m_lfit,h_300,w_300'
 
         def get_info(p):
             filename = path.join(BASE_DIR, 'static', 'pos', pos, *p.split('_')[:-1], p + '.json')
