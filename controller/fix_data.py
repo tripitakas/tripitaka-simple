@@ -77,7 +77,7 @@ def fix(in_path):
 
 
 class RankingHandler(BaseHandler):
-    URL = r'/ranking/(block|column|char)'
+    URL = r'/ranking/(block|column|char|proof)'
 
     def get(self, pos):
         ranking = fix(path.join(data_path, 'lock', pos))
@@ -87,7 +87,7 @@ class RankingHandler(BaseHandler):
 
 
 class HistoryHandler(BaseHandler):
-    URL = r'/(block|column|char)/(h\d?)/([A-Za-z0-9-_ ]*)'
+    URL = r'/(block|column|char|proof)/(h\d?)/([A-Za-z0-9-_ ]*)'
 
     def get(self, pos, h, name):
         def callback_get(num, fn, filename, text, rows):
