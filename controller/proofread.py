@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from controller.cut import CutHandler
+import re
 
 
 class ProofreadHandler(CutHandler):
@@ -10,6 +11,8 @@ class ProofreadHandler(CutHandler):
     def do_render(self, name, template_name, **params):
         def gen_segments(txt):
             segments = []
+            txt = re.sub(r'\S*<!--.+-->\S*', '\n', txt, flags=re.S)  # 修正从其他网站贴入的音释内容
+            txt = re.sub(r'N', '\n', txt)  # 对按回车录入的自动分行
             for blk_i, block in enumerate(txt.split('\n\n\n')):
                 col_diff = 1
                 for col_i, column in enumerate(block.strip().split('\n')):
