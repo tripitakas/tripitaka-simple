@@ -14,12 +14,11 @@ class ProofreadHandler(CutHandler):
                 col_diff = 1
                 for col_i, column in enumerate(block.strip().split('\n')):
                     line_no = col_diff + col_i
-                    while col_diff < 10 and not [c for c in chars if c['char_id'].startswith('b%dc%dc' % (1 + blk_i, line_no))]:
+                    while col_diff < 50 and not [c for c in chars if c['char_id'].startswith('b%dc%dc' % (1 + blk_i, line_no))]:
                         col_diff += 1
                         line_no = col_diff + col_i
-                    if col_diff < 10:
-                        ln = dict(block_no=1 + blk_i, line_no=line_no, type='same', ocr=column)
-                        segments.append(ln)
+                    ln = dict(block_no=1 + blk_i, line_no=line_no, type='same', ocr=column)
+                    segments.append(ln)
             return {'segments': segments}
 
         chars = params['chars']
