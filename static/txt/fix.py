@@ -17,7 +17,6 @@ def scan_dir(txt_path):
             if text.startswith('"'):
                 text = json.loads(text)
             text = re.sub(r'\S*<!--.+-->\S*', '\n', text, flags=re.S)
-            text = re.sub(r'N', '\n', text)
             if old != text:
                 with open(filename, 'w') as f:
                     f.write(text)

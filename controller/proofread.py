@@ -12,7 +12,6 @@ class ProofreadHandler(CutHandler):
         def gen_segments(txt):
             segments = []
             txt = re.sub(r'\S*<!--.+-->\S*', '\n', txt, flags=re.S)  # 修正从其他网站贴入的音释内容
-            txt = re.sub(r'N', '\n', txt)  # 对按回车录入的自动分行
             for blk_i, block in enumerate(txt.split('\n\n\n')):
                 col_diff = 1
                 for col_i, column in enumerate(block.strip().split('\n')):
