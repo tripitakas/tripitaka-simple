@@ -37,8 +37,10 @@
         <button type="button" class="btn btn-default" id="hl-all">高亮<sup class="count"></sup></button>
         <button type="button" class="btn btn-default navbar-btn" style="margin-left: 10px;" id="undo">撤销</button>
         <button type="button" class="btn btn-default navbar-btn" id="redo">重做</button>
+        {% if not readonly %}
         <button type="button" class="btn btn-primary navbar-btn" style="margin-left: 10px;"  id="save">保存</button>
         <button type="button" class="btn btn-primary navbar-btn" id="submit">提交</button>
+        {% end %}
       </ul>
       {% include nav-right.html %}
     </div>

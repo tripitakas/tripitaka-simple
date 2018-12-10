@@ -34,6 +34,7 @@
         oldChar[1] = box && (info.shape.data('text') || info.shape.data('char')) || '';
         oldChar[2] = info;
         $('#order').val(oldChar[0] || '');
+        console.log(info);
 
         if (reason === 'navigate') {
           var curId = info && info.shape && info.shape.data('cid') || '?';

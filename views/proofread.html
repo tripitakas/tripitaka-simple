@@ -31,8 +31,10 @@
       <!-- Collect the nav links, forms, and other content for toggling -->
       <div class="collapse navbar-collapse" id="bs-navbar-collapse-1">
         <ul class="nav navbar-nav">
+          {% if not readonly %}
           <button type="button" class="btn btn-normal navbar-btn" id="save">保存</button>
           <button type="button" class="btn btn-normal navbar-btn" id="submit">提交</button>
+          {% end %}
         </ul>
       </div>
     </div>

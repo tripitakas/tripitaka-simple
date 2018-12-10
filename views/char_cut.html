@@ -57,8 +57,10 @@
         <button type="button" class="btn btn-sm btn-default" id="undo">撤销</button>
         <button type="button" class="btn btn-sm btn-default" id="redo">重做</button>
       </div>
+      {% if not readonly %}
       <button type="button" class="btn btn-sm btn-primary navbar-btn" id="save">保存</button>
       <button type="button" class="btn btn-sm btn-primary navbar-btn" id="submit">提交</button>
+      {% end %}
     </ul>
     {% include nav-right.html %}
   </div>

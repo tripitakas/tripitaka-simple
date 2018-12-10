@@ -150,9 +150,8 @@ class CutHandler(BaseHandler):
         else:
             page[pos + 's'] = []
 
-        if self.lock_page(self, pos, name) != name:
-            return
-        self.do_render(name, self.html_files[pos], pos_type=pos_types[pos],
+        readonly = self.lock_page(self, pos, name, False) != name
+        self.do_render(name, self.html_files[pos], pos_type=pos_types[pos], readonly=readonly,
                        page=page, pos=pos, kind=kind, **page, get_img=get_img, txt=get_txt(name))
 
     def do_render(self, name, template_name, **params):
