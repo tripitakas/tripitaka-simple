@@ -86,6 +86,7 @@
                 <div class="fr">
                   <!-- <span><i title="退回任务" class="btn-returnback"></i></span> -->
                   <!-- <span><i title="完成" class="btn-ok"></i></span> -->
+                  <span><i title="原文" class="btn-doubts"></i></span>
                   <span><i title="帮助" class="btn-help"></i></span>
                 </div>
               </div>
@@ -137,6 +138,27 @@
       <!-- /.modal-dialog -->
     </div>
     <!-- /.modal -->
+  </div>
+
+  <div class="panel-body" style="padding: 0;">
+    <!-- modal content -->
+    <div id="txtModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="txtModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true" style="color: blue">×</button>
+            <h4 class="modal-title" id="txtModalLabel">原文</h4>
+          </div>
+          <div class="modal-body">
+            <ol style="list-style-type: decimal; padding: 8px; margin-left: 20px; font-size: 1.2em">
+              {% for s in origin_txt %}
+              <li>{{s}}</li>
+              {% end %}
+            </ol>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
@@ -253,6 +275,10 @@
     $('#save').click(save.bind(null, false));
     $('#submit').click(save.bind(null, true));
     $('.btn-returnback').click(save.bind(null, 'rollback'));
+
+    $('.btn-doubts').click(function () {
+      $('#txtModal').modal();
+    });
   </script>
 </body>
 

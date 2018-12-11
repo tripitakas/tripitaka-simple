@@ -24,5 +24,6 @@ class ProofreadHandler(CutHandler):
             return {'segments': segments}
 
         chars = params['chars']
+        params['origin_txt'] = params['txt'].strip().split('\n')
         params['txt'] = gen_segments(params['txt'])
         return self.render(template_name, **params)
