@@ -60,7 +60,7 @@
       {% for p in pages %}
       <div class="col-xs-4 col-md-3">
         <div class="thumbnail" id="{{p}}">
-            <a href="/{{pos}}/{{p[:2]}}/{{p[3:]}}"><img src="{{get_icon(p)}}"></a>
+            <a href="/{{pos}}/{{p[:2]}}/{{p[3:]}}?c={{checker}}"><img src="{{get_icon(p)}}"></a>
             <div class="caption text-center" id="title-{{p}}">
               <p>{{p}}</p>
             </div>

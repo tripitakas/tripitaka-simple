@@ -16,8 +16,9 @@ kinds = {
     'block': {'JX': '嘉兴藏'},
     'column': {'JX': '嘉兴藏'},
     'char': {'GL': '高丽藏', 'JX': '嘉兴藏', 'QL': '乾隆藏', 'YB': '永乐北藏'},
-    'proof': {'QL': '乾隆藏', 'YB': '永乐北藏'}
+    'proof': {'QL': '乾隆藏', 'YB': '永乐北藏', 'FX': '补校'}
 }
+fix_tasks = load_json(path.join(BASE_DIR, 'fix_tasks.json'))
 
 
 class MainHandler(BaseHandler):
@@ -33,11 +34,12 @@ class MainHandler(BaseHandler):
             save_json(proof, 'proof.json')
         index_file = 'index_d.json' if options.debug else 'index.json'
         index = load_json(path.join('static', index_file))
-        self.render('index.html', kinds=kinds, index=index, pos='char')
+        self.render('index.html', kinds=kinds, index=index, pos='char', fix_tasks=fix_tasks)
 
 
 class PagesHandler(BaseHandler):
     URL = [r'/(block|column|char|proof)/([A-Z]{2}|me)/?',
+           r'/(proof_f)/(.+)',
            r'/(block|column|char|proof)/(me)/(\w+)']
 
     @staticmethod
@@ -66,6 +68,11 @@ class PagesHandler(BaseHandler):
             filename = path.join(BASE_DIR, 'static', 'pos', pos, *p.split('_')[:-1], p + '.json')
             return load_json(filename)
 
+        pages_limit = pos == 'proof_f' and fix_tasks.get(kind)
+        checker = pos == 'proof_f' and kind
+        if pos == 'proof_f':
+            pos = 'proof'
+            kind = 'FX'
         page_codes = load_json(path.join(BASE_DIR, 'static/pagecode_hash.json'))
         pos_type = pos_types[pos]
         cur_user = self.current_user or self.get_ip()
@@ -78,14 +85,17 @@ class PagesHandler(BaseHandler):
             return self.render('my_pages.html', kinds=kinds, pages=pages, count=len(pages), username=username,
                                pos_type=pos_type, pos=pos, kind=kind, get_icon=get_icon, get_info=get_info)
 
-        index_file = 'index_d.json' if options.debug else 'index.json'
-        index = load_json(path.join('static', index_file))
-        pages, count = self.pick_pages(pos, index[pos].get(kind, []), 12)
+        if pages_limit:
+            pages, count = self.pick_pages(pos, pages_limit, 12)
+        else:
+            index_file = 'index_d.json' if options.debug else 'index.json'
+            index = load_json(path.join('static', index_file))
+            pages, count = self.pick_pages(pos, index[pos].get(kind, []), 12)
         html = 'block_pages.html' if pos == 'block' else 'char_pages.html'
         if pos == 'block':
             [CutHandler.lock_page(self, pos, name) for name in pages]
 
-        self.render(html, kinds=kinds, pages=pages, count=count, username=username,
+        self.render(html, kinds=kinds, pages=pages, count=count, username=username, checker=checker,
                     pos_type=pos_type, pos=pos, kind=kind, get_icon=get_icon, get_info=get_info)
 
     @staticmethod
@@ -152,6 +162,7 @@ class CutHandler(BaseHandler):
 
         readonly = self.lock_page(self, pos, name, False) != name
         self.do_render(name, self.html_files[pos], pos_type=pos_types[pos], readonly=readonly,
+                       checker=self.get_argument('c', ''),
                        page=page, pos=pos, kind=kind, **page, get_img=get_img, txt=get_txt(name))
 
     def do_render(self, name, template_name, **params):
@@ -184,6 +195,7 @@ class CutHandler(BaseHandler):
         submit = self.get_body_argument('submit', 0)
         rollback = submit == 'rollback'
         submit = submit == 'true'
+        checker = self.get_body_argument('checker', None)
 
         if rollback:
             lock_file = PagesHandler.get_lock_file(pos, name)
@@ -209,8 +221,12 @@ class CutHandler(BaseHandler):
                     f.write(txt.strip('\n'))
 
         if submit:
-            index_file = 'index_d.json' if options.debug else 'index.json'
-            pages = PagesHandler.pick_pages(pos, load_json(path.join('static', index_file))[pos][kind], 1)[0]
+            if checker:
+                pages = fix_tasks.get(checker)
+                pages = PagesHandler.pick_pages(pos, pages, 1)[0]
+            else:
+                index_file = 'index_d.json' if options.debug else 'index.json'
+                pages = PagesHandler.pick_pages(pos, load_json(path.join('static', index_file))[pos][kind], 1)[0]
             self.write('jump:' + pages[0][3:] if pages else 'error:本类切分已全部校对完成。')
         self.write('')
 

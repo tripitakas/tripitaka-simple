@@ -66,6 +66,12 @@
       <li><a href="/proof/{{k}}">{{n}} ({{len(index['proof'].get(k, []))}})</a></li>
       {% end %}
     </ul>
+    <h4>文字校对（补校）</h4>
+    <ul>
+      {% for k, pages in fix_tasks.items() %}
+      <li><a href="/proof_f/{{k}}">{{k}} ({{len(pages)}})</a></li>
+      {% end %}
+    </ul>
   </div>
 </div>
 
