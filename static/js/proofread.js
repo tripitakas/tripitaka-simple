@@ -45,7 +45,7 @@ function highlightBox($span, first) {
     }
     var $line = $span.parent(), $block = $line.parent();
     var block_no = parseInt($block.attr('id').replace(/^.+-/, ''));
-    var line_no = parseInt($line.attr('id').replace(/^.+-/, ''));
+    var line_no = parseInt(($line.attr('id') || '').replace(/^.+-/, ''));
     var offset0 = parseInt($span.attr('offset'));
     var offsetInSpan = first ? 0 : getCursorPosition($span[0]);
     var offsetInLine = offsetInSpan + offset0;
@@ -238,14 +238,40 @@ $(document).on('click', '.not-same', function (e) {
     var r_h = $(".right").height();
     var o_t = $dlg.offset().top;
     var d_h = $dlg.height();
+    var shouldUp = false;
     $dlg.removeClass('dialog-common-t');
     $dlg.addClass('dialog-common');
     if (o_t + d_h > r_h) {
-        $dlg.offset({ top: $(this).offset().top - 180, left: $(this).offset().left - 4 });
+        $dlg.offset({ top: $(this).offset().top - 180 });
         $dlg.removeClass('dialog-common');
         $dlg.addClass('dialog-common-t');
+        shouldUp = true;
     }
-    
+
+    // 当弹框右边出界时，向左移动
+    var r_w = $dlg.parent()[0].getBoundingClientRect().right;
+    var o_l = $dlg.offset().left;
+    var d_r = $dlg[0].getBoundingClientRect().right;
+    var offset = 0;
+    if (d_r > r_w - 20) {
+        offset = parseInt(r_w - d_r - 20);
+        $dlg.offset({left: o_l + offset});
+    }
+
+    var $mark = $dlg.find('.dlg-after');
+    var ml = $mark.attr('last-left') || $mark.css('marginLeft');
+    if (shouldUp) {
+        $mark.attr('last-left', ml)
+        $mark.css('marginLeft', parseInt(ml) - offset);
+    }
+
+    $mark = $dlg.find('.dlg-before');
+    ml = $mark.attr('last-left') || $mark.css('marginLeft');
+    if (!shouldUp) {
+        $mark.attr('last-left', ml);
+        $mark.css('marginLeft', parseInt(ml) - offset);
+    }
+
     // 设置当前异文
     $('.not-same').removeClass('current-not-same');
     $(this).addClass('current-not-same');

@@ -229,7 +229,7 @@
   padding: 10px;
 }
 
-.pfread .pfread-dialog:before {
+.pfread .pfread-dialog > .dlg-before {
   left: 31%;
 }
 
@@ -286,7 +286,7 @@
   border-radius: 5px;
 }
 
-.dialog-common:before {
+.dialog-common > .dlg-before {
   position: absolute;
   width: 12px;
   height: 12px;
@@ -317,7 +317,7 @@
   border-radius: 5px;
 }
 
-.dialog-common-t:after {
+.dialog-common-t > .dlg-after {
   position: absolute;
   width: 12px;
   height: 12px;
@@ -380,6 +380,7 @@
 
 .right .add {
   display: block;
+  margin-right: 10px;
 }
 
 .right .variant-highlight {
