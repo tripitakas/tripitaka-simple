@@ -232,7 +232,18 @@ $(document).on('click', '.not-same', function (e) {
     $("#pfread-dialog-slct").text("");
     $("#pfread-dialog").offset({ top: $(this).offset().top + 40, left: $(this).offset().left - 4 });
     $("#pfread-dialog").show();
-
+    
+    //当弹框超出文字框时，向上弹出
+    var r_h = $(".right").height();
+    var o_t = $("#pfread-dialog").offset().top;
+    $("#pfread-dialog").removeClass('dialog-common-t');
+    	$("#pfread-dialog").addClass('dialog-common');
+    if(o_t>r_h){
+    		$("#pfread-dialog").offset({ top: $(this).offset().top - 180, left: $(this).offset().left - 4 });
+    		$("#pfread-dialog").removeClass('dialog-common');
+    		$("#pfread-dialog").addClass('dialog-common-t');
+    }
+    
     // 设置当前异文
     $('.not-same').removeClass('current-not-same');
     $(this).addClass('current-not-same');

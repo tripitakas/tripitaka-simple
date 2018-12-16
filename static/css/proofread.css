@@ -304,6 +304,37 @@
   box-shadow: 1px 1px 1px 0 rgba(0, 0, 0, .3);
 }
 
+.dialog-common-t {
+  position: absolute;
+  top: 0;
+  left: 0;
+  background-color: #fff;
+  box-shadow: -1px -1px 8px 0 rgba(0, 0, 0, .76);
+  padding: 10px;
+  z-index: 2;
+  height: auto;
+  white-space: nowrap;
+  border-radius: 5px;
+}
+
+.dialog-common-t:after {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  content: " ";
+  -webkit-transform: rotate(45deg);
+  -ms-transform: rotate(45deg);
+  transform: rotate(45deg);
+  border: 1px solid transparent;
+  background-color: #fff;
+  bottom: -6px;
+  left: 32%;
+  margin-left: -103px;
+  border-top: none;
+  border-left: none;
+  box-shadow: 1px 1px 1px 0 rgba(0, 0, 0, .3);
+}
+
 /* add by xiandu */
 
 .right .sutra-text {
