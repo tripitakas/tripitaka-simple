@@ -221,7 +221,7 @@ class CutHandler(BaseHandler):
                     f.write(txt.strip('\n'))
 
         if submit:
-            if checker:
+            if checker and checker != 'False':
                 pages = fix_tasks.get(checker)
                 pages = PagesHandler.pick_pages(pos, pages, 1)[0]
             else:
