@@ -168,7 +168,7 @@ $(document).ready(function () {
               "' cmp='" + item.cmp + "' offset=" + offset + ">" + item.ocr + "</span>";
             variantCounts++;
         } else if (item.type === 'emptyline') {
-            adjustLineNo++;
+            // adjustLineNo++;
         }
         offset += item.ocr ? item.ocr.length : 0;
     }

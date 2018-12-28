@@ -56,8 +56,9 @@
                   <button type="button" class="btn btn-default btn-sm" id="redo">重做</button>
                 </div>
                 <div class="fr">
-                  <input id="order" class="form-control input-sm" placeholder="序号" style="width: 50px; margin: 8 8 0 0;"
-                    maxlength="2">
+                  <span style="font-size: 14px; color: #777;" id="char-id"></span>
+                  <input id="order" class="form-control input-sm" placeholder="序号"
+                         style="width: 50px; margin: 8px 8px 0 0; display: inline-block" maxlength="2">
                 </div>
               </div>
             </div>
@@ -245,6 +246,7 @@
     });
     $.cut.onBoxChanged(function () {
       updateUndo();
+      $('#char-id').text($.cut.getCurrentCharID() || '');
     });
 
     function save(submit) {
@@ -256,7 +258,7 @@
       $.post('/{{pos}}/{{kind}}/{{imgname}}', {
         submit: submit,
         txt: JSON.stringify(txt),
-        boxes: [] // JSON.stringify($.cut.exportBoxes())
+        boxes: JSON.stringify($.cut.exportBoxes())
       }, function (res) {
         if (/^error:/.test(res)) {
           swal('操作失败', res.replace(/^error:/, ''), 'error', {buttons: false, timer: 1500});
