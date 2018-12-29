@@ -86,7 +86,7 @@ function highlightBox($span, first) {
     currentSpan = [$span, first];
 
     // 按字序号浮动亮显当前行的字框
-    text = $line.text().replace(/\s/g, '');
+    text = getLineText($line);
     all = $.cut.findCharsByLine(block_no, line_no);
     $.cut.showFloatingPanel((showOrder || showText) ? all : [],
       function(char, index) {
@@ -128,6 +128,12 @@ var showOrder = true;
 var showText = false;
 var currentSpan = [];
 
+function unicodeValuesToText(values) {
+  return values.map(function (c) {
+    return decodeURIComponent(c);
+  }).join('');
+}
+
 $(document).ready(function () {
     // 根据json生成html
     var contentHtml = "";
@@ -138,10 +144,8 @@ $(document).ready(function () {
     function genHtmlByJson(item) {
         var cls;
         if (Array.isArray(item.ocr)) {
-          item.ocr = item.ocr.map(function (c) {
-            console.assert(c.length === 2 || c.length === 4);
-            return String.fromCharCode(parseInt(c, 16));
-          }).join('');
+          item.unicode = item.ocr;
+          item.ocr = unicodeValuesToText(item.ocr);
         }
         if (item.block_no !== curBlockNo) {
             if (item.block_no !== 1) {
@@ -163,6 +167,7 @@ $(document).ready(function () {
         }
         if (item.type === 'same') {
             contentHtml += "<span contentEditable='false' class='same' ocr='" + item.ocr +
+              (item.unicode ? "' unicode='" + item.unicode.join(',') : '') +
               "' cmp='" + item.ocr + "' offset=" + offset + ">" + item.ocr + "</span>";
         } else if (item.type === 'diff') {
             cls = item.ocr === '' ? 'not-same diff emptyplace' : 'not-same diff';
@@ -171,6 +176,7 @@ $(document).ready(function () {
             diffCounts++;
         } else if (item.type === 'variant') {
             contentHtml += "<span contentEditable='false' class='not-same variant' ocr='" + item.ocr +
+              (item.unicode ? "' unicode='" + item.unicode.join(',') : '') +
               "' cmp='" + item.cmp + "' offset=" + offset + ">" + item.ocr + "</span>";
             variantCounts++;
         } else if (item.type === 'emptyline') {
@@ -210,15 +216,29 @@ function checkMismatch(report) {
     var boxes = $.cut.findCharsByLine(no[0], no[1]);
     var $line = $('#block-' + no[0] + ' #line-' + no[1]);
     var text = $line.text().replace(/\s/g, '');
-    $line.toggleClass('mismatch', boxes.length != text.length);
-    if (boxes.length != text.length) {
-      mismatch.push('第 ' + no[1] + ' 行，文本 ' + text.length + ' 字，图像 ' + boxes.length +
+    var len = getLineText($line).length;
+    $line.toggleClass('mismatch', boxes.length !== len);
+    if (boxes.length !== len) {
+      mismatch.push('第 ' + no[1] + ' 行，文本 ' + len + ' 字，图像 ' + boxes.length +
           ' 字。\n' + text + '\n');
     }
   });
   if (report && (total || mismatch.length)) {
       swal('图文不匹配', total + '\n' + mismatch.join('\n'));
   }
+}
+
+function getLineText($line) {
+  var chars = [];
+  $line.find('span').each(function (i, el) {
+      if ($(el).hasClass('variant')) {
+        chars.push($(el).text());
+      } else {
+        var text = $(el).text().replace(/\s/g, '');
+        chars = chars.concat(text.split(''));
+      }
+    });
+  return chars;
 }
 
 $('.btn-check').click(function() {

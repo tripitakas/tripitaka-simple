@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+from tornado.escape import url_escape
 from controller.cut import CutHandler
 import re
 import json
@@ -12,6 +13,10 @@ class ProofreadHandler(CutHandler):
 
     def do_render(self, name, template_name, **params):
         def gen_segments(txt):
+            def apply_span():
+                if items:
+                    segments.append(dict(block_no=1 + blk_i, line_no=line_no, type='same', ocr=items))
+                    
             segments = []
             txt = re.sub(r'\S*<!--.+-->\S*', '\n', txt, flags=re.S)  # 修正从其他网站贴入的音释内容
             for blk_i, block in enumerate(txt.split('\n\n\n')):
@@ -25,8 +30,17 @@ class ProofreadHandler(CutHandler):
                     while col_diff < 50 and not [c for c in chars if c['char_id'].startswith('b%dc%dc' % (1 + blk_i, line_no))]:
                         col_diff += 1
                         line_no = col_diff + col_i
-                    column = [str(c.encode('unicode-escape'))[-5:-1] for c in list(column)]
-                    segments.append(dict(block_no=1 + blk_i, line_no=line_no, type='same', ocr=column))
+                    # column = [str(c.encode('unicode-escape'))[5:-1] for c in list(column)]
+                    column = [url_escape(c) for c in list(column)]
+                    items = []
+                    for c in column:
+                        if len(c) > 9:
+                            apply_span()
+                            items = []
+                            segments.append(dict(block_no=1 + blk_i, line_no=line_no, type='variant', ocr=[c], cmp=''))
+                        else:
+                            items.append(c)
+                    apply_span()
             return {'segments': segments}
 
         chars = params['chars']
