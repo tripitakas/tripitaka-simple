@@ -13,10 +13,10 @@ import codecs
 BASE_DIR = path.dirname(path.dirname(__file__))
 pos_types = dict(block='切栏', column='切列', char='切字', proof='文字')
 kinds = {
-    'block': {'JX': '嘉兴藏'},
-    'column': {'JX': '嘉兴藏'},
-    'char': {'GL': '高丽藏', 'JX': '嘉兴藏', 'QL': '乾隆藏', 'YB': '永乐北藏'},
-    'proof': {'JX': '嘉兴藏', 'QL': '乾隆藏', 'YB': '永乐北藏'}
+    'block': {},  # 'JX': '嘉兴藏'},
+    'column': {},  # 'JX': '嘉兴藏'},
+    'char': {},  # 'GL': '高丽藏', 'JX': '嘉兴藏', 'QL': '乾隆藏', 'YB': '永乐北藏'},
+    'proof': {'JX': '嘉兴藏'}  # , 'QL': '乾隆藏', 'YB': '永乐北藏'}
 }
 
 

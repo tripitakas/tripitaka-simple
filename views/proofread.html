@@ -32,6 +32,9 @@
       <div class="collapse navbar-collapse" id="bs-navbar-collapse-1">
         <ul class="nav navbar-nav">
           {% if not readonly %}
+          {% if not order_changed %}
+          <button type="button" class="btn btn-normal navbar-btn" id="layout">重排</button>
+          {% end %}
           <button type="button" class="btn btn-normal navbar-btn" id="save">保存</button>
           <button type="button" class="btn btn-normal navbar-btn" id="submit">提交</button>
           {% end %}
@@ -249,7 +252,7 @@
       $('#char-id').text($.cut.getCurrentCharID() || '');
     });
 
-    function save(submit) {
+    function save(submit, ended) {
       var txt = $('#sutra-text').find('.block').map(function (i, block) {
         return $(block).find('.line').map(function (line, el) {
           return $(el).text();
@@ -272,6 +275,9 @@
                 else if (/^jump:/.test(res)) {
                   window.location.href = '/{{pos}}/{{kind}}/' + res.replace(/^jump:/, '');
                 }
+                else if (ended) {
+                  ended();
+                }
               });
         }
       });
@@ -279,6 +285,11 @@
     $('#save').click(save.bind(null, false));
     $('#submit').click(save.bind(null, true));
     $('.btn-returnback').click(save.bind(null, 'rollback'));
+    $('#layout').click(function () {
+      save(false, function () {
+        window.location.reload();
+      });
+    });
 
     $('.btn-doubts').click(function () {
       $('#txtModal').modal();

@@ -30,8 +30,8 @@
 
       // 响应字框的变化，记下当前字框的关联信息
       self.onBoxChanged(function(info, box, reason) {
-        oldChar[0] = box && info.shape.data('order');
-        oldChar[1] = box && (info.shape.data('text') || info.shape.data('char')) || '';
+        oldChar[0] = box && info.shape && info.shape.data('order');
+        oldChar[1] = box && info.shape && (info.shape.data('text') || info.shape.data('char')) || '';
         oldChar[2] = info;
         $('#order').val(oldChar[0] || '');
         console.log(info);
@@ -65,8 +65,15 @@
             if (last) {
               self.removeBandNumber(last);
               last.char_no = oldChar[0] || 0;
-              if (!last.char_no) {
+              if (last.char_no) {
+                last.char_id = 'b' + last.block_no + 'c' + last.line_no + 'c' + last.char_no;
+              } else {
                 last.line_no = 0;
+                last.char_id = ''
+              }
+              if (last.shape) {
+                last.shape.data('cid', last.char_id);
+                last.order_changed = true;
               }
             }
             // 更新当前字框的关联信息
@@ -75,6 +82,14 @@
             info.char_no = order;
             info.block_no = $.cut.data.block_no;
             info.line_no = $.cut.data.line_no;
+            info.char_id = 'b' + info.block_no + 'c' + info.line_no + 'c' + info.char_no;
+            if (info.shape) {
+              info.shape.data('cid', info.char_id);
+              info.order_changed = true;
+            }
+            $.cut.data.chars.sort(function (a, b) {
+              return a.char_id.localeCompare(b.char_id);
+            });
             if (highlightBox) {
               highlightBox();
               $.cut.switchCurrentBox(info.shape);
@@ -132,11 +147,11 @@
           data.texts = data.texts || {};
           data.texts[el.data('cid')] = data.texts[el.data('cid')] || [
               data.paper.rect(p.x + offset, p.y, p.width, p.height)
-                .attr({stroke: 'rgba(0,0,0,.1)'}),
+                .attr({stroke: 'rgba(0,0,0,.2)'}),
               data.paper.text(p.x + p.width / 2 + offset, p.y + p.height / 2, '' + text)
                 .attr({'font-size': 11 * s, 'text-align': 'center', stroke: '#44f'}),
               data.paper.rect(p.x, p.y, p.width, p.height)
-                .attr({stroke: 'rgba(0,0,0,.2)'})
+                .attr({stroke: 'rgba(0,0,0,.3)'})
             ]
         }
       });
@@ -158,7 +173,7 @@
       var el = char.shape;
       var arr = el && (data.texts || {})[el.data('cid')];
       if (arr) {
-        delete data.texts[char.shape.data('cid')];
+        delete data.texts[char.shape && char.shape.data('cid')];
         arr.forEach(function (p) {
           p.remove();
         });
