@@ -107,8 +107,8 @@ class HistoryHandler(BaseHandler):
         name = name[:2].upper() + re.sub(r'-|\s', '_', name[2:])
         scan_lock_files(callback_get, path.join(data_path, 'lock', pos + h[1:]))
         items.sort(key=itemgetter(2))
-        items = ['<li><span>{0}</span> {1}</li>'.format(fn, s) for fn, s, t in items]
-        css = 'li>span{display: inline-block; min-width: 120px; margin-right: 10px}'
+        items = ['<li><a href="/{2}/{3}/{4}">{0}</a> {1}</li>'.format(f, s, pos, f[:2], f[3:]) for f, s, t in items]
+        css = 'li>a{display: inline-block; min-width: 120px; margin-right: 10px; text-decoration: none}'
         self.write('<style>%s</style><h3>页面校对历史 (%d 个页面)</h3><ol>%s</ol>' % (css, len(items), ''.join(items)))
 
 

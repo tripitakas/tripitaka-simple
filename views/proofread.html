@@ -275,7 +275,7 @@
                 else if (/^jump:/.test(res)) {
                   window.location.href = '/{{pos}}/{{kind}}/' + res.replace(/^jump:/, '');
                 }
-                else if (ended) {
+                else if (typeof ended === 'function') {
                   ended();
                 }
               });

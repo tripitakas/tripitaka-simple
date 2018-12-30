@@ -8,7 +8,7 @@ from .use_noteid import calc_order
 
 # A 是否包含在B当中
 def is_contained_in(A, B):
-    threshold = 20
+    threshold = max(20, B['w'] * 0.25)
     if A['x'] - B['x'] >= -threshold:
         if A['x'] + A['w'] - B['x'] - B['w'] <= threshold:
             if A['y'] - B['y'] >= -threshold:

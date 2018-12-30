@@ -49,6 +49,9 @@ class ProofreadHandler(CutHandler):
             new_chars = calc(chars, params['blocks'], params['columns'])
             for i, c in enumerate(new_chars):
                 chars[i]['char_id'] = 'b%dc%dc%d' % (c['block_id'], c['column_id'], c['column_order'])
+                chars[i]['line_no'] = c['column_id']
+                chars[i]['block_no'] = c['block_id']
+                chars[i]['char_no'] = c['column_order']
         params['origin_txt'] = params['txt'].strip().split('\n')
         params['txt'] = json.dumps(gen_segments(params['txt']), ensure_ascii=False)
         return self.render(template_name, **params)

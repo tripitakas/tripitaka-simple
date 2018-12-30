@@ -90,7 +90,7 @@ function highlightBox($span, first) {
     all = $.cut.findCharsByLine(block_no, line_no);
     $.cut.showFloatingPanel((showOrder || showText) ? all : [],
       function(char, index) {
-          return (showOrder ? char.char_no : '') + (showText ? text[index] : '');
+          return (showOrder ? char.char_no : '') + (!text[index] ? '？' : showText ? text[index] : '');
       }, highlightBox);
 
     $.cut.switchCurrentBox(((boxes.length ? boxes : all)[0] || {}).shape);
