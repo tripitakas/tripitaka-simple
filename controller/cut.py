@@ -150,7 +150,7 @@ class CutHandler(BaseHandler):
         else:
             page[pos + 's'] = []
 
-        readonly = self.lock_page(self, pos, name, False) != name
+        readonly = self.get_query_argument('readonly', None) or self.lock_page(self, pos, name, False) != name
         self.do_render(name, self.html_files[pos], pos_type=pos_types[pos], readonly=readonly,
                        page=page, pos=pos, kind=kind, **page, get_img=get_img, txt=get_txt(name))
 

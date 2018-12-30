@@ -12,6 +12,9 @@ class ProofreadHandler(CutHandler):
     URL = r'/(proof)/([A-Z]{2})/(\w{4,20})'
 
     def do_render(self, name, template_name, **params):
+        def get_column_boxes(block_no, line_no):
+            return [c for c in chars if c['char_id'].startswith('b%dc%dc' % (block_no, line_no))]
+
         def gen_segments(txt):
             def apply_span():
                 if items:
@@ -27,10 +30,12 @@ class ProofreadHandler(CutHandler):
                     if not column:
                         segments.append(dict(block_no=1 + blk_i, line_no=line_no, type='emptyline', ocr=''))
                         continue
-                    while col_diff < 50 and not [c for c in chars if c['char_id'].startswith('b%dc%dc' % (1 + blk_i, line_no))]:
+                    while col_diff < 50 and not get_column_boxes(1 + blk_i, line_no):
                         col_diff += 1
                         line_no = col_diff + col_i
-                    # column = [str(c.encode('unicode-escape'))[5:-1] for c in list(column)]
+                    boxes = get_column_boxes(1 + blk_i, line_no)
+                    if len(boxes) != len(re.sub(r'\s', '', column)):
+                        params['mismatch_lines'].append('b%dc%d' % (1 + blk_i, line_no))
                     column = [url_escape(c) for c in list(column)]
                     items = []
                     for c in column:
@@ -49,9 +54,11 @@ class ProofreadHandler(CutHandler):
             new_chars = calc(chars, params['blocks'], params['columns'])
             for i, c in enumerate(new_chars):
                 chars[i]['char_id'] = 'b%dc%dc%d' % (c['block_id'], c['column_id'], c['column_order'])
-                chars[i]['line_no'] = c['column_id']
-                chars[i]['block_no'] = c['block_id']
-                chars[i]['char_no'] = c['column_order']
+                if 'line_no' in chars[i]:
+                    chars[i]['line_no'] = c['column_id']
+                    chars[i]['block_no'] = c['block_id']
+                    chars[i]['char_no'] = c['column_order']
         params['origin_txt'] = params['txt'].strip().split('\n')
+        params['mismatch_lines'] = []
         params['txt'] = json.dumps(gen_segments(params['txt']), ensure_ascii=False)
-        return self.render(template_name, **params)
+        return params if 'test' in params else self.render(template_name, **params)
