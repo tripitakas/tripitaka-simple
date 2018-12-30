@@ -130,7 +130,7 @@ var currentSpan = [];
 
 function unicodeValuesToText(values) {
   return values.map(function (c) {
-    return decodeURIComponent(c);
+    return c.length > 2 ? decodeURIComponent(c) : ' ';
   }).join('');
 }
 
