@@ -52,7 +52,8 @@
                   <span><i title="显隐字框" class="btn-cut-show"></i></span>
                   <span><i title="显隐序号" class="btn-num-show"></i></span>
                   <span><i title="显隐文本" class="btn-txt-hidden"></i></span>
-                  <span><i title="全屏" class="btn-fullscrean"></i></span>
+                  <span><i title="全屏校对字框" class="btn-fullscrean full-chars"></i></span>
+                  <span><i title="全屏校对列框" class="btn-fullscrean full-columns"></i></span>
                   <button type="button" class="btn btn-default btn-sm" style="margin-left: 10px;" id="undo">撤销</button>
                   <button type="button" class="btn btn-default btn-sm" id="redo">重做</button>
                 </div>
@@ -199,7 +200,7 @@
     }
     createPage();
 
-    $('.btn-fullscrean').click(function () {
+    $('.full-chars').click(function () {
       var $modal = $('#cutModal');
       var bindings = $.fn.mapKey.bindings;
 
@@ -231,6 +232,51 @@
       $modal.find('button.btn-primary').unbind('click').click(function () {
         char_data = $.cut.exportBoxes();
         $modal.find('[data-dismiss="modal"]').click();
+      });
+    });
+
+    $('.full-columns').click(function () {
+      var $modal = $('#cutModal');
+      var bindings = $.fn.mapKey.bindings;
+
+      $modal.modal().on('hidden.bs.modal', function () {
+        $.fn.mapKey.bindings = bindings;
+        createPage();
+      });
+
+      $.cut.create({
+        columnMode: true,
+        name: '{{imgname}}-c',
+        width: {{imgsize['width']}},
+        height: {{imgsize['height']}},
+        scrollContainer: '#cut-canvas-bd',
+        holder: 'cut-canvas',
+        image: '{{get_img(imgname)}}',
+        chars: columns
+      });
+
+      $.fn.mapKey.bindings = {
+        up: {},
+        down: {}
+      };
+      $.cut.bindKeys();
+      updateUndo();
+
+      $modal.find('button.btn-primary').unbind('click').click(function () {
+        $.post('/{{pos}}/{{kind}}/{{imgname}}', {
+          is_column: true,
+          boxes: JSON.stringify($.cut.exportBoxes())
+        }, function (res) {
+          if (/^error:/.test(res)) {
+            swal('操作失败', res.replace(/^error:/, ''), 'error', {buttons: false, timer: 1500});
+          } else {
+            swal('栏框更新成功', '{{imgname}} ' + '的栏框已更新成功。', 'success',
+               {buttons: false, timer: 1000})
+               .then(function () {
+                 window.location = '/{{pos}}/{{kind}}/{{imgname}}?layout=1&v=' + Math.ceil(Math.random() * 1000);
+               });
+          }
+        });
       });
     });
 
