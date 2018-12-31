@@ -18,7 +18,7 @@ def load_json(filename):
             logging.error('%s: %s' % (str(e), filename))
 
 
-def save_json(obj, filename, sort_keys=False, indent=None):
+def save_json(obj, filename, sort_keys=False, indent=2):
     with open(filename, 'w') as f:
         json.dump(obj, f, ensure_ascii=False, sort_keys=sort_keys, indent=indent)
 

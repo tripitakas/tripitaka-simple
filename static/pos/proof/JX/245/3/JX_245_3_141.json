@@ -99,11 +99,11 @@
       "h": 164.8,
       "cc": 0.8653,
       "no": 14,
-      "char_id": "b1c0c0",
+      "char_id": "b1c2c15",
       "changed": 1,
       "block_no": 1,
-      "line_no": 0,
-      "char_no": 0
+      "line_no": 2,
+      "char_no": 15
     },
     {
       "char_id": "b1c1c1",
@@ -913,7 +913,7 @@
       "char_no": 15
     },
     {
-      "char_id": "b1c5c16",
+      "char_id": "b1c5c2",
       "x": 874.5,
       "y": 431.8,
       "w": 177.4,
@@ -921,7 +921,7 @@
       "changed": 1,
       "block_no": 1,
       "line_no": 5,
-      "char_no": 16,
+      "char_no": 2,
       "order_changed": true
     },
     {
@@ -970,11 +970,11 @@
       "h": 61,
       "cc": 0.7614,
       "no": 1,
-      "char_id": "b1c5c2",
+      "char_id": "b1c5c16",
       "changed": 1,
       "block_no": 1,
       "line_no": 5,
-      "char_no": 2,
+      "char_no": 16,
       "order_changed": true
     },
     {

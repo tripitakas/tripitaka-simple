@@ -50,7 +50,7 @@ class ProofreadHandler(CutHandler):
 
         chars = params['chars']
         params['order_changed'] = len([c for c in chars if c.get('order_changed')])
-        if not params['order_changed']:
+        if not params['order_changed'] or self.get_query_argument('layout', 0) == '1':
             new_chars = calc(chars, params['blocks'], params['columns'])
             for i, c in enumerate(new_chars):
                 chars[i]['char_id'] = 'b%dc%dc%d' % (c['block_id'], c['column_id'], c['column_order'])
