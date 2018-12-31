@@ -93,6 +93,12 @@ function highlightBox($span, first) {
           return (showOrder ? char.char_no : '') + (!text[index] ? '？' : showText ? text[index] : '');
       }, highlightBox);
 
+    // 显示当前栏框和列框
+    if ($.cut.showColumn) {
+      $.cut.showColumn('columnBox', window.columns, all.length && all[0].char_id.split('c').slice(0, 2).join('c'));
+      $.cut.showColumn('blockBox', window.blocks, all.length && all[0].char_id.split('c')[0]);
+    }
+
     $.cut.switchCurrentBox(((boxes.length ? boxes : all)[0] || {}).shape);
 }
 

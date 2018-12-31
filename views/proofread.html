@@ -179,6 +179,8 @@
   <script>
     var char_data = $.cut.decodeJSON('{{chars}}');
     var cmpdata = $.cut.decodeJSON('{{txt}}');
+    var columns = $.cut.decodeJSON('{{columns}}');
+    var blocks = $.cut.decodeJSON('{{blocks}}');
 
     function createPage() {
       $.cut.create({
@@ -256,12 +258,7 @@
           return $(el).text();
         }).get().join('\n');
       }).get().join('\n\n\n');
-      var url = '/{{pos}}/{{kind}}/{{imgname}}';
-      if (submit === 'layout') {
-        url += '?layout=1';
-        submit = false;
-      }
-      $.post(url, {
+      $.post('/{{pos}}/{{kind}}/{{imgname}}', {
         submit: submit,
         txt: JSON.stringify(txt),
         boxes: JSON.stringify($.cut.exportBoxes())
@@ -289,8 +286,8 @@
     $('#submit').click(save.bind(null, true));
     $('.btn-returnback').click(save.bind(null, 'rollback'));
     $('#layout').click(function () {
-      save('layout', function () {
-        window.location.reload();
+      save(false, function () {
+        window.location = '/{{pos}}/{{kind}}/{{imgname}}?layout=1&v=' + Math.ceil(Math.random() * 1000);
       });
     });
 
