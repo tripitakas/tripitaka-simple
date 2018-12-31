@@ -18,79 +18,104 @@
   ],
   "columns": [
     {
-      "char_id": "new1",
-      "changed": true,
+      "char_id": "b1c1",
+      "changed": 1,
       "x": 1706.9,
       "y": 316.7,
       "w": 250.2,
       "h": 2604.2,
       "no": "b1c1",
-      "column_id": "b1c1"
+      "column_id": "b1c1",
+      "block_no": 1,
+      "line_no": 1,
+      "char_no": null
     },
     {
       "x": 1483,
       "y": 301,
       "w": 214,
       "h": 2603,
-      "char_id": "org7",
+      "char_id": "b1c2",
       "no": "b1c2",
-      "column_id": "b1c2"
+      "column_id": "b1c2",
+      "block_no": 1,
+      "line_no": 2,
+      "char_no": null
     },
     {
       "x": 1246,
       "y": 301,
       "w": 237,
       "h": 2603,
-      "char_id": "org6",
+      "char_id": "b1c3",
       "no": "b1c3",
-      "column_id": "b1c3"
+      "column_id": "b1c3",
+      "block_no": 1,
+      "line_no": 3,
+      "char_no": null
     },
     {
       "x": 1081,
       "y": 301,
-      "w": 138,
+      "w": 163.7,
       "h": 2603,
-      "char_id": "org5",
+      "char_id": "b1c4",
       "no": "b1c4",
-      "column_id": "b1c4"
+      "column_id": "b1c4",
+      "block_no": 1,
+      "line_no": 4,
+      "char_no": null,
+      "changed": true
     },
     {
       "x": 850.7,
       "y": 301,
       "w": 190.3,
       "h": 2603,
-      "char_id": "org4",
-      "changed": true,
+      "char_id": "b1c5",
+      "changed": 1,
       "no": "b1c5",
-      "column_id": "b1c5"
+      "column_id": "b1c5",
+      "block_no": 1,
+      "line_no": 5,
+      "char_no": null
     },
     {
       "x": 603,
       "y": 301,
       "w": 214.7,
       "h": 2603,
-      "char_id": "org3",
-      "changed": true,
+      "char_id": "b1c6",
+      "changed": 1,
       "no": "b1c6",
-      "column_id": "b1c6"
+      "column_id": "b1c6",
+      "block_no": 1,
+      "line_no": 6,
+      "char_no": null
     },
     {
       "x": 394,
       "y": 301,
       "w": 209,
       "h": 2603,
-      "char_id": "org2",
+      "char_id": "b1c7",
       "no": "b1c7",
-      "column_id": "b1c7"
+      "column_id": "b1c7",
+      "block_no": 1,
+      "line_no": 7,
+      "char_no": null
     },
     {
       "x": 190,
       "y": 301,
       "w": 204,
       "h": 2603,
-      "char_id": "org1",
+      "char_id": "b1c8",
       "no": "b1c8",
-      "column_id": "b1c8"
+      "column_id": "b1c8",
+      "block_no": 1,
+      "line_no": 8,
+      "char_no": null
     }
   ],
   "chars": [
@@ -712,11 +737,11 @@
       "h": 163.1,
       "cc": 0.9509,
       "no": 1,
-      "char_id": "b1c0c0",
+      "char_id": "b1c4c1",
       "changed": 1,
-      "char_no": 0,
+      "char_no": 1,
       "block_no": 1,
-      "line_no": 0
+      "line_no": 4
     },
     {
       "x": 1088.7,
@@ -725,9 +750,9 @@
       "h": 161.1,
       "cc": 0.6728,
       "no": 2,
-      "char_id": "b1c4c3",
+      "char_id": "b1c4c4",
       "changed": 1,
-      "char_no": 3,
+      "char_no": 4,
       "block_no": 1,
       "line_no": 4
     },
@@ -1414,24 +1439,24 @@
       "line_no": 6
     },
     {
-      "char_id": "b1c4c1",
+      "char_id": "b1c4c2",
       "changed": 1,
       "x": 1097.6,
       "y": 492.1,
       "w": 155.1,
       "h": 140.2,
-      "char_no": 1,
+      "char_no": 2,
       "block_no": 1,
       "line_no": 4
     },
     {
-      "char_id": "b1c4c2",
+      "char_id": "b1c4c3",
       "changed": 1,
       "x": 1091.7,
       "y": 639.8,
       "w": 143.2,
       "h": 153.6,
-      "char_no": 2,
+      "char_no": 3,
       "block_no": 1,
       "line_no": 4
     },
