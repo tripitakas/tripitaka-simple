@@ -251,6 +251,16 @@ $('.btn-check').click(function() {
   checkMismatch(true);
 });
 
+// 双击异文删除，临时用
+$(document).on('dblclick', '.not-same', function (e) {
+    e.stopPropagation();
+    var cmp = $(this).attr("cmp");
+    if (!cmp) {
+        swal('已删除此字', '在保存前此字还未彻底删除，保存或提交后将彻底删除。', 'info', {timer: 2000, buttons: false});
+        $(this).remove();
+    }
+});
+
 // 单击异文
 $(document).on('click', '.not-same', function (e) {
     e.stopPropagation();
