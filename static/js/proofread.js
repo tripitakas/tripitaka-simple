@@ -93,6 +93,11 @@ function highlightBox($span, first) {
           return (showOrder ? char.char_no : '') + (!text[index] ? '？' : showText ? text[index] : '');
       }, highlightBox);
 
+    // 显示当前列框
+    if ($.cut.showColumn) {
+      $.cut.showColumn(window.columns, all.length && all[0].char_id.split('c').slice(0, 2).join('c'));
+    }
+
     $.cut.switchCurrentBox(((boxes.length ? boxes : all)[0] || {}).shape);
 }
 

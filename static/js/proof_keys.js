@@ -98,6 +98,22 @@
         }
       });
     },
+    
+    showColumn: function (columns, id) {
+      var self = this, data = this.data;
+      if (self.columnBox) {
+        self.columnBox.remove();
+        delete self.columnBox;
+      }
+      var column = columns && columns.filter(function (c) {
+        return c.column_id === id;
+      })[0];
+      if (column) {
+        var s = data.ratio * data.ratioInitial;
+        self.columnBox = data.paper.rect(column.x * s, column.y * s, column.w * s, column.h * s)
+          .attr({fill: 'rgba(0,128,0,.02)', stroke: 'rgba(0,0,255,.3)'});
+      }
+    },
 
     // 显示当前列字框的浮动文字面板
     showFloatingPanel: function(chars, content, refresh) {
@@ -147,11 +163,11 @@
           data.texts = data.texts || {};
           data.texts[el.data('cid')] = data.texts[el.data('cid')] || [
               data.paper.rect(p.x + offset, p.y, p.width, p.height)
-                .attr({stroke: 'rgba(0,0,0,.2)'}),
+                .attr({stroke: 'rgba(0,0,0,.3)'}),
               data.paper.text(p.x + p.width / 2 + offset, p.y + p.height / 2, '' + text)
-                .attr({'font-size': 11 * s, 'text-align': 'center', stroke: '#44f'}),
+                .attr({'font-size': 12 * s, 'text-align': 'center', stroke: '#44f'}),
               data.paper.rect(p.x, p.y, p.width, p.height)
-                .attr({stroke: 'rgba(0,0,0,.3)'})
+                .attr({stroke: 'rgba(0,0,0,.4)'})
             ]
         }
       });

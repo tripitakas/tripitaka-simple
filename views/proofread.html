@@ -59,7 +59,6 @@
                   <button type="button" class="btn btn-default btn-sm" id="redo">重做</button>
                 </div>
                 <div class="fr">
-                  <span style="font-size: 14px; color: #777;" id="char-id"></span>
                   <input id="order" class="form-control input-sm" placeholder="序号"
                          style="width: 50px; margin: 8px 8px 0 0; display: inline-block" maxlength="2">
                 </div>
@@ -67,8 +66,8 @@
             </div>
             <div class="bd" id="canvas-bd">
               <div class="bd-in">
-                <div id="canvas-pane">
-                </div>
+                <div id="char-id" style="position: absolute; top: 65px; left: 40px; z-index: 100; color: #777; background-color: rgba(255,255,255,.9)"></div>
+                <div id="canvas-pane"></div>
               </div>
             </div>
           </div>
@@ -181,6 +180,7 @@
   <script>
     var char_data = $.cut.decodeJSON('{{chars}}');
     var cmpdata = $.cut.decodeJSON('{{txt}}');
+    var columns = $.cut.decodeJSON('{{page["columns"]}}');
 
     function createPage() {
       $.cut.create({
@@ -249,7 +249,8 @@
     });
     $.cut.onBoxChanged(function () {
       updateUndo();
-      $('#char-id').text($.cut.getCurrentCharID() || '');
+      var c = $.cut.findCharById($.cut.getCurrentCharID());
+      $('#char-id').text(c && c.char_id + ' (' + c.x + ', ' + c.y + ') ' + c.w + ' x ' + c.h || '');
     });
 
     function save(submit, ended) {
