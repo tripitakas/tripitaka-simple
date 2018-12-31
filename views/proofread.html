@@ -32,9 +32,7 @@
       <div class="collapse navbar-collapse" id="bs-navbar-collapse-1">
         <ul class="nav navbar-nav">
           {% if not readonly %}
-          {% if not order_changed %}
           <button type="button" class="btn btn-normal navbar-btn" id="layout">重排</button>
-          {% end %}
           <button type="button" class="btn btn-normal navbar-btn" id="save">保存</button>
           <button type="button" class="btn btn-normal navbar-btn" id="submit">提交</button>
           {% end %}
@@ -258,7 +256,12 @@
           return $(el).text();
         }).get().join('\n');
       }).get().join('\n\n\n');
-      $.post('/{{pos}}/{{kind}}/{{imgname}}', {
+      var url = '/{{pos}}/{{kind}}/{{imgname}}';
+      if (submit === 'layout') {
+        url += '?layout=1';
+        submit = false;
+      }
+      $.post(url, {
         submit: submit,
         txt: JSON.stringify(txt),
         boxes: JSON.stringify($.cut.exportBoxes())
@@ -286,7 +289,7 @@
     $('#submit').click(save.bind(null, true));
     $('.btn-returnback').click(save.bind(null, 'rollback'));
     $('#layout').click(function () {
-      save(false, function () {
+      save('layout', function () {
         window.location.reload();
       });
     });
