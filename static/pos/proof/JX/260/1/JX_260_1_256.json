@@ -134,11 +134,11 @@
       "h": 136.8,
       "cc": 0.9809,
       "no": 3,
-      "char_id": "b1c1c1",
+      "char_id": "b1c1c2",
       "changed": 1,
       "block_no": 1,
       "line_no": 1,
-      "char_no": 1
+      "char_no": 2
     },
     {
       "x": 1661.8,
@@ -147,11 +147,11 @@
       "h": 139.9,
       "cc": 0.9729,
       "no": 4,
-      "char_id": "b1c1c2",
+      "char_id": "b1c1c3",
       "changed": 1,
       "block_no": 1,
       "line_no": 1,
-      "char_no": 2
+      "char_no": 3
     },
     {
       "x": 1683,
@@ -160,10 +160,10 @@
       "h": 137,
       "cc": 0.9613,
       "no": 5,
-      "char_id": "b1c1c3",
+      "char_id": "b1c1c4",
       "block_no": 1,
       "line_no": 1,
-      "char_no": 3
+      "char_no": 4
     },
     {
       "x": 1661.8,
@@ -172,11 +172,11 @@
       "h": 142.5,
       "cc": 0.9487,
       "no": 6,
-      "char_id": "b1c1c4",
+      "char_id": "b1c1c5",
       "changed": 1,
       "block_no": 1,
       "line_no": 1,
-      "char_no": 4
+      "char_no": 5
     },
     {
       "x": 1666.1,
@@ -185,11 +185,11 @@
       "h": 139,
       "cc": 0.8407,
       "no": 7,
-      "char_id": "b1c1c5",
+      "char_id": "b1c1c6",
       "changed": 1,
       "block_no": 1,
       "line_no": 1,
-      "char_no": 5
+      "char_no": 6
     },
     {
       "x": 1664.9,
@@ -198,11 +198,11 @@
       "h": 138,
       "cc": 0.9436,
       "no": 8,
-      "char_id": "b1c1c6",
+      "char_id": "b1c1c7",
       "changed": 1,
       "block_no": 1,
       "line_no": 1,
-      "char_no": 6
+      "char_no": 7
     },
     {
       "x": 1655.9,
@@ -211,11 +211,11 @@
       "h": 136,
       "cc": 0.9507,
       "no": 9,
-      "char_id": "b1c1c7",
+      "char_id": "b1c1c8",
       "changed": 1,
       "block_no": 1,
       "line_no": 1,
-      "char_no": 7
+      "char_no": 8
     },
     {
       "x": 1666.2,
@@ -224,11 +224,11 @@
       "h": 142,
       "cc": 0.7494,
       "no": 10,
-      "char_id": "b1c1c8",
+      "char_id": "b1c1c9",
       "changed": 1,
       "block_no": 1,
       "line_no": 1,
-      "char_no": 8
+      "char_no": 9
     },
     {
       "x": 1667.6,
@@ -237,11 +237,11 @@
       "h": 125.8,
       "cc": 0.6365,
       "no": 11,
-      "char_id": "b1c1c9",
+      "char_id": "b1c1c10",
       "changed": 1,
       "block_no": 1,
       "line_no": 1,
-      "char_no": 9
+      "char_no": 10
     },
     {
       "x": 1679,
@@ -250,10 +250,10 @@
       "h": 144,
       "cc": 0.8869,
       "no": 12,
-      "char_id": "b1c1c10",
+      "char_id": "b1c1c11",
       "block_no": 1,
       "line_no": 1,
-      "char_no": 10
+      "char_no": 11
     },
     {
       "x": 1663.3,
@@ -262,11 +262,11 @@
       "h": 130.8,
       "cc": 0.8968,
       "no": 13,
-      "char_id": "b1c1c11",
+      "char_id": "b1c1c12",
       "changed": 1,
       "block_no": 1,
       "line_no": 1,
-      "char_no": 11
+      "char_no": 12
     },
     {
       "x": 1667.6,
@@ -275,11 +275,11 @@
       "h": 148,
       "cc": 0.9901,
       "no": 14,
-      "char_id": "b1c1c12",
+      "char_id": "b1c1c13",
       "changed": 1,
       "block_no": 1,
       "line_no": 1,
-      "char_no": 12
+      "char_no": 13
     },
     {
       "x": 1663.3,
@@ -288,11 +288,11 @@
       "h": 139.7,
       "cc": 0.9736,
       "no": 15,
-      "char_id": "b1c1c13",
+      "char_id": "b1c1c14",
       "changed": 1,
       "block_no": 1,
       "line_no": 1,
-      "char_no": 13
+      "char_no": 14
     },
     {
       "x": 1657.5,
@@ -301,11 +301,11 @@
       "h": 136.4,
       "cc": 0.9616,
       "no": 16,
-      "char_id": "b1c1c14",
+      "char_id": "b1c1c15",
       "changed": 1,
       "block_no": 1,
       "line_no": 1,
-      "char_no": 14
+      "char_no": 15
     },
     {
       "x": 1466.2,
@@ -1959,14 +1959,14 @@
       "char_no": 14
     },
     {
-      "char_id": "new1",
+      "char_id": "b1c1c1",
       "x": 1670.8,
       "y": 524.6,
       "w": 136.6,
       "h": 136.6,
-      "block_no": null,
-      "line_no": null,
-      "char_no": null
+      "block_no": 1,
+      "line_no": 1,
+      "char_no": 1
     }
   ]
 }

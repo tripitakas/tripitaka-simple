@@ -149,10 +149,11 @@ class CutHandler(BaseHandler):
         page = load_json(filename)
         if not page:
             return self.write('error: {0} 页面不存在'.format(name))
-        if pos + 's' in page:
-            page[pos + 's'] = json.dumps(page[pos + 's'])
-        else:
-            page[pos + 's'] = []
+        if pos in 'block|column|char':
+            if pos + 's' in page:
+                page[pos + 's'] = json.dumps(page[pos + 's'])
+            else:
+                page[pos + 's'] = []
 
         readonly = self.get_query_argument('readonly', None) or self.lock_page(self, pos, name, False) != name
         self.do_render(name, self.html_files[pos], pos_type=pos_types[pos], readonly=readonly,

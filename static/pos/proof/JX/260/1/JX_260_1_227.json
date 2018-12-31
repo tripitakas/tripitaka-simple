@@ -1574,11 +1574,11 @@
       "h": 142,
       "cc": 0.922,
       "no": 15,
-      "char_id": "b1c0c0",
+      "char_id": "b1c8c16",
       "changed": 1,
       "block_no": 1,
-      "line_no": 0,
-      "char_no": 0
+      "line_no": 8,
+      "char_no": 16
     },
     {
       "x": 287.9,
@@ -1600,11 +1600,11 @@
       "h": 125.8,
       "cc": 0.8614,
       "no": 18,
-      "char_id": "b1c8c16",
+      "char_id": "b1c8c17",
       "changed": 1,
       "block_no": 1,
       "line_no": 8,
-      "char_no": 16
+      "char_no": 17
     },
     {
       "x": 127.5,
@@ -1865,6 +1865,17 @@
       "block_no": 1,
       "line_no": 4,
       "char_no": 12
+    },
+    {
+      "char_id": "new1",
+      "changed": true,
+      "x": 289.1,
+      "y": 2347.6,
+      "w": 150.4,
+      "h": 128.9,
+      "block_no": null,
+      "line_no": null,
+      "char_no": null
     }
   ]
 }
