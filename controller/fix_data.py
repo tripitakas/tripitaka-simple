@@ -147,6 +147,7 @@ def merge_chars(dst_path, char_path, column_path):
 if __name__ == '__main__':
     # print(fix(path.join(data_path, 'lock', 'char')))
     # clean_log()
-    merge_chars(path.join(static_path, 'pos/proof/JX'),
-                path.join(static_path, 'pos/proof/char-cut'),
-                path.join(static_path, 'pos/proof/column'))
+    if 0:
+        merge_chars(path.join(static_path, 'pos/proof/JX'),
+                    path.join(static_path, 'pos/proof/char-cut'),
+                    path.join(static_path, 'pos/proof/column'))
