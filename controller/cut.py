@@ -204,9 +204,9 @@ class CutHandler(BaseHandler):
                 for name, arr in boxes:
                     self.save(kind, pos, name, arr)
             else:
-                self.save(kind, pos, name, boxes)
+                self.save(kind, pos, name, boxes, self.get_body_argument('is_column', 0) and 'columns')
 
-            txt = self.get_body_argument('txt', '0')
+            txt = self.get_body_argument('txt', 0)
             txt = json.loads(txt) if txt and txt.startswith('"') else txt
             if txt:
                 with codecs.open('/'.join(['./static/txt/', *name.split('_')[:-1], name + '.txt']), 'w', 'utf-8') as f:
@@ -218,11 +218,11 @@ class CutHandler(BaseHandler):
             self.write('jump:' + pages[0][3:] if pages else 'error:本类切分已全部校对完成。')
         self.write('')
 
-    def save(self, kind, pos, name, boxes):
+    def save(self, kind, pos, name, boxes, field=None):
         filename = path.join(BASE_DIR, 'static', 'pos', pos, *name.split('_')[:-1], name + '.json')
         page = load_json(filename)
         assert page and isinstance(boxes, list)
-        field = 'chars' if pos == 'proof' else pos + 's'
+        field = field or ('chars' if pos == 'proof' else pos + 's')
         if page[field] != boxes and boxes:
             page[field] = boxes
             save_json(page, filename)

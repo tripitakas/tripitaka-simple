@@ -508,6 +508,7 @@
 
       state.readonly = p.readonly;
       data.blockMode = p.blockMode;
+      data.columnMode = p.columnMode;
       if (p.blockMode) {
         data.activeFillOpacity = 0.2;
       }
@@ -527,6 +528,9 @@
       }
 
       p.chars.forEach(function(b, idx) {
+        if (p.columnMode) {
+          b.char_id = b.column_id;
+        }
         if (!b.line_no && b.char_id) {
           var ids = b.char_id.replace('b', 'c').split('c');
           b.block_no = parseInt(ids[1]);
@@ -723,6 +727,11 @@
         var box = c.shape.getBBox();
         c = $.extend({}, c, {x: r(box.x), y: r(box.y), w: r(box.width), h: r(box.height)});
         delete c.shape;
+        Object.keys(c).forEach(function (k) {
+          if (c[k] === null) {
+            delete c[k];
+          }
+        })
         return c;
       });
     },

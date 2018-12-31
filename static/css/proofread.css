@@ -155,8 +155,12 @@
   background-image: url(../images/proofread/txt-hidden.png);
 }
 
-.pfread .hd i.btn-fullscrean {
-  background-image: url(../images/proofread/fullscrean.png);
+.pfread .hd i.btn-full-chars {
+  background-image: url(../images/proofread/chars.png);
+}
+
+.pfread .hd i.btn-full-columns {
+  background-image: url(../images/proofread/columns.png);
 }
 
 .pfread .hd i.btn-addupline {
