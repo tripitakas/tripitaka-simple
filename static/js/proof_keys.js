@@ -99,19 +99,19 @@
       });
     },
     
-    showColumn: function (columns, id) {
+    showColumn: function (field, columns, id) {
       var self = this, data = this.data;
-      if (self.columnBox) {
-        self.columnBox.remove();
-        delete self.columnBox;
+      if (self[field]) {
+        self[field].remove();
+        delete self[field];
       }
-      var column = columns && columns.filter(function (c) {
-        return c.column_id === id;
+      var column = columns && id && columns.filter(function (c) {
+        return id.indexOf('c') < 0 ? c.block_id === id : c.column_id === id;
       })[0];
       if (column) {
         var s = data.ratio * data.ratioInitial;
-        self.columnBox = data.paper.rect(column.x * s, column.y * s, column.w * s, column.h * s)
-          .attr({fill: 'rgba(0,128,0,.02)', stroke: 'rgba(0,0,255,.3)'});
+        self[field] = data.paper.rect(column.x * s, column.y * s, column.w * s, column.h * s)
+          .attr({fill: id.indexOf('c') < 0 ? 'none' : 'rgba(0,128,0,.01)', stroke: 'rgba(0,0,255,.3)'});
       }
     },
 

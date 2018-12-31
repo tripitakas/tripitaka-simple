@@ -95,7 +95,8 @@ function highlightBox($span, first) {
 
     // 显示当前列框
     if ($.cut.showColumn) {
-      $.cut.showColumn(window.columns, all.length && all[0].char_id.split('c').slice(0, 2).join('c'));
+      $.cut.showColumn('columnBox', window.columns, all.length && all[0].char_id.split('c').slice(0, 2).join('c'));
+      $.cut.showColumn('blockBox', window.blocks, all.length && all[0].char_id.split('c')[0]);
     }
 
     $.cut.switchCurrentBox(((boxes.length ? boxes : all)[0] || {}).shape);

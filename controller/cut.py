@@ -140,6 +140,9 @@ class CutHandler(BaseHandler):
             base_url = 'http://tripitaka-img.oss-cn-beijing.aliyuncs.com/page'
             return '/'.join([base_url, *p.split('_')[:-1], p+'_'+get_hash(p)+'.jpg'])
 
+        # index = load_json(path.join('static', 'index_d.json' if options.debug else 'index.json'))
+        # for name in index[pos].get(kind, []):  # 在 do_render 中传入 test=True 可遍历所有页面
+
         name = kind + '_' + name
         filename = path.join(BASE_DIR, 'static', 'pos', pos, *name.split('_')[:-1], name + '.json')
         page = load_json(filename)

@@ -18,9 +18,9 @@ def load_json(filename):
             logging.error('%s: %s' % (str(e), filename))
 
 
-def save_json(obj, filename, sort_keys=False):
+def save_json(obj, filename, sort_keys=False, indent=None):
     with open(filename, 'w') as f:
-        json.dump(obj, f, ensure_ascii=False, sort_keys=sort_keys)
+        json.dump(obj, f, ensure_ascii=False, sort_keys=sort_keys, indent=indent)
 
 
 def get_date_time(fmt=None):
