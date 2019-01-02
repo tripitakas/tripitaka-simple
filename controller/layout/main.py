@@ -7,8 +7,8 @@ from .use_noteid import calc_order
 
 
 # A 是否包含在B当中
-def is_contained_in(A, B):
-    threshold = max(20, B['w'] * 0.25)
+def is_contained_in(A, B, threshold=0):
+    threshold = threshold or max(20, B['w'] * 0.25)
     if A['x'] - B['x'] >= -threshold:
         if A['x'] + A['w'] - B['x'] - B['w'] <= threshold:
             if A['y'] - B['y'] >= -threshold:
@@ -83,43 +83,51 @@ def calc(chars, blocks, columns, sort_after_notecheck=False):
             char_list.append(
                 {'block_id': 0, 'column_id': 0, 'ch_id': 0, 'subcolumn_id': 0, 'note_id': 0, 'column_order': 0})
 
-        # 标记栏框和列框
-        for i in range(0, len(chars)):
-            for i_b in range(0, len(blocks)):
-                if is_contained_in(chars[i], blocks[i_b]):
-                    char_list[i]['block_id'] = i_b + 1
-            for i_c in range(0, len(columns)):
-                if is_contained_in(chars[i], columns[i_c]):
-                    char_list[i]['column_id'] = i_c + 1
-                    ##########################################################################
-        # 逐列处理
-        for i_b in range(0, len(blocks)):
-            for i_c in range(0, len(columns)):
-                # 统计列内字框的索引
-                char_indices_in_column = []
-                for i in range(0, len(chars)):
-                    if char_list[i]['column_id'] == i_c + 1 and char_list[i]['block_id'] == i_b + 1:
-                        char_indices_in_column.append(i)
-                # 按高度重新排序
-                idx_sorted = sorted(range(len(char_indices_in_column)),
-                                    key=lambda k: chars[char_indices_in_column[k]]['y'])
-                sorted_char_indices = []
-                for i in range(0, len(char_indices_in_column)):
-                    sorted_char_indices.append(char_indices_in_column[idx_sorted[i]])
+        # 按坐标对栏框和列框排序
+        blocks = sorted(blocks, key=lambda c: c['y'])
+        columns_sorted = []
+        for i_b, block in enumerate(blocks):
+            block['no'] = i_b + 1
+            block['block_id'] = 'b{}'.format(i_b + 1)
+            columns_in_block = [column for column in columns if is_contained_in(column, block, 20)]
+            columns_in_block.sort(key=lambda c: c['x'], reverse=True)
+            for i_c, column in enumerate(columns_in_block):
+                column['no'] = i_c + 1
+                column['block_no'] = i_b + 1
+                column['column_id'] = block['block_id'] + 'c{}'.format(i_c + 1)
+            columns_sorted += columns_in_block
+        columns = columns_sorted
 
-                # 判断是否存在夹注小字
-                flag_multiple_subcolumns = check_multiple_subcolumns(chars, sorted_char_indices)
-                # 按高度排序，标记大字
-                if flag_multiple_subcolumns == 0:
-                    order = 1
-                    for i in sorted_char_indices:
-                        char_list[i]['ch_id'] = order
-                        char_list[i]['column_order'] = order
-                        order += 1
-                else:
-                    # 标记夹注小字
-                    mark_subcolumns(chars, char_list, sorted_char_indices)
-                    calc_order(char_list, sorted_char_indices)
+        # 标记栏框和列框
+        for i, c in enumerate(chars):
+            for column in columns:
+                if is_contained_in(c, column):
+                    char_list[i]['block_id'] = column['block_no']
+                    char_list[i]['column_id'] = column['no']
+                    c['block_no'] = column['block_no']
+                    c['line_no'] = column['no']
+                    c['column_id'] = column['column_id']
+
+        # 逐列处理
+        for column in columns:
+            # 统计列内字框的索引
+            char_indices_in_column = [i for i, c in enumerate(chars) if c['column_id'] == column['column_id']]
+            # 按高度重新排序
+            sorted_char_indices = sorted(char_indices_in_column, key=lambda i: chars[i]['y'])
+
+            # 判断是否存在夹注小字
+            flag_multiple_subcolumns = check_multiple_subcolumns(chars, sorted_char_indices)
+            # 按高度排序，标记大字
+            if flag_multiple_subcolumns == 0:
+                order = 1
+                for i in sorted_char_indices:
+                    char_list[i]['ch_id'] = order
+                    char_list[i]['column_order'] = order
+                    order += 1
+            else:
+                # 标记夹注小字
+                mark_subcolumns(chars, char_list, sorted_char_indices)
+                calc_order(char_list, sorted_char_indices)
     # 输出数据
     return char_list
 
