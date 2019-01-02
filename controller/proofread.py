@@ -55,8 +55,6 @@ class ProofreadHandler(CutHandler):
             for i, c in enumerate(new_chars):
                 chars[i]['char_id'] = 'b%dc%dc%d' % (c['block_id'], c['column_id'], c['column_order'])
                 if 'line_no' in chars[i]:
-                    chars[i]['line_no'] = c['column_id']
-                    chars[i]['block_no'] = c['block_id']
                     chars[i]['char_no'] = c['column_order']
         params['origin_txt'] = params['txt'].strip().split('\n')
         params['mismatch_lines'] = []
