@@ -56,4 +56,4 @@ scan_files(path.join(base_path, 'static.tmp/txt'),
            path.join(base_path, 'static/txt'), indexes, '.txt', 0, 0)
 scan_files(path.join(base_path, 'static.tmp/img'),
            path.join(base_path, 'static/img'), indexes, '.jpg', 0, 0)
-open(path.join(base_path, 'static/index_d.json'), 'w').write(json.dumps(indexes, ensure_ascii=False))
+open(path.join(base_path, 'static/index.json'), 'w').write(json.dumps(indexes, ensure_ascii=False))

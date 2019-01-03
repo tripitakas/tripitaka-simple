@@ -58,7 +58,6 @@ coverage.xml
 *.pkl
 *.db
 *.rdb
-static/*.json
 static/download/
 static/*pos/
 static/txt/

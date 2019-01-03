@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from os import path, listdir
+from os import path, listdir, mkdir
 import re
 from operator import itemgetter
 from controller.base import BaseHandler, load_json, save_json
@@ -144,9 +144,27 @@ def merge_chars(dst_path, char_path, column_path):
             save_json(char, dst_file)
 
 
+def merge_columns(dst_path, char_path):
+    indexes = load_json(path.join(static_path, 'index.json'))
+    indexes['column'] = {}
+    for fn in listdir(char_path):
+        src_file = path.join(char_path, fn)
+        if fn.endswith('.json') and fn[:2] in ['GL', 'QL', 'YB']:
+            dst_file = dst_path
+            for folder in fn.split('_')[:-1]:
+                dst_file = path.join(dst_file, folder)
+                if not path.exists(dst_file):
+                    mkdir(dst_file)
+            dst_file = path.join(dst_file, fn)
+            column = load_json(src_file)
+            assert column and column.get('columns')
+            save_json(column, dst_file)
+            indexes['column'][fn[:2]] = indexes['column'].get(fn[:2], []) + [fn[:-5]]
+    save_json(indexes, path.join(static_path, 'index.json'))
+
+
 if __name__ == '__main__':
     # print(fix(path.join(data_path, 'lock', 'char')))
     # clean_log()
-    merge_chars(path.join(static_path, 'pos/proof/JX'),
-                path.join(static_path, 'pos/proof/char-cut'),
-                path.join(static_path, 'pos/proof/column'))
+    merge_columns(path.join(static_path, 'pos/column/'),
+                  path.join(static_path, 'pos/column/char-cut'))

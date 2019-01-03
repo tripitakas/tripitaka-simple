@@ -12,12 +12,9 @@ import codecs
 
 BASE_DIR = path.dirname(path.dirname(__file__))
 pos_types = dict(block='切栏', column='切列', char='切字', proof='文字')
-kinds = {
-    'block': {},  # 'JX': '嘉兴藏'},
-    'column': {},  # 'JX': '嘉兴藏'},
-    'char': {},  # 'GL': '高丽藏', 'JX': '嘉兴藏', 'QL': '乾隆藏', 'YB': '永乐北藏'},
-    'proof': {'JX': '嘉兴藏'}  # , 'QL': '乾隆藏', 'YB': '永乐北藏'}
-}
+kind_types = {'GL': '高丽藏', 'JX': '嘉兴藏', 'QL': '乾隆藏', 'YB': '永乐北藏'}
+indexes = load_json(path.join('static', 'index.json'))
+kinds = {k: {t: kind_types[t] for t in v} for k, v in indexes.items()}
 
 
 class MainHandler(BaseHandler):
@@ -31,9 +28,7 @@ class MainHandler(BaseHandler):
             for t in lines:
                 proof[t[:2]].append(t)
             save_json(proof, 'proof.json')
-        index_file = 'index_d.json' if options.debug else 'index.json'
-        index = load_json(path.join('static', index_file))
-        self.render('index.html', kinds=kinds, index=index, pos='char')
+        self.render('index.html', kinds=kinds, index=indexes, pos='char')
 
 
 class PagesHandler(BaseHandler):
@@ -78,9 +73,7 @@ class PagesHandler(BaseHandler):
             return self.render('my_pages.html', kinds=kinds, pages=pages, count=len(pages), username=username,
                                pos_type=pos_type, pos=pos, kind=kind, get_icon=get_icon, get_info=get_info)
 
-        index_file = 'index_d.json' if options.debug else 'index.json'
-        index = load_json(path.join('static', index_file))
-        pages, count = self.pick_pages(pos, index[pos].get(kind, []), 12)
+        pages, count = self.pick_pages(pos, indexes[pos].get(kind, []), 12)
         html = 'block_pages.html' if pos == 'block' else 'char_pages.html'
         if pos == 'block':
             [CutHandler.lock_page(self, pos, name) for name in pages]
@@ -158,8 +151,7 @@ class CutHandler(BaseHandler):
 
         test = self.get_query_argument('all', 0) == '1'
         if test:
-            index = load_json(path.join('static', 'index_d.json' if options.debug else 'index.json'))
-            for name in index[pos].get(kind, []):  # 在 do_render 中传入 test=True 可遍历所有页面
+            for name in indexes[pos].get(kind, []):  # 在 do_render 中传入 test=True 可遍历所有页面
                 load_render(name)
         else:
             load_render(name)
@@ -219,8 +211,7 @@ class CutHandler(BaseHandler):
                     f.write(txt.strip('\n'))
 
         if submit:
-            index_file = 'index_d.json' if options.debug else 'index.json'
-            pages = PagesHandler.pick_pages(pos, load_json(path.join('static', index_file))[pos][kind], 1)[0]
+            pages = PagesHandler.pick_pages(pos, indexes[pos][kind], 1)[0]
             self.write('jump:' + pages[0][3:] if pages else 'error:本类切分已全部校对完成。')
         self.write('')
 
