@@ -140,23 +140,29 @@ class CutHandler(BaseHandler):
             base_url = 'http://tripitaka-img.oss-cn-beijing.aliyuncs.com/page'
             return '/'.join([base_url, *p.split('_')[:-1], p+'_'+get_hash(p)+'.jpg'])
 
-        # index = load_json(path.join('static', 'index_d.json' if options.debug else 'index.json'))
-        # for name in index[pos].get(kind, []):  # 在 do_render 中传入 test=True 可遍历所有页面
+        def load_render(p):
+            if not p.startswith(kind):
+                p = kind + '_' + p
+            filename = path.join(BASE_DIR, 'static', 'pos', pos, *p.split('_')[:-1], p + '.json')
+            page = load_json(filename)
+            if not page:
+                return self.write('error: {0} 页面不存在'.format(p))
+            if pos + 's' in page:
+                page[pos + 's'] = json.dumps(page[pos + 's'])
+            else:
+                page[pos + 's'] = []
 
-        if not name.startswith(kind):
-            name = kind + '_' + name
-        filename = path.join(BASE_DIR, 'static', 'pos', pos, *name.split('_')[:-1], name + '.json')
-        page = load_json(filename)
-        if not page:
-            return self.write('error: {0} 页面不存在'.format(name))
-        if pos + 's' in page:
-            page[pos + 's'] = json.dumps(page[pos + 's'])
+            readonly = test or self.get_query_argument('readonly', None) or self.lock_page(self, pos, p, False) != p
+            self.do_render(p, self.html_files[pos], pos_type=pos_types[pos], readonly=readonly, test=test,
+                           page=page, pos=pos, kind=kind, **page, get_img=get_img, txt=get_txt(p))
+
+        test = self.get_query_argument('all', 0) == '1'
+        if test:
+            index = load_json(path.join('static', 'index_d.json' if options.debug else 'index.json'))
+            for name in index[pos].get(kind, []):  # 在 do_render 中传入 test=True 可遍历所有页面
+                load_render(name)
         else:
-            page[pos + 's'] = []
-
-        readonly = self.get_query_argument('readonly', None) or self.lock_page(self, pos, name, False) != name
-        self.do_render(name, self.html_files[pos], pos_type=pos_types[pos], readonly=readonly,
-                       page=page, pos=pos, kind=kind, **page, get_img=get_img, txt=get_txt(name))
+            load_render(name)
 
     def do_render(self, name, template_name, **params):
         self.render(template_name, **params)

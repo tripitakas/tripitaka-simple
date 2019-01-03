@@ -84,13 +84,14 @@ def calc(chars, blocks, columns, sort_after_notecheck=False):
                 {'block_id': 0, 'column_id': 0, 'ch_id': 0, 'subcolumn_id': 0, 'note_id': 0, 'column_order': 0})
 
         # 按坐标对栏框和列框排序
-        blocks = sorted(blocks, key=lambda c: c['y'])
+        blocks = sorted(blocks, key=lambda b: b['y'])
         columns_sorted = []
         for i_b, block in enumerate(blocks):
             block['no'] = i_b + 1
             block['block_id'] = 'b{}'.format(i_b + 1)
-            columns_in_block = [column for column in columns if is_contained_in(column, block, 20)]
-            columns_in_block.sort(key=lambda c: c['x'], reverse=True)
+            columns_in_block = [column for column in columns if is_contained_in(column, block,
+                                                                                max(40, column['w'] * 0.5))]
+            columns_in_block.sort(key=lambda b: b['x'], reverse=True)
             for i_c, column in enumerate(columns_in_block):
                 column['no'] = i_c + 1
                 column['block_no'] = i_b + 1
@@ -106,12 +107,16 @@ def calc(chars, blocks, columns, sort_after_notecheck=False):
                     char_list[i]['column_id'] = column['no']
                     c['block_no'] = column['block_no']
                     c['line_no'] = column['no']
-                    c['column_id'] = column['column_id']
+            if not c.get('block_no') or not c.get('line_no'):
+                pass  # print(c)
 
         # 逐列处理
         for column in columns:
             # 统计列内字框的索引
-            char_indices_in_column = [i for i, c in enumerate(chars) if c['column_id'] == column['column_id']]
+            if not column.get('block_no'):
+                print(column)
+            char_indices_in_column = [i for i, c in enumerate(chars) if c.get('block_no') == column['block_no']
+                                      and c.get('line_no') == column['no']]
             # 按高度重新排序
             sorted_char_indices = sorted(char_indices_in_column, key=lambda i: chars[i]['y'])
 
