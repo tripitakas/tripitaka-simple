@@ -166,5 +166,6 @@ def merge_columns(dst_path, char_path):
 if __name__ == '__main__':
     # print(fix(path.join(data_path, 'lock', 'char')))
     # clean_log()
-    merge_columns(path.join(static_path, 'pos/column/'),
-                  path.join(static_path, 'pos/column/char-cut'))
+    if 0:
+        merge_columns(path.join(static_path, 'pos/column/'),
+                      path.join(static_path, 'pos/column/char-cut'))

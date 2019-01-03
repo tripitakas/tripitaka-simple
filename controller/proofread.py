@@ -56,10 +56,18 @@ class ProofreadHandler(CutHandler):
                 chars[i]['char_id'] = 'b%dc%dc%d' % (c['block_id'], c['column_id'], c['column_order'])
                 if 'line_no' in chars[i]:
                     chars[i]['char_no'] = c['column_order']
-        zero_char_id = [c['char_id'] for c in chars if 'c0' in c['char_id']]
-        if zero_char_id:
-            print(name, ','.join(zero_char_id))
+        params['zero_char_id'] = [c['char_id'] for c in chars if 'c0' in c['char_id']]
+        if params['zero_char_id']:
+            print(name, ','.join(params['zero_char_id']))
         params['origin_txt'] = params['txt'].strip().split('\n')
         params['mismatch_lines'] = []
         params['txt'] = json.dumps(gen_segments(params['txt']), ensure_ascii=False)
+        return params if params.get('test') else self.render(template_name, **params)
+
+
+class ColumnCheckHandler(CutHandler):
+    URL = r'/(column)/([A-Z]{2})/(\w{4,20})'
+
+    def do_render(self, name, template_name, **params):
+        params['txt_lines'] = len([t for t in params['txt'].split('\n') if t])
         return params if params.get('test') else self.render(template_name, **params)

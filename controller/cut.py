@@ -108,7 +108,7 @@ class PagesHandler(BaseHandler):
 
 
 class CutHandler(BaseHandler):
-    URL = r'/(block|column|char)/([A-Z]{2})/(\w{4,20}|all)'
+    URL = r'/(block|char)/([A-Z]{2})/(\w{4,20}|all)'
     html_files = dict(block='block_cut.html', column='column_cut.html', char='char_cut.html', proof='proofread.html')
 
     def get(self, pos, kind, name):

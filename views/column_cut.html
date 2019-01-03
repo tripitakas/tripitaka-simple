@@ -51,7 +51,7 @@
   <div id="body-content" style="margin-top: 65px">
     <div id="holder" class="col-md-9"></div>
     <div id="txt" class="col-md-3" style="font-size:18px;">
-      <p style="text-align:center">【经文】</p>
+      <p style="text-align:center">【经文】{{txt_lines}}行</p>
       <textarea class="form-control" rows="20" style="font-size: 18px;">
         {{ txt }}
       </textarea>
@@ -138,6 +138,9 @@
             .then(function () {
               if (/^jump:/.test(res)) {
                 window.location.href = '/{{pos}}/{{kind}}/' + res.replace(/^jump:/, '');
+              }
+              else {
+                window.location.reload();
               }
             });
         }

@@ -624,6 +624,13 @@
           })
           .data('cid', b.char_id)
           .data('char', b.ch);
+
+        if (b.char_id && b.char_id.indexOf('c0') > 0) {
+          setTimeout(function () {
+            c.shape.attr({fill: rgb_a(data.hoverFill, 0.8)});
+            c.shape.show();
+          }, 100);
+        }
       });
       var char = this.findCharById(cid);
       this.switchCurrentBox(char && char.shape);
