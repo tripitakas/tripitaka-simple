@@ -7,12 +7,12 @@ from .use_noteid import calc_order
 
 
 # A 是否包含在B当中
-def is_contained_in(A, B, threshold=0):
+def is_contained_in(A, B, threshold=0, ignore_y=False):
     threshold = threshold or max(20, B['w'] * 0.25)
     if A['x'] - B['x'] >= -threshold:
         if A['x'] + A['w'] - B['x'] - B['w'] <= threshold:
-            if A['y'] - B['y'] >= -threshold:
-                if A['y'] + A['h'] - B['y'] - B['h'] <= threshold:
+            if ignore_y or A['y'] - B['y'] >= -threshold:
+                if ignore_y or A['y'] + A['h'] - B['y'] - B['h'] <= threshold:
                     return True
     return False
 
@@ -89,8 +89,8 @@ def calc(chars, blocks, columns, sort_after_notecheck=False):
         for i_b, block in enumerate(blocks):
             block['no'] = i_b + 1
             block['block_id'] = 'b{}'.format(i_b + 1)
-            columns_in_block = [column for column in columns if is_contained_in(column, block,
-                                                                                max(40, column['w'] * 0.5))]
+            columns_in_block = [column for column in columns
+                                if is_contained_in(column, block, max(40, column['w'] / 2), ignore_y=len(blocks) < 2)]
             columns_in_block.sort(key=lambda b: b['x'], reverse=True)
             for i_c, column in enumerate(columns_in_block):
                 column['no'] = i_c + 1

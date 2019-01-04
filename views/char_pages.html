@@ -5,8 +5,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-  <meta name="description" content="藏经{{pos_type}}校对">
-  <title>藏经{{pos_type}}校对</title>
+  <meta name="description" content="{{username + '提交的' if kind == 'me' else kinds[pos][kind]}}{{pos_type}}校对页面">
+  <title>{{'' if kind == 'me' else kinds[pos][kind]}}{{pos_type}}校对</title>
   <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
   <link rel="shortcut icon" type="image/x-icon" href="/static/favicon.ico">
   {% include _font.html %}

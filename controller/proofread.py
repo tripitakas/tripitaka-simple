@@ -13,7 +13,7 @@ class ProofreadHandler(CutHandler):
 
     def do_render(self, name, template_name, **params):
         def get_column_boxes(block_no, line_no):
-            return [c for c in chars if c['char_id'].startswith('b%dc%dc' % (block_no, line_no))]
+            return [c for c in chars if c.get('char_id', '').startswith('b%dc%dc' % (block_no, line_no))]
 
         def gen_segments(txt):
             def apply_span():
@@ -56,9 +56,9 @@ class ProofreadHandler(CutHandler):
                 chars[i]['char_id'] = 'b%dc%dc%d' % (c['block_id'], c['column_id'], c['column_order'])
                 if 'line_no' in chars[i]:
                     chars[i]['char_no'] = c['column_order']
-        params['zero_char_id'] = [c['char_id'] for c in chars if 'c0' in c['char_id']]
+        params['zero_char_id'] = [c.get('char_id') for c in chars if 'c0' in c.get('char_id', '')]
         if params['zero_char_id']:
-            print(name, ','.join(params['zero_char_id']))
+            print('%s\t%d\t%s' % (name, len(params['zero_char_id']), ','.join(params['zero_char_id'])))
         params['origin_txt'] = params['txt'].strip().split('\n')
         params['mismatch_lines'] = []
         params['txt'] = json.dumps(gen_segments(params['txt']), ensure_ascii=False)

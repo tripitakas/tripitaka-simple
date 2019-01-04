@@ -34,7 +34,7 @@
 }
 
 .pfread .left {
-  width: 49%;
+  width: 59%;
   border: 1px solid #ccc;
   border-radius: 5px;
   box-sizing: border-box;
@@ -80,7 +80,7 @@
 }
 
 .pfread .right {
-  width: 49%;
+  width: 39%;
   margin-left: 1%;
   border: 1px solid #ccc;
   border-radius: 5px;
