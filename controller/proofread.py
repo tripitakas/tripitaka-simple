@@ -21,9 +21,10 @@ class ProofreadHandler(CutHandler):
                     segments.append(dict(block_no=1 + blk_i, line_no=line_no, type='same', ocr=items))
                     
             segments = []
-            txt = re.sub(r'\S*<!--.+-->\S*', '\n', txt, flags=re.S)  # 修正从其他网站贴入的音释内容
+            txt = re.sub(r'\s*<!--.+-->\s*\n?', '\n', txt, flags=re.M)  # 修正从其他网站贴入的音释内容
             for blk_i, block in enumerate(txt.split('\n\n\n')):
                 col_diff = 1
+                block = re.sub(r'\n{2}', '\n', block, flags=re.M)
                 for col_i, column in enumerate(block.strip().split('\n')):
                     column = column.strip()
                     line_no = col_diff + col_i
