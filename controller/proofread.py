@@ -21,9 +21,10 @@ class ProofreadHandler(CutHandler):
                     segments.append(dict(block_no=1 + blk_i, line_no=line_no, type='same', ocr=items))
                     
             segments = []
-            txt = re.sub(r'\S*<!--.+-->\S*', '\n', txt, flags=re.S)  # 修正从其他网站贴入的音释内容
+            txt = re.sub(r'\s*<!--.+-->\s*\n?', '\n', txt, flags=re.M)  # 修正从其他网站贴入的音释内容
             for blk_i, block in enumerate(txt.split('\n\n\n')):
                 col_diff = 1
+                block = re.sub(r'\n{2}', '\n', block, flags=re.M)
                 for col_i, column in enumerate(block.strip().split('\n')):
                     column = column.strip()
                     line_no = col_diff + col_i
@@ -49,14 +50,19 @@ class ProofreadHandler(CutHandler):
             return {'segments': segments}
 
         chars = params['chars']
+        ids0 = {}
         params['order_changed'] = len([c for c in chars if c.get('order_changed')])
         if not params['order_changed'] or self.get_query_argument('layout', 0) == '1':
             new_chars = calc(chars, params['blocks'], params['columns'])
             for i, c in enumerate(new_chars):
+                if not c['column_order']:
+                    zero_key = 'b%dc%d' % (c['block_id'], c['column_id'])
+                    ids0[zero_key] = ids0.get(zero_key, 50) + 1
+                    c['column_order'] = ids0[zero_key]
                 chars[i]['char_id'] = 'b%dc%dc%d' % (c['block_id'], c['column_id'], c['column_order'])
                 if 'line_no' in chars[i]:
                     chars[i]['char_no'] = c['column_order']
-        params['zero_char_id'] = [c.get('char_id') for c in chars if 'c0' in c.get('char_id', '')]
+        params['zero_char_id'] = [c.get('char_id') for c in chars if 'c0' in c.get('char_id', '')] + list(ids0.keys())
         if params['zero_char_id']:
             print('%s\t%d\t%s' % (name, len(params['zero_char_id']), ','.join(params['zero_char_id'])))
         params['origin_txt'] = params['txt'].strip().split('\n')
