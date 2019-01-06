@@ -73,7 +73,8 @@ class PagesHandler(BaseHandler):
             return self.render('my_pages.html', kinds=kinds, pages=pages, count=len(pages), username=username,
                                pos_type=pos_type, pos=pos, kind=kind, get_icon=get_icon, get_info=get_info)
 
-        pages, count = self.pick_pages(pos, indexes[pos].get(kind, []), 12)
+        pages = indexes[pos].get(kind, [])
+        count = len(pages)
         html = 'block_pages.html' if pos == 'block' else 'char_pages.html'
         if pos == 'block':
             [CutHandler.lock_page(self, pos, name) for name in pages]
@@ -147,8 +148,14 @@ class CutHandler(BaseHandler):
                     page[pos + 's'] = []
 
             readonly = test or self.get_query_argument('readonly', None) or self.lock_page(self, pos, p, False) != p
-            self.do_render(p, self.html_files[pos], pos_type=pos_types[pos], readonly=readonly, test=test,
-                           page=page, pos=pos, kind=kind, **page, get_img=get_img, txt=get_txt(p))
+            r = self.do_render(p, self.html_files[pos], pos_type=pos_types[pos], readonly=readonly, test=test,
+                               page=page, pos=pos, kind=kind, **page, get_img=get_img, txt=get_txt(p))
+            if test and r['columns']:
+                page['columns'] = r['columns']
+                page['chars'] = r['chars']
+                save_json(page, filename, indent=2)
+                with open('/'.join(['./static/txt', *p.split('_')[:-1], p + '.txt']), 'w') as f:
+                    return f.write(r['lines'])
 
         test = self.get_query_argument('all', 0) == '1'
         if test:

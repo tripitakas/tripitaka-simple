@@ -43,6 +43,9 @@ class ProofreadHandler(CutHandler):
                     boxes = get_column_boxes(1 + blk_i, line_no)
                     if len(boxes) != len(re.sub(r'\s', '', column)):
                         params['mismatch_lines'].append('b%dc%d' % (1 + blk_i, line_no))
+
+                    if ('b1c%d' % line_no) in err_ids:
+                        lines.append(column)
                     column = [url_escape(c) for c in list(column)]
                     items = []
                     for c in column:
@@ -57,6 +60,7 @@ class ProofreadHandler(CutHandler):
 
         chars = params['chars']
         ids0 = {}
+        lines = []
         params['order_changed'] = len([c for c in chars if c.get('order_changed')])
         if not params['order_changed'] or self.get_query_argument('layout', 0) == '1':
             new_chars = calc(chars, params['blocks'], params['columns'])
@@ -69,11 +73,16 @@ class ProofreadHandler(CutHandler):
                 if 'line_no' in chars[i]:
                     chars[i]['char_no'] = c['column_order']
         params['zero_char_id'] = [c.get('char_id') for c in chars if to_int(c.get('char_id').split('c')[2]) > 100]
-        if params['zero_char_id']:
+        if params['zero_char_id'] and len(params['blocks']) == 1:
             print('%s\t%d\t%s' % (name, len(params['zero_char_id']), ','.join(params['zero_char_id'])))
+            err_ids = ['c'.join(c.split('c')[:2]) for c in params['zero_char_id']]
         params['origin_txt'] = params['txt'].strip().split('\n')
         params['mismatch_lines'] = []
         params['txt'] = json.dumps(gen_segments(params['txt']), ensure_ascii=False)
+        if params.get('test') and params['zero_char_id'] and len(params['blocks']) == 1:
+            chars = params['chars'] = [c for c in params['chars'] if 'c'.join(c['char_id'].split('c')[:2]) in err_ids]
+            params['columns'] = [c for c in params.get('columns', []) if c.get('column_id') and c.get('column_id') in err_ids]
+            params['lines'] = '\n'.join(lines)
         return params if params.get('test') else self.render(template_name, **params)
 
 
