@@ -66,6 +66,12 @@
       <li><a href="/proof/{{k}}">{{n}} ({{len(index['proof'].get(k, []))}})</a></li>
       {% end %}
     </ul>
+    <h4>文字校对(有字框编号问题)</h4>
+    <ul>
+      {% for k, n in kinds['proof_invalid'].items() %}
+      <li><a href="/proof/{{k}}?invalid=1">{{n}} ({{len(index['proof_invalid'].get(k, []))}})</a></li>
+      {% end %}
+    </ul>
   </div>
 </div>
 

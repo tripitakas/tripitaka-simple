@@ -62,7 +62,11 @@
         <div class="thumbnail" id="{{p}}">
             <a href="/{{pos}}/{{p[:2]}}/{{p[3:]}}"><img src="{{get_icon(p)}}"></a>
             <div class="caption text-center" id="title-{{p}}">
-              <p>{{p}}</p>
+              <p>{{p}}
+                {% if p in invalids %}
+                ({{invalids[p]}} 个字框错误)
+                {% end %}
+              </p>
             </div>
           </div>
       </div>

@@ -16,6 +16,235 @@ kind_types = {'GL': '高丽藏', 'JX': '嘉兴藏', 'QL': '乾隆藏', 'YB': '�
 indexes = load_json(path.join('static', 'index.json'))
 kinds = {k: {t: kind_types[t] for t in v} for k, v in indexes.items()}
 
+invalids = '''GL_1260_4_3	1
+GL_166_2_5	1
+GL_1056_3_2	1
+GL_78_9_18	1
+GL_807_1_24	1
+GL_1454_3_12	1
+GL_923_2_9	1
+GL_143_1_22	1
+GL_1418_4_9	1
+GL_70_1_8	1
+GL_1442_1_8	1
+GL_1047_1_34	1
+GL_807_2_8	1
+GL_1054_5_5	1
+GL_1051_8_11	1
+GL_1047_1_15	1
+GL_63_1_23	1
+GL_1260_3_8	1
+GL_1056_1_27	1
+GL_1260_10_7	1
+GL_1056_5_13	1
+GL_78_6_13	1
+GL_924_2_21	1
+GL_1260_7_9	1
+GL_1434_5_10	1
+GL_1049_1_4	1
+GL_1056_2_6	2
+GL_174_3_3	2
+GL_1048_1_39	2
+GL_129_3_27	2
+GL_1054_4_4	2
+GL_61_1_15	2
+GL_914_9_20	2
+GL_1486_17_9	2
+GL_959_3_15	2
+GL_82_1_5	2
+GL_74_4_16	2
+GL_914_1_16	2
+GL_914_8_15	2
+GL_1260_5_3	2
+GL_1454_3_6	2
+GL_167_1_25	2
+GL_1054_1_23	2
+GL_922_1_8	2
+GL_1260_11_11	2
+GL_1442_1_14	2
+GL_807_1_12	3
+GL_807_2_14	3
+GL_1462_2_4	3
+GL_1462_2_5	3
+GL_1260_8_8	3
+GL_78_2_15	3
+GL_1418_4_7	3
+GL_57_1_29	3
+GL_1056_2_4	3
+GL_1056_5_12	3
+GL_1260_1_3	3
+GL_1418_4_3	4
+GL_1454_2_14	4
+GL_127_7_11	4
+GL_914_9_17	4
+GL_1454_1_9	4
+GL_9_1_16	4
+GL_1434_5_11	4
+GL_1054_1_19	4
+GL_128_3_15	4
+GL_1056_1_28	5
+GL_1439_1_9	5
+GL_9_1_9	5
+GL_1054_5_13	5
+GL_1056_2_3	5
+GL_9_1_13	6
+GL_1486_20_6	6
+GL_1426_2_8	6
+GL_1054_3_20	6
+GL_1056_4_16	6
+GL_1056_1_8	6
+GL_1454_3_13	6
+GL_807_1_18	6
+GL_1054_3_2	6
+GL_1056_2_10	6
+GL_1418_4_10	6
+GL_1260_10_10	6
+GL_1260_9_7	7
+GL_1454_3_15	7
+GL_924_2_5	7
+GL_1048_2_59	7
+GL_1462_2_6	7
+GL_128_3_13	7
+GL_1452_2_9	7
+GL_1049_1_27	7
+GL_924_1_2	7
+GL_1054_2_11	8
+GL_923_1_23	8
+GL_1260_2_4	8
+GL_923_1_14	8
+GL_1056_2_18	8
+GL_1047_2_17	8
+GL_914_5_18	8
+GL_1054_4_2	8
+GL_1481_18_5	8
+GL_922_1_16	8
+GL_914_4_3	8
+GL_1434_5_5	9
+GL_914_1_20	9
+GL_923_2_7	9
+GL_1456_1_12	9
+GL_923_1_36	9
+GL_1440_1_6	10
+GL_1260_8_3	10
+GL_1260_8_4	10
+GL_924_2_13	10
+GL_924_2_17	10
+GL_1056_2_22	11
+GL_1454_2_13	11
+GL_1434_4_15	11
+GL_914_10_7	12
+GL_143_2_19	12
+GL_1056_2_24	12
+GL_922_2_32	12
+GL_1056_2_26	13
+GL_924_1_12	14
+GL_922_1_34	14
+GL_914_2_2	14
+GL_1056_1_20	14
+GL_1054_4_7	14
+GL_1260_7_11	15
+GL_1054_1_13	15
+GL_1260_5_7	16
+GL_1056_5_6	16
+GL_82_2_8	17
+GL_1260_4_2	18
+GL_127_6_17	19
+GL_1056_1_22	19
+GL_1260_3_3	19
+GL_807_1_9	20
+GL_924_2_23	20
+GL_922_1_24	20
+GL_922_1_18	20
+GL_922_1_21	20
+GL_1047_1_21	21
+GL_924_2_30	21
+GL_1260_9_5	21
+GL_922_1_10	21
+GL_807_1_14	22
+GL_1260_8_11	22
+GL_1054_6_2	23
+GL_1056_2_20	23
+GL_1260_1_11	24
+GL_1054_1_12	25
+GL_924_2_35	27
+GL_922_2_28	27
+GL_923_1_11	27
+GL_1049_1_10	28
+GL_923_2_30	28
+GL_922_1_30	28
+GL_922_1_12	31
+GL_922_1_17	41
+GL_1260_5_4	44
+GL_922_1_5	47
+GL_1054_1_4	49
+GL_1047_1_5	51
+GL_922_1_29	53
+GL_1056_2_21	53
+GL_924_1_10	56
+GL_922_2_21	61
+GL_922_1_6	116
+GL_922_1_4	134
+YB_34_151	76
+YB_33_308	17
+YB_24_119	14
+YB_26_172	14
+YB_24_259	14
+YB_32_967	13
+YB_27_531	11
+YB_29_32	11
+YB_30_623	10
+YB_29_124	9
+YB_28_615	9
+YB_32_117	8
+YB_24_204	8
+YB_30_159	8
+YB_30_774	7
+YB_33_776	7
+YB_24_522	6
+YB_29_277	6
+YB_28_515	6
+YB_28_885	6
+YB_28_890	6
+YB_26_959	6
+YB_29_269	6
+YB_30_507	5
+YB_24_400	5
+YB_23_890	5
+YB_24_215	5
+YB_28_524	4
+YB_33_858	4
+YB_32_27	4
+YB_29_677	3
+YB_31_297	3
+YB_32_698	3
+YB_24_210	3
+YB_24_251	3
+YB_29_361	3
+YB_30_708	3
+YB_22_816	2
+YB_24_667	2
+YB_24_132	2
+YB_30_80	2
+YB_26_607	2
+YB_32_438	2
+YB_24_219	2
+YB_24_262	2
+YB_25_692	1
+YB_26_463	1
+YB_27_480	1
+YB_33_525	1
+YB_25_474	1
+YB_23_721	1
+YB_29_347	1
+YB_33_418	1
+YB_29_234	1
+YB_29_130	1
+YB_27_772	1
+YB_23_727	1
+YB_29_245	1
+YB_32_346	1'''.split('\n')
+invalids = {s.split('\t')[0]: s.split('\t')[1] for s in invalids}
+
 
 class MainHandler(BaseHandler):
     URL = r'/'
@@ -73,12 +302,13 @@ class PagesHandler(BaseHandler):
             return self.render('my_pages.html', kinds=kinds, pages=pages, count=len(pages), username=username,
                                pos_type=pos_type, pos=pos, kind=kind, get_icon=get_icon, get_info=get_info)
 
-        pages, count = self.pick_pages(pos, indexes[pos].get(kind, []), 12)
+        field = pos + ('_invalid' if self.get_query_argument('invalid', 0) == '1' else '')
+        pages, count = self.pick_pages(pos, indexes[field].get(kind, []), 12)
         html = 'block_pages.html' if pos == 'block' else 'char_pages.html'
         if pos == 'block':
             [CutHandler.lock_page(self, pos, name) for name in pages]
 
-        self.render(html, kinds=kinds, pages=pages, count=count, username=username,
+        self.render(html, kinds=kinds, pages=pages, count=count, username=username, invalids=invalids,
                     pos_type=pos_type, pos=pos, kind=kind, get_icon=get_icon, get_info=get_info)
 
     @staticmethod
@@ -140,10 +370,11 @@ class CutHandler(BaseHandler):
             page = load_json(filename)
             if not page:
                 return self.write('error: {0} 页面不存在'.format(p))
-            if pos + 's' in page:
-                page[pos + 's'] = json.dumps(page[pos + 's'])
-            else:
-                page[pos + 's'] = []
+            if pos in 'char|column|block':
+                if pos + 's' in page:
+                    page[pos + 's'] = json.dumps(page[pos + 's'])
+                else:
+                    page[pos + 's'] = []
 
             readonly = test or self.get_query_argument('readonly', None) or self.lock_page(self, pos, p, False) != p
             self.do_render(p, self.html_files[pos], pos_type=pos_types[pos], readonly=readonly, test=test,
