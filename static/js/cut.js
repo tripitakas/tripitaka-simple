@@ -625,7 +625,7 @@
           .data('cid', b.char_id)
           .data('char', b.ch);
 
-        if (b.char_id && b.char_id.indexOf('c0') > 0) {
+        if (b.char_id && parseInt(b.char_id.split('c')[2]) > 100) {
           setTimeout(function () {
             c.shape.attr({fill: rgb_a(data.hoverFill, 0.8)});
             c.shape.show();

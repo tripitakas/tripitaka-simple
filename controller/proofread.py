@@ -15,6 +15,12 @@ class ProofreadHandler(CutHandler):
         def get_column_boxes(block_no, line_no):
             return [c for c in chars if c.get('char_id', '').startswith('b%dc%dc' % (block_no, line_no))]
 
+        def to_int(s):
+            try:
+                return int(s)
+            except TypeError:
+                return 0
+
         def gen_segments(txt):
             def apply_span():
                 if items:
@@ -57,12 +63,12 @@ class ProofreadHandler(CutHandler):
             for i, c in enumerate(new_chars):
                 if not c['column_order']:
                     zero_key = 'b%dc%d' % (c['block_id'], c['column_id'])
-                    ids0[zero_key] = ids0.get(zero_key, 50) + 1
+                    ids0[zero_key] = ids0.get(zero_key, 100) + 1
                     c['column_order'] = ids0[zero_key]
                 chars[i]['char_id'] = 'b%dc%dc%d' % (c['block_id'], c['column_id'], c['column_order'])
                 if 'line_no' in chars[i]:
                     chars[i]['char_no'] = c['column_order']
-        params['zero_char_id'] = [c.get('char_id') for c in chars if 'c0' in c.get('char_id', '')] + list(ids0.keys())
+        params['zero_char_id'] = [c.get('char_id') for c in chars if to_int(c.get('char_id').split('c')[2]) > 100]
         if params['zero_char_id']:
             print('%s\t%d\t%s' % (name, len(params['zero_char_id']), ','.join(params['zero_char_id'])))
         params['origin_txt'] = params['txt'].strip().split('\n')
