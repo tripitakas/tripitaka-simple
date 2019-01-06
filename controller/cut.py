@@ -150,7 +150,7 @@ class CutHandler(BaseHandler):
             readonly = test or self.get_query_argument('readonly', None) or self.lock_page(self, pos, p, False) != p
             r = self.do_render(p, self.html_files[pos], pos_type=pos_types[pos], readonly=readonly, test=test,
                                page=page, pos=pos, kind=kind, **page, get_img=get_img, txt=get_txt(p))
-            if test and r['columns']:
+            if test and r['columns'] and r['chars'] and r.get('lines'):
                 page['columns'] = r['columns']
                 page['chars'] = r['chars']
                 save_json(page, filename, indent=2)
