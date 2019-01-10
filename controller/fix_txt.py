@@ -62,7 +62,7 @@ def find_especial_chars(chars, txt_path, sub_set=None, pattern=None):
                 lines = sub_set and [t for t in text.split('\n') if [1 for r in list(res) if r in t]]
                 lines = lines and '\t' + lines[0] or ''
                 chars |= res
-                output(path.basename(filename) + ': ' + ''.join(list(res)) + lines)
+                output(fn + ': ' + ''.join(list(res)) + lines)
     return chars
 
 

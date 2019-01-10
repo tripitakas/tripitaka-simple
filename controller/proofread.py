@@ -55,6 +55,10 @@ class ProofreadHandler(CutHandler):
                     apply_span()
             return {'segments': segments}
 
+        def get_char_no(c):
+            p = c.get('char_id').split('c')
+            return to_int(p[2]) if len(p) > 2 else 0
+
         chars = params['chars']
         ids0 = {}
         params['order_changed'] = len([c for c in chars if c.get('order_changed')])
@@ -68,7 +72,7 @@ class ProofreadHandler(CutHandler):
                 chars[i]['char_id'] = 'b%dc%dc%d' % (c['block_id'], c['column_id'], c['column_order'])
                 if 'line_no' in chars[i]:
                     chars[i]['char_no'] = c['column_order']
-        params['zero_char_id'] = [c.get('char_id') for c in chars if to_int(c.get('char_id').split('c')[2]) > 100]
+        params['zero_char_id'] = [c.get('char_id') for c in chars if get_char_no(c) > 100]
         if params['zero_char_id']:
             print('%s\t%d\t%s' % (name, len(params['zero_char_id']), ','.join(params['zero_char_id'])))
         params['origin_txt'] = params['txt'].strip().split('\n')
