@@ -153,14 +153,15 @@
         <div class="modal-content">
           <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal" aria-hidden="true" style="color: blue">×</button>
-            <h4 class="modal-title" id="txtModalLabel">原文</h4>
+            <h4 class="modal-title" id="txtModalLabel">原文
+              <button class="btn btn-default" style="margin-left: 10px" id="save-txt">保存</button>
+            </h4>
           </div>
           <div class="modal-body">
-            <ol style="list-style-type: decimal; padding: 8px; margin-left: 20px; font-size: 1.2em">
-              {% for s in origin_txt %}
-              <li>{{s}}</li>
-              {% end %}
-            </ol>
+            <textarea style="width: 100%; font-size: 1.2em; border: none; margin-bottom: 10px" rows="26">
+              {{'\n'.join(origin_txt)}}
+            </textarea>
+            <p><b>说明</b>：用两个空行作栏分隔符</p>
           </div>
         </div>
       </div>
@@ -349,6 +350,19 @@
 
     $('.btn-doubts').click(function () {
       $('#txtModal').modal();
+    });
+    $('#save-txt').click(function () {
+      var txt = $('#txtModal .modal-body > textarea').val().replace(/-/g, '');
+      $.post('/{{pos}}/{{kind}}/{{imgname}}', {
+        txt: JSON.stringify(txt),
+        boxes: JSON.stringify($.cut.exportBoxes())
+      }, function (res) {
+        if (/^error:/.test(res)) {
+          swal('操作失败', res.replace(/^error:/, ''), 'error', {buttons: false, timer: 1500});
+        } else {
+          window.location.reload();
+        }
+      });
     });
   </script>
 </body>
