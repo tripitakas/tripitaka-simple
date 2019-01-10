@@ -66,7 +66,7 @@
         <div class="panel-body">
           <ol>
             {% for c in chars %}
-            <li>{{c}} {{unicode(c)}}</li>
+            <li><a href="/fix_txt/{{c}}">{{c}}</a> <code>{{unicode(c)}}</code> {{len(occurrence[c])}}页</li>
             {% end %}
           </ol>
         </div>
@@ -79,8 +79,8 @@
         <div class="panel-heading">统计明细</div>
         <div class="panel-body">
           <ol>
-            {% for s in messages %}
-            <li>{{s}}</li>
+            {% for name, msg in messages %}
+            <li><a href="/proof/{{name[:2]}}/{{name[3:]}}">{{name}}</a>{{msg}}</li>
             {% end %}
           </ol>
         </div>

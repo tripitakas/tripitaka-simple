@@ -7,11 +7,17 @@ import json
 import re
 
 messages = []
+occurrence = {}
 TXT_PATH = path.join(path.dirname(path.dirname(__file__)), 'static', 'txt')
 
 
 def output(msg):
     messages.append(msg)
+
+
+def has_json(txt_file):
+    json_file = txt_file.replace('/txt/', '/pos/proof/').replace('.txt', '.json')
+    return path.exists(json_file)
 
 
 def scan_dir(txt_path):
@@ -24,7 +30,7 @@ def scan_dir(txt_path):
         filename = path.join(txt_path, fn)
         if path.isdir(filename):
             scan_dir(filename)
-        elif fn.endswith('.txt'):
+        elif fn.endswith('.txt') and has_json(filename):
             with open(filename) as f:
                 old = text = f.read()
             changes = []
@@ -51,7 +57,7 @@ def find_especial_chars(chars, txt_path, sub_set=None, pattern=None):
         filename = path.join(txt_path, fn)
         if path.isdir(filename):
             find_especial_chars(chars, filename, sub_set, pattern)
-        elif fn.endswith('.txt'):
+        elif fn.endswith('.txt') and has_json(filename):
             with open(filename) as f:
                 text = f.read()
             res = re.findall(pattern or r'[^\u4E00-\u9FA50-9A-MO-Za-z\u3000○,，。?？ \t\n]', text)
@@ -59,6 +65,10 @@ def find_especial_chars(chars, txt_path, sub_set=None, pattern=None):
             if sub_set:
                 res &= sub_set
             if res:
+                for r in list(res):
+                    if r in text:
+                        occurrence[r] = occurrence.get(r, set())
+                        occurrence[r].add(fn)
                 lines = sub_set and [t for t in text.split('\n') if [1 for r in list(res) if r in t]]
                 lines = lines and '\t' + lines[0] or ''
                 chars |= res
@@ -92,9 +102,10 @@ class FixTextHandler(BaseHandler):
                 sub_set = ['N', '*']
             else:
                 sub_set = [op] if op else []
-                pattern = op
+                pattern = r'\*' if op == '*' else r'\?' if op == '?' else r'\+' if op == '+' else op
             especial_chars = sorted(list(find_especial_chars(set(), TXT_PATH, set(sub_set), pattern)))
-        self.render('text.html', messages=messages, chars=especial_chars,
+        self.render('text.html', chars=especial_chars, occurrence=occurrence,
+                    messages=[s.split('.txt') for s in messages],
                     unicode=lambda c: str(c.encode('unicode-escape'))[3:-1])
 
 
