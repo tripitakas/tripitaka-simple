@@ -146,16 +146,11 @@ class CutHandler(BaseHandler):
                     page[pos + 's'] = json.dumps(page[pos + 's'])
                 else:
                     page[pos + 's'] = []
+            # if test: save_json(page, filename, indent=2)
 
             readonly = test or self.get_query_argument('readonly', None) or self.lock_page(self, pos, p, False) != p
-            r = self.do_render(p, self.html_files[pos], pos_type=pos_types[pos], readonly=readonly, test=test,
-                               page=page, pos=pos, kind=kind, **page, get_img=get_img, txt=get_txt(p))
-            if test and r['columns'] and r['chars'] and r.get('lines'):
-                page['columns'] = r['columns']
-                page['chars'] = r['chars']
-                save_json(page, filename, indent=2)
-                with open('/'.join(['./static/txt', *p.split('_')[:-1], p + '.txt']), 'w') as f:
-                    return f.write(r['lines'])
+            self.do_render(p, self.html_files[pos], pos_type=pos_types[pos], readonly=readonly, test=test,
+                           page=page, pos=pos, kind=kind, **page, get_img=get_img, txt=get_txt(p))
 
         test = self.get_query_argument('all', 0) == '1'
         if test:

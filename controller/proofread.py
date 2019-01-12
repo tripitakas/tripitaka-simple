@@ -21,6 +21,10 @@ class ProofreadHandler(CutHandler):
             except TypeError:
                 return 0
 
+        def get_char_no(c):
+            p = c.get('char_id').split('c')
+            return to_int(p[2]) if len(p) > 2 else 0
+
         def gen_segments(txt):
             def apply_span():
                 if items:
@@ -63,7 +67,7 @@ class ProofreadHandler(CutHandler):
         lines = []
         params['order_changed'] = len([c for c in chars if c.get('order_changed')])
         if not params['order_changed'] or self.get_query_argument('layout', 0) == '1':
-            new_chars = calc(chars, params['blocks'], params['columns'])
+            new_chars = calc(chars, params['blocks'])
             for i, c in enumerate(new_chars):
                 if not c['column_order']:
                     zero_key = 'b%dc%d' % (c['block_id'], c['column_id'])
@@ -72,15 +76,13 @@ class ProofreadHandler(CutHandler):
                 chars[i]['char_id'] = 'b%dc%dc%d' % (c['block_id'], c['column_id'], c['column_order'])
                 if 'line_no' in chars[i]:
                     chars[i]['char_no'] = c['column_order']
-        params['zero_char_id'] = [c.get('char_id') for c in chars if to_int(c.get('char_id').split('c')[2]) > 100]
+        params['zero_char_id'] = [c.get('char_id') for c in chars if get_char_no(c) > 100]
         err_ids = []
         if params['zero_char_id'] and len(params['blocks']) == 1:
-            # print('%s\t%d\t%s' % (name, len(params['zero_char_id']), ','.join(params['zero_char_id'])))
+            print('%s\t%d\t%s' % (name, len(params['zero_char_id']), ','.join(params['zero_char_id'])))
             err_ids = [int(c.split('c')[1]) for c in params['zero_char_id']]
         params['origin_txt'] = params['txt'].strip().split('\n')
         params['mismatch_lines'] = []
-        if len(params['txt'].split('\n')) > 5:
-            print(name)
         params['txt'] = json.dumps(gen_segments(params['txt']), ensure_ascii=False)
         if params.get('test') and params['zero_char_id'] and len(params['blocks']) == 1:
             chars = params['chars'] = [c for c in params['chars'] if 'c'.join(c['char_id'].split('c')[:2]) in err_ids]
