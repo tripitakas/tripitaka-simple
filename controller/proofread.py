@@ -5,7 +5,8 @@ from tornado.escape import url_escape
 from controller.cut import CutHandler
 import re
 import json
-from .layout.main import calc
+from .layout.v1 import calc as calc1
+from .layout.v2 import calc as calc2
 
 
 class ProofreadHandler(CutHandler):
@@ -62,8 +63,10 @@ class ProofreadHandler(CutHandler):
         chars = params['chars']
         ids0 = {}
         params['order_changed'] = len([c for c in chars if c.get('order_changed')])
-        if not params['order_changed'] or self.get_query_argument('layout', 0) == '1':
-            new_chars = calc(chars, params['blocks'])
+        layout_type = params['layout_type'] = self.get_query_argument('layout', '0')
+        if not params['order_changed'] or layout_type in '12':
+            new_chars = calc2(chars, params['blocks']) if layout_type == '2' \
+                else calc1(chars, params['blocks'], params['columns'])
             for i, c in enumerate(new_chars):
                 if not c['column_order']:
                     zero_key = 'b%dc%d' % (c['block_id'], c['column_id'])

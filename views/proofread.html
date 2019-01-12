@@ -33,7 +33,10 @@
       <div class="collapse navbar-collapse" id="bs-navbar-collapse-1">
         <ul class="nav navbar-nav">
           {% if not readonly %}
-          <button type="button" class="btn btn-normal navbar-btn" id="layout">重排</button>
+          <button type="button" class="btn btn-normal navbar-btn" style="{{'' if layout_type == '2' else 'color: blue'}}"
+                  id="layout1">重排(旧算法)</button>
+          <button type="button" class="btn btn-normal navbar-btn" style="{{'color: blue' if layout_type == '2' else ''}}"
+                  id="layout2">重排(新算法)</button>
           <button type="button" class="btn btn-normal navbar-btn" id="save">保存</button>
           <button type="button" class="btn btn-normal navbar-btn" id="submit">提交</button>
           {% end %}
@@ -278,7 +281,7 @@
             swal('栏框更新成功', '{{imgname}} ' + '的栏框已更新成功。', 'success',
                {buttons: false, timer: 1000})
                .then(function () {
-                 window.location = '/{{pos}}/{{kind}}/{{imgname}}?layout=1&v=' + Math.ceil(Math.random() * 1000);
+                 window.location = '/{{pos}}/{{kind}}/{{imgname}}?layout={{layout_type}}&v=' + Math.ceil(Math.random() * 1000);
                });
           }
         });
@@ -338,10 +341,11 @@
     $('#save').click(save.bind(null, false));
     $('#submit').click(save.bind(null, true));
     $('.btn-returnback').click(save.bind(null, 'rollback'));
-    $('#layout').click(function () {
-      save(false, function () {
-        window.location = '/{{pos}}/{{kind}}/{{imgname}}?layout=1&v=' + Math.ceil(Math.random() * 1000);
-      });
+    $('#layout1').click(function () {
+      window.location = '/{{pos}}/{{kind}}/{{imgname}}?layout=1&v=' + Math.ceil(Math.random() * 1000);
+    });
+    $('#layout2').click(function () {
+      window.location = '/{{pos}}/{{kind}}/{{imgname}}?layout=2&v=' + Math.ceil(Math.random() * 1000);
     });
 
     {% if zero_char_id %}
