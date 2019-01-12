@@ -63,9 +63,9 @@ class ProofreadHandler(CutHandler):
         chars = params['chars']
         ids0 = {}
         params['order_changed'] = len([c for c in chars if c.get('order_changed')])
-        layout_type = params['layout_type'] = self.get_query_argument('layout', '0')
-        if not params['order_changed'] or layout_type in '12':
-            new_chars = calc2(chars, params['blocks']) if layout_type == '2' \
+        layout_type = params['layout_type'] = int(self.get_query_argument('layout', params.get('layout_type', 0)))
+        if not params['order_changed'] or layout_type:
+            new_chars = calc2(chars, params['blocks']) if layout_type == 2 \
                 else calc1(chars, params['blocks'], params['columns'])
             for i, c in enumerate(new_chars):
                 if not c['column_order']:

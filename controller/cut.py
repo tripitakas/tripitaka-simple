@@ -417,6 +417,7 @@ class CutHandler(BaseHandler):
         submit = self.get_body_argument('submit', 0)
         rollback = submit == 'rollback'
         submit = submit == 'true'
+        layout_type = int(self.get_body_argument('layout_type', 0))
 
         if rollback:
             lock_file = PagesHandler.get_lock_file(pos, name)
@@ -433,7 +434,8 @@ class CutHandler(BaseHandler):
                 for name, arr in boxes:
                     self.save(kind, pos, name, arr)
             else:
-                self.save(kind, pos, name, boxes, self.get_body_argument('is_column', 0) and 'columns')
+                self.save(kind, pos, name, boxes,
+                          self.get_body_argument('is_column', 0) and 'columns', layout_type=layout_type)
 
             txt = self.get_body_argument('txt', 0)
             txt = json.loads(txt) if txt and txt.startswith('"') else txt
@@ -446,13 +448,17 @@ class CutHandler(BaseHandler):
             self.write('jump:' + pages[0][3:] if pages else 'error:本类切分已全部校对完成。')
         self.write('')
 
-    def save(self, kind, pos, name, boxes, field=None):
+    def save(self, kind, pos, name, boxes, field=None, layout_type=0):
         filename = path.join(BASE_DIR, 'static', 'pos', pos, *name.split('_')[:-1], name + '.json')
         page = load_json(filename)
         assert page and isinstance(boxes, list)
         field = field or ('chars' if pos == 'proof' else pos + 's')
+        saved = page.get('layout_type', 0) != layout_type or (page[field] != boxes and boxes)
+        if layout_type:
+            page['layout_type'] = layout_type
         if page[field] != boxes and boxes:
             page[field] = boxes
+        if saved:
             save_json(page, filename)
             logging.info('%d boxes saved: %s' % (len(boxes), name))
 

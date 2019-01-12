@@ -33,9 +33,9 @@
       <div class="collapse navbar-collapse" id="bs-navbar-collapse-1">
         <ul class="nav navbar-nav">
           {% if not readonly %}
-          <button type="button" class="btn btn-normal navbar-btn" style="{{'' if layout_type == '2' else 'color: blue'}}"
+          <button type="button" class="btn btn-normal navbar-btn" style="{{'' if layout_type == 2 else 'color: blue'}}"
                   id="layout1">重排(旧算法)</button>
-          <button type="button" class="btn btn-normal navbar-btn" style="{{'color: blue' if layout_type == '2' else ''}}"
+          <button type="button" class="btn btn-normal navbar-btn" style="{{'color: blue' if layout_type == 2 else ''}}"
                   id="layout2">重排(新算法)</button>
           <button type="button" class="btn btn-normal navbar-btn" id="save">保存</button>
           <button type="button" class="btn btn-normal navbar-btn" id="submit">提交</button>
@@ -313,6 +313,7 @@
       }).get().join('\n\n\n');
       $.post('/{{pos}}/{{kind}}/{{imgname}}', {
         submit: submit,
+        layout_type: {{layout_type}},
         txt: JSON.stringify(txt),
         boxes: JSON.stringify($.cut.exportBoxes())
       }, function (res) {
