@@ -345,7 +345,7 @@
     });
 
     {% if zero_char_id %}
-    swal('有异常编号的字框', '请检查修正已标红的字框：{{", ".join(zero_char_id)}}', 'warning', {buttons: false, timer: 2000});
+    swal('有{{len(zero_char_id)}}个异常编号的字框', '请检查修正已标红的字框：{{", ".join(zero_char_id)}}', 'warning', {buttons: false, timer: 2000});
     {% end %}
 
     $('.btn-doubts').click(function () {

@@ -63,7 +63,7 @@ class ProofreadHandler(CutHandler):
         ids0 = {}
         params['order_changed'] = len([c for c in chars if c.get('order_changed')])
         if not params['order_changed'] or self.get_query_argument('layout', 0) == '1':
-            new_chars = calc(chars, params['blocks'], params['columns'])
+            new_chars = calc(chars, params['blocks'])
             for i, c in enumerate(new_chars):
                 if not c['column_order']:
                     zero_key = 'b%dc%d' % (c['block_id'], c['column_id'])
