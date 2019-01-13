@@ -7,6 +7,7 @@ import re
 import json
 from .layout.v1 import calc as calc1
 from .layout.v2 import calc as calc2
+import logging
 
 
 class ProofreadHandler(CutHandler):
@@ -113,7 +114,7 @@ class ProofreadHandler(CutHandler):
                         if chars_prev and idx >= 0 and idx == index_column[i - 1] \
                             and not has_note_in_column(chars_cur) \
                                 and not has_note_in_column(chars_prev):
-                            print('%s merge columns: %s %s' % (name, new_columns[i], new_columns[i - 1]))
+                            logging.info('%s merge columns: %s %s' % (name, new_columns[i], new_columns[i - 1]))
                             column_no -= 1
                             for ci, c in enumerate(chars_cur):
                                 c['column_order'] = len(chars_prev) + ci + 1
@@ -152,10 +153,10 @@ class ProofreadHandler(CutHandler):
             else:
                 layout_type = 2
                 params['force_layout_type'] = layout_type
-                print('%s\t0\t2' % name)
+                logging.info('%s\t0\t2' % name)
 
         if params.get('zero_char_id'):
-            print('%s\t%d\t%s\t%d' % (name, len(params['zero_char_id']), ','.join(params['zero_char_id'][:5]), layout_type))
+            logging.info('%s\t%d\t%s\t%d' % (name, len(params['zero_char_id']), ','.join(params['zero_char_id'][:5]), layout_type))
         params['origin_txt'] = params['txt'].strip().split('\n')
         params['mismatch_lines'] = []
         params['txt'] = json.dumps(gen_segments(params['txt']), ensure_ascii=False)
