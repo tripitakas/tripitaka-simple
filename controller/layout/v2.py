@@ -1,24 +1,19 @@
 import json
 
-# from check_mulsubcol import check_multiple_subcolumns
-# from mark_mulsubcol import mark_subcolumns
-# from use_noteid import calc_order
 
-# ----------------------------------------------------------------------------------------#
+# --------------------20190113上午修改--------------------------------------------------------------------#
 # A 是否包含在B当中
 
 
-def is_contained_in(A, B, threshold=0, ignore_y=False):
-    threshold = threshold or max(20, A['w'] * 0.25)
-    if A['x'] - B['x'] >= -threshold:
-        if A['x'] + A['w'] - B['x'] - B['w'] <= threshold:
-            if ignore_y or A['y'] - B['y'] >= -threshold:
-                if ignore_y or A['y'] + A['h'] - B['y'] - B['h'] <= threshold:
-                    return True
-    return False
+def is_contained_in(A, B):
+    threshold = 0
+    if (A['x'] + A['w'] - B['x'] <= threshold) or (A['x'] - B['x'] - B['w'] >= threshold) \
+            or (A['y'] - B['y'] - B['h'] >= threshold) or (A['y'] + A['h'] - B['y'] <= threshold):
+        return False
+    return True
 
 
-# ----------------------------------------------------------------------------------------#
+# --------------------20190113上午修改--------------------------------------------------------------------#
 # 计算各字框之间的链接关系
 
 
@@ -130,8 +125,42 @@ def delete_connections(coordinate, indices, connection, case=0):
                 for j in tmp_down:
                     b_c = connection[j]
                     if len(b_c['Up']) >= 2 and len(a_c['Down']) >= 2:
-                        a_c['Down'].remove(j)
-                        b_c['Up'].remove(i)
+                        # --------------------20190113上午修改--------------------------------------------------------------------#
+                        # 计算各链接之间的距离，将距离最大的链接删除
+                        a = coordinate[i]
+                        dist_a_down = []
+                        for i_a in a_c['Down']:
+                            tmp_dist_h = -(a['y'] + a['h']) + coordinate[i_a]['y']
+                            # 计算左重合点
+                            x_overlap_left = max(a['x'], coordinate[i_a]['x'])
+                            # 计算右重合点
+                            x_overlap_right = min(a['x'] + a['w'], coordinate[i_a]['x'] + coordinate[i_a]['w'])
+                            # 计算重合长度
+                            w_overlap = x_overlap_right - x_overlap_left
+                            dist_a_down.append(tmp_dist_h - w_overlap)
+                        b = coordinate[j]
+                        dist_b_up = []
+                        for i_a in b_c['Up']:
+                            tmp_dist_h = b['y'] - (coordinate[i_a]['y'] + coordinate[i_a]['h'])
+                            # 计算左重合点
+                            x_overlap_left = max(b['x'], coordinate[i_a]['x'])
+                            # 计算右重合点
+                            x_overlap_right = min(b['x'] + b['w'], coordinate[i_a]['x'] + coordinate[i_a]['w'])
+                            # 计算重合长度
+                            w_overlap = x_overlap_right - x_overlap_left
+                            dist_b_up.append(tmp_dist_h - w_overlap)
+                        if max(dist_a_down) == max(dist_b_up):
+                            a_c['Down'].remove(j)
+                            b_c['Up'].remove(i)
+                        elif max(dist_a_down) > max(dist_b_up):
+                            arg_max = max(range(len(dist_a_down)), key=lambda p: dist_a_down[p])
+                            connection[a_c['Down'][arg_max]]['Up'].remove(i)
+                            a_c['Down'].remove(a_c['Down'][arg_max])
+                        else:
+                            arg_max = max(range(len(dist_b_up)), key=lambda p: dist_b_up[p])
+                            connection[b_c['Up'][arg_max]]['Down'].remove(j)
+                            b_c['Up'].remove(b_c['Up'][arg_max])
+                            # --------------------20190113上午修改--------------------------------------------------------------------#
         if case == 2 or case == 0:
             tmp_down = a_c['Down'].copy()
             for j in tmp_down:
@@ -146,6 +175,12 @@ def delete_connections(coordinate, indices, connection, case=0):
                                 a_c['Down'].remove(j)
                                 b_c['Up'].remove(i)
                                 break
+                                # --------------------20190113上午添加--------------------------------------------------------------------#
+                                # 删除N型链接关系
+                                # 删除众型链接关系
+                                # 删除倒众型链接关系
+                                # --------------------20190113上午添加--------------------------------------------------------------------#
+
     return
 
 
@@ -422,13 +457,13 @@ def show2(char_list, coordinate_char_list, indices, ax, filename):
             radius = min([coordinate_char_list[i]['h'], coordinate_char_list[i]['w']]) / 2
             circ = plt.Circle(((xleft + xright) / 2, (-yup - ydown) / 2), radius, color='g', alpha=0.5)  # 圆心，半径，颜色，α
             ax.add_patch(circ)
-            # plt.text(xleft,-ydown,str(A['column_id'])+'-'+str(A['ch_id'])+'-'+str(A['subcolumn_id'])+'-'+str(A['note_id']))
-            # plt.text(xright, -ydown, str(i))
-            # plt.text(xleft, -ydown, str(A['column_order']))
-            # plt.text(xleft, -ydown, str(A['column_id'])+'-'+str(A['column_order']))
+        # plt.text(xleft,-ydown,str(A['column_id'])+'-'+str(A['ch_id'])+'-'+str(A['subcolumn_id'])+'-'+str(A['note_id']))
+        # plt.text(xright, -ydown, str(i))
+        plt.text(xleft, -ydown, str(A['column_order']))
+        # plt.text(xleft, -ydown, str(A['column_id'])+'-'+str(A['column_order']))
 
 
-# plt.savefig(filename, dpi = 300)
+#    plt.savefig(filename, dpi = 300)
 #    plt.show()
 
 # ----------------------------------------------------------------------------------------#
@@ -479,6 +514,8 @@ def show_connection(char_list, coordinate_char_list, indices):
 
 
 # ----------------------------------------------------------------------------------------#
+# 主计算函数，在Web服务和__main__中使用
+
 
 def calc(chars, blocks):
     # 定义新的字框数据结构
@@ -493,7 +530,7 @@ def calc(chars, blocks):
     # 标记栏框
     for i in range(0, len(chars)):
         for i_b in range(0, len(blocks)):
-            if is_contained_in(chars[i], blocks[i_b], ignore_y=len(blocks) == 1):
+            if is_contained_in(chars[i], blocks[i_b]):
                 char_list[i]['block_id'] = i_b + 1
                 # -------------------------
                 # 检查是否存在没有标记栏序的字框
@@ -508,11 +545,11 @@ def calc(chars, blocks):
             if char_list[i]['block_id'] == i_b + 1:
                 char_indices_in_block.append(i)
         calc_connections(chars, char_indices_in_block, connections)
-        # --------------------20190112下午添加--------------------------------------------------------------------#
+        # --------------------20190113上午修改--------------------------------------------------------------------#
         # 删除无效链接关系
-        delete_connections(chars, char_indices_in_block, connections, 2)
         delete_connections(chars, char_indices_in_block, connections, 1)
-        # --------------------20190112下午添加--------------------------------------------------------------------#
+        delete_connections(chars, char_indices_in_block, connections, 2)
+        # --------------------20190113上午修改--------------------------------------------------------------------#
         # print(connections)
         # print(connections[2])
         # print(connections[3])
@@ -579,12 +616,12 @@ if __name__ == '__main__':
     # tempfilename = "JX_245_3_67"
     # tempfilename = "JX_260_1_126"
     # tempfilename = "JX_245_3_87" # 三列夹注小字
-    tempfilename = "JX_254_5_218"
+    # tempfilename = "JX_254_5_218"
     # tempfilename = "JX_260_1_206"
     # tempfilename = "JX_260_1_241"
     # tempfilename = "JX_260_1_256"
     # tempfilename = "GL_807_2_8"
-    # tempfilename = "GL_922_1_5"
+    tempfilename = "QL_10_287"
 
     filename = "data/" + tempfilename
     # 加载字框数据
