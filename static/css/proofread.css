@@ -163,6 +163,10 @@
   background-image: url(../images/proofread/columns.png);
 }
 
+.pfread .hd i.btn-full-blocks {
+  background-image: url(../images/proofread/blocks.png);
+}
+
 .pfread .hd i.btn-addupline {
   background-image: url(../images/proofread/addline-up.png);
 }

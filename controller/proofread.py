@@ -67,26 +67,32 @@ class ProofreadHandler(CutHandler):
                     ids0[zero_key] = ids0.get(zero_key, 100) + 1
                     c['column_order'] = ids0[zero_key]
                 chars[c_i]['char_id'] = 'b%dc%dc%d' % (c['block_id'], c['column_id'], c['column_order'])
-                if 'line_no' in chars[c_i]:
-                    chars[c_i]['char_no'] = c['column_order']
+                chars[c_i].pop('block_no', 0)
+                chars[c_i].pop('line_no', 0)
+                chars[c_i].pop('char_no', 0)
+            params['zero_char_id'] = [c.get('char_id') for c in chars if get_char_no(c) > 100]
 
         chars = params['chars']
         ids0 = {}
         params['order_changed'] = len([c for c in chars if c.get('order_changed')])
+        params['zero_char_id'] = []
         layout_type = params['layout_type'] = int(self.get_query_argument('layout', params.get('layout_type', 0)))
         if not params['order_changed'] or self.get_query_argument('layout', None):
             new_chars = calc2(chars, params['blocks']) if layout_type == 2 \
                 else calc1(chars, params['blocks'], params['columns'])
             apply_new_chars()
-        params['zero_char_id'] = [c.get('char_id') for c in chars if get_char_no(c) > 100]
-
-        # 旧算法提示有问题，就尝试使用新算法计算
-        if layout_type != 2 and params['zero_char_id'] and params.get('test'):
-            layout_type = 2
+        if params.get('test') and params.get('zero_char_id') and layout_type != 2:
             new_chars = calc2(chars, params['blocks'])
             apply_new_chars()
+            if params['zero_char_id']:
+                new_chars = calc1(chars, params['blocks'], params['columns'])
+                apply_new_chars()
+            else:
+                layout_type = 2
+                params['force_layout_type'] = layout_type
+                print('%s\t0\t2' % name)
 
-        if params['zero_char_id']:
+        if params.get('zero_char_id'):
             print('%s\t%d\t%s\t%d' % (name, len(params['zero_char_id']), ','.join(params['zero_char_id'][:5]), layout_type))
         params['origin_txt'] = params['txt'].strip().split('\n')
         params['mismatch_lines'] = []

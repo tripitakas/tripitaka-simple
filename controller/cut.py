@@ -379,14 +379,14 @@ class CutHandler(BaseHandler):
             readonly = test or self.get_query_argument('readonly', None) or self.lock_page(self, pos, p, False) != p
             p = self.do_render(p, self.html_files[pos], pos_type=pos_types[pos], readonly=readonly, test=test,
                                page=page, pos=pos, kind=kind, **page, get_img=get_img, txt=get_txt(p))
-            if 'force_layout_type' in p:
+            if p and 'force_layout_type' in p:
                 page = load_json(filename)
                 page['layout_type'] = p['force_layout_type']
                 save_json(page, filename)
 
         test = self.get_query_argument('all', 0) == '1'
         if test:
-            pages = indexes[pos][kind] + indexes[pos + '_invalid'].get(kind, [])
+            pages = indexes[pos][kind] + indexes.get(pos + '_invalid', {}).get(kind, [])
             for name in pages:  # 在 do_render 中传入 test=True 可遍历所有页面
                 load_render(name)
         else:
@@ -439,8 +439,9 @@ class CutHandler(BaseHandler):
                 for name, arr in boxes:
                     self.save(kind, pos, name, arr)
             else:
-                self.save(kind, pos, name, boxes,
-                          self.get_body_argument('is_column', 0) and 'columns', layout_type=layout_type)
+                field = self.get_body_argument('is_column', 0) and 'columns' or \
+                        self.get_body_argument('is_block', 0) and 'blocks'
+                self.save(kind, pos, name, boxes, field, layout_type=layout_type)
 
             txt = self.get_body_argument('txt', 0)
             txt = json.loads(txt) if txt and txt.startswith('"') else txt

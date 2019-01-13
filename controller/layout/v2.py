@@ -9,7 +9,7 @@ import json
 
 
 def is_contained_in(A, B, threshold=0, ignore_y=False):
-    threshold = threshold or max(20, B['w'] * 0.25)
+    threshold = threshold or max(20, A['w'] * 0.25)
     if A['x'] - B['x'] >= -threshold:
         if A['x'] + A['w'] - B['x'] - B['w'] <= threshold:
             if ignore_y or A['y'] - B['y'] >= -threshold:
@@ -493,7 +493,7 @@ def calc(chars, blocks):
     # 标记栏框
     for i in range(0, len(chars)):
         for i_b in range(0, len(blocks)):
-            if is_contained_in(chars[i], blocks[i_b], ignore_y=len(blocks) < 2):
+            if is_contained_in(chars[i], blocks[i_b], ignore_y=len(blocks) == 1):
                 char_list[i]['block_id'] = i_b + 1
                 # -------------------------
                 # 检查是否存在没有标记栏序的字框

@@ -531,11 +531,13 @@
         if (p.columnMode) {
           b.char_id = b.column_id;
         }
-        if (!b.line_no && b.char_id) {
+        if (b.char_id) {
           var ids = b.char_id.replace('b', 'c').split('c');
-          b.block_no = parseInt(ids[1]);
-          b.line_no = parseInt(ids[2]);
-          b.char_no = parseInt(ids[3]);
+          if (ids.length > 2) {
+            b.block_no = parseInt(ids[1]);
+            b.line_no = parseInt(ids[2]);
+            b.char_no = parseInt(ids[3]);
+          }
         }
         if (b.block_no && b.line_no && b.char_no && !b.char_id) {
           b.char_id = (b.block_no * 1000 + b.line_no) + 'n' + (b.char_no > 9 ? b.char_no : '0' + b.char_no);
