@@ -1,6 +1,4 @@
 import json
-# import matplotlib.pyplot as plt
-# import matplotlib.image as mpimg
 
 # from check_mulsubcol import check_multiple_subcolumns
 # from mark_mulsubcol import mark_subcolumns
@@ -29,6 +27,10 @@ def calc_connections(coordinate, indices, connection):
     ratio = 0.3
     # 字框高度差比例超过ratio_h，认为字框在另一字框下方
     ratio_h = 0.3
+    # --------------------20190112下午添加--------------------------------------------------------------------#
+    # 字框重合比例超过ratio，认为是一一链接
+    ratio_one_one = 0.8
+    # --------------------20190112下午添加--------------------------------------------------------------------#
     # 逐字框处理
     for i in range(0, len(indices)):
         a = coordinate[indices[i]]
@@ -38,6 +40,11 @@ def calc_connections(coordinate, indices, connection):
         for j in range(0, len(indices)):
             if j == i:
                 continue
+            # --------------------20190112下午添加--------------------------------------------------------------------#
+            # 排除已确定一一链接的字框
+            if connection[indices[j]]['Mono_Uplink_Flag']:
+                continue
+            # --------------------20190112下午添加--------------------------------------------------------------------#
             b = coordinate[indices[j]]
             # 仅考虑比a低的字框
             if b['y'] < a['y']:
@@ -76,6 +83,27 @@ def calc_connections(coordinate, indices, connection):
                         candidate_flag = False
             if candidate_flag:
                 down_neighbor.append(dist[j]['index'])
+        # --------------------20190112下午添加--------------------------------------------------------------------#
+        # 判断是不是一一链接
+        Mono_Uplink_Flag = False
+        for j in down_neighbor:
+            b = coordinate[j]
+            # 计算左重合点
+            x_overlap_left = max(a['x'], b['x'])
+            # 计算右重合点
+            x_overlap_right = min(a['x'] + a['w'], b['x'] + b['w'])
+            # 计算重合长度
+            w_overlap = x_overlap_right - x_overlap_left
+            # 重合比例超过门限
+            if (w_overlap > ratio_one_one * a['w']) and (w_overlap > ratio_one_one * b['w']):
+                connection[j]['Mono_Uplink_Flag'] = True
+                connection[indices[i]]['Down'].append(j)
+                connection[j]['Up'].append(indices[i])
+                Mono_Uplink_Flag = True
+                break
+        if Mono_Uplink_Flag:
+            continue
+        # --------------------20190112下午添加--------------------------------------------------------------------#
         # 更新链接关系
         for j in down_neighbor:
             connection[indices[i]]['Down'].append(j)
@@ -83,7 +111,45 @@ def calc_connections(coordinate, indices, connection):
     return
 
 
-# ----------------------------------------------------------------------------------------#
+# --------------------20190112下午添加--------------------------------------------------------------------#
+
+
+# 删除无效链接关系
+def delete_connections(coordinate, indices, connection, case=0):
+    # 空格超过threthold，则认为不在同一列
+    threthold = 5
+    for i in indices:
+        a_c = connection[i]
+        # 删除字歪斜导致的飞线情况
+        if len(a_c['Down']) == 0:
+            continue
+        if case == 1 or case == 0:
+            # a 下连多，b上连多
+            if len(a_c['Down']) >= 2:
+                tmp_down = a_c['Down'].copy()
+                for j in tmp_down:
+                    b_c = connection[j]
+                    if len(b_c['Up']) >= 2 and len(a_c['Down']) >= 2:
+                        a_c['Down'].remove(j)
+                        b_c['Up'].remove(i)
+        if case == 2 or case == 0:
+            tmp_down = a_c['Down'].copy()
+            for j in tmp_down:
+                b_c = connection[j]
+                if len(b_c['Up']) >= 2:
+                    a = coordinate[i]
+                    tmp_up = b_c['Up'].copy()
+                    for k in tmp_up:
+                        if k != i:
+                            c = coordinate[k]
+                            if c['y'] > a['y'] + a['h'] * threthold:
+                                a_c['Down'].remove(j)
+                                b_c['Up'].remove(i)
+                                break
+    return
+
+
+# --------------------20190112下午添加--------------------------------------------------------------------#
 
 
 # 对同列的字框标上列序号
@@ -356,14 +422,37 @@ def show2(char_list, coordinate_char_list, indices, ax, filename):
             radius = min([coordinate_char_list[i]['h'], coordinate_char_list[i]['w']]) / 2
             circ = plt.Circle(((xleft + xright) / 2, (-yup - ydown) / 2), radius, color='g', alpha=0.5)  # 圆心，半径，颜色，α
             ax.add_patch(circ)
-        # plt.text(xleft,-ydown,str(A['column_id'])+'-'+str(A['ch_id'])+'-'+str(A['subcolumn_id'])+'-'+str(A['note_id']))
-        # plt.text(xright, -ydown, str(i))
-        # plt.text(xright, -ydown, str(A['column_order']))
-        plt.text(xleft, -ydown, str(A['column_id']) + '-' + str(A['column_order']))
+            # plt.text(xleft,-ydown,str(A['column_id'])+'-'+str(A['ch_id'])+'-'+str(A['subcolumn_id'])+'-'+str(A['note_id']))
+            # plt.text(xright, -ydown, str(i))
+            # plt.text(xleft, -ydown, str(A['column_order']))
+            # plt.text(xleft, -ydown, str(A['column_id'])+'-'+str(A['column_order']))
 
 
 # plt.savefig(filename, dpi = 300)
 #    plt.show()
+
+# ----------------------------------------------------------------------------------------#
+
+
+
+# 显示连线
+def show_downconnection(coordinate, connection, indices):
+    for i in range(0, len(indices)):
+        idx = indices[i]
+        a = coordinate[idx]
+        a_c = connection[idx]
+        if len(a_c['Down']) == 0:
+            continue
+        a_x = a['x'] + a['w'] * 1 / 2
+        a_y = a['y'] + a['h'] * 1 / 2
+        for j in a_c['Down']:
+            b = coordinate[j]
+            b_x = b['x'] + b['w'] * 1 / 2
+            b_y = b['y'] + b['h'] * 1 / 2
+            plt.plot([a_x, b_x], [-a_y, -b_y], 'g-')
+            # plt.text(a['x'], -(a['y'] + a['h']), str(int(a_c['Mono_Uplink_Flag'])))
+    return
+
 
 # ----------------------------------------------------------------------------------------#
 
@@ -389,6 +478,8 @@ def show_connection(char_list, coordinate_char_list, indices):
     return
 
 
+# ----------------------------------------------------------------------------------------#
+
 def calc(chars, blocks):
     # 定义新的字框数据结构
     char_list = []
@@ -396,11 +487,12 @@ def calc(chars, blocks):
     for i in range(0, len(chars)):
         char_list.append(
             {'block_id': 0, 'column_id': 0, 'ch_id': 0, 'subcolumn_id': 0, 'note_id': 0, 'column_order': 0})
-        connections.append({'Up': [], 'Down': []})
+        # --------------------20190112下午修改--------------------------------------------------------------------#
+        connections.append({'Up': [], 'Down': [], 'Mono_Uplink_Flag': False})
+        # --------------------20190112下午修改--------------------------------------------------------------------#
     # 标记栏框
     for i in range(0, len(chars)):
         for i_b in range(0, len(blocks)):
-
             if is_contained_in(chars[i], blocks[i_b], ignore_y=len(blocks) < 2):
                 char_list[i]['block_id'] = i_b + 1
                 # -------------------------
@@ -416,6 +508,11 @@ def calc(chars, blocks):
             if char_list[i]['block_id'] == i_b + 1:
                 char_indices_in_block.append(i)
         calc_connections(chars, char_indices_in_block, connections)
+        # --------------------20190112下午添加--------------------------------------------------------------------#
+        # 删除无效链接关系
+        delete_connections(chars, char_indices_in_block, connections, 2)
+        delete_connections(chars, char_indices_in_block, connections, 1)
+        # --------------------20190112下午添加--------------------------------------------------------------------#
         # print(connections)
         # print(connections[2])
         # print(connections[3])
@@ -464,14 +561,15 @@ def calc(chars, blocks):
             # 检查是否存在没有标记列内序号的字框
             # 云贵师兄： 能否完善该部分？
             # -------------------------
-    # 输出数据
     return char_list
 
-# ----------------------------------------------------------------------------------------#
 
 # main 函数
 #########################################################################
 if __name__ == '__main__':
+    import matplotlib.pyplot as plt
+    import matplotlib.image as mpimg
+
     # 文件路径
     # 师兄只需要看这几个页面："JX_245_2_155", "JX_245_3_67", "JX_245_3_87", "JX_254_5_218", "JX_260_1_206", "JX_260_1_241", "JX_260_1_256"
     # tempfilename = "JX_165_7_12"
@@ -485,20 +583,26 @@ if __name__ == '__main__':
     # tempfilename = "JX_260_1_206"
     # tempfilename = "JX_260_1_241"
     # tempfilename = "JX_260_1_256"
+    # tempfilename = "GL_807_2_8"
+    # tempfilename = "GL_922_1_5"
+
     filename = "data/" + tempfilename
     # 加载字框数据
     with open(filename + ".json", 'r', encoding='UTF-8') as load_f:
         data_dict = json.load(load_f)
         coordinate_char_list = data_dict['chars']
-    # 加载栏框和列框数据
-    with open(filename + "_column" + ".json", 'r') as load_f:
-        data_dict = json.load(load_f)
         coordinate_block_list = data_dict['blocks']
+        # 加载栏框和列框数据
+        # with open(filename + "_column" + ".json", 'r') as load_f:
+        # data_dict = json.load(load_f)
+        # coordinate_block_list = data_dict['blocks']
         # coordinate_column_list = data_dict['columns']
+    #########################################################################
 
     # 保存数据
+    char_list = calc(coordinate_char_list, coordinate_block_list)
     py2json = {}
-    py2json['char_list'] = calc(coordinate_char_list, coordinate_block_list)
+    py2json['char_list'] = char_list
     json_str = json.dumps(py2json)
     # print(char_list)
     # print(json_str)
@@ -509,6 +613,7 @@ if __name__ == '__main__':
     ax = fig.add_subplot(1, 1, 1)
     show2(char_list, coordinate_char_list, [n for n in range(0, len(char_list))], ax=ax,
           filename=filename + '_note.jpg')
+    show_downconnection(coordinate_char_list, connections, [n for n in range(0, len(char_list))])
     plt.show()
 
     # print(char_list)
@@ -533,5 +638,5 @@ if __name__ == '__main__':
                 show_connection(char_list, coordinate_char_list, char_indices_in_column)
             else:
                 break
-    plt.savefig(filename + '_lines.jpg', dpi=300)
+    # plt.savefig(filename+'_lines.jpg', dpi = 300)
     plt.show()
