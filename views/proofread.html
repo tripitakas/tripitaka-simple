@@ -12,6 +12,11 @@
   <link href="{{ static_url('css/proof-base.css') }}" type="text/css" rel="stylesheet">
   <link href="{{ static_url('css/proofread.css') }}" type="text/css" rel="stylesheet">
 
+  <style>
+    .modal-header {
+      cursor: move;
+    }
+  </style>
 </head>
 
 <body>
@@ -403,6 +408,25 @@
     $('.btn-doubts').click(function () {
       $('#txtModal').modal();
     });
+
+    $(".modal-header").on("mousedown", function (mousedownEvt) {
+      var $draggable = $(this);
+      var x = mousedownEvt.pageX - $draggable.offset().left,
+          y = mousedownEvt.pageY - $draggable.offset().top;
+      $("body").on("mousemove.draggable", function (mousemoveEvt) {
+        $draggable.closest(".modal-dialog").offset({
+          "left": mousemoveEvt.pageX - x,
+          "top": mousemoveEvt.pageY - y
+        });
+      });
+      $("body").one("mouseup", function () {
+        $("body").off("mousemove.draggable");
+      });
+      $draggable.closest(".modal").one("bs.modal.hide", function () {
+        $("body").off("mousemove.draggable");
+      });
+    });
+
     $('#save-txt').click(function () {
       var txt = $('#txtModal .modal-body > textarea').val().replace(/-/g, '');
       $.post('/{{pos}}/{{kind}}/{{imgname}}', {

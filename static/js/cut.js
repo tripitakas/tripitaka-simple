@@ -317,6 +317,9 @@
       var st = win.scrollTop(), sl = win.scrollLeft(), w = win.innerWidth(), h = win.innerHeight();
       var scroll = 0;
 
+      if (!box) {
+        return;
+      }
       if (data.scrollContainer) {
         var parentRect = data.scrollContainer[0].getBoundingClientRect();
         bound.y -= parentRect.y;
@@ -376,7 +379,7 @@
       if (el) {
         state.editStroke = el.attr('stroke');
         state.editHandle.fill = el.attr('fill');
-        state.editHandle.hidden = el.node.style.display === 'none';
+        state.editHandle.hidden = el.node && el.node.style.display === 'none';
         el.attr({
           stroke: rgb_a(data.changedColor, data.boxOpacity),
           fill: rgb_a(data.hoverFill, data.activeFillOpacity)
@@ -740,7 +743,7 @@
           if (c[k] === null) {
             delete c[k];
           }
-        })
+        });
         return c;
       });
     },
@@ -822,6 +825,9 @@
       ret = cur = state.edit || state.hover || (chars[chars.length - 1] || {}).shape;
       cur = cur && cur.getBBox();
 
+      if (!cur) {
+        return;
+      }
       if (direction === 'left' || direction === 'right') {
         calc = function(box) {
           // 排除水平反方向的框：如果方向为left，则用当前框右边的x来过滤；如果方向为right，则用当前框左边的x来过滤
@@ -945,8 +951,8 @@
 
       this.switchCurrentBox(el);
 
-      if (box) {
-        var box2 = el.getBBox();
+      var box2 = el.getBBox();
+      if (box && box2) {
         window.scrollTo(box2.x + box2.width / 2 - box.x - box.width / 2 + pos[0],
           box2.y + box2.width / 2 - box.y - box.width / 2 + pos[1]);
       }
