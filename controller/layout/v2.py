@@ -517,7 +517,7 @@ def show_connection(char_list, coordinate_char_list, indices):
 # 主计算函数，在Web服务和__main__中使用
 
 
-def calc(chars, blocks):
+def calc(chars, blocks, columns=None):
     # 定义新的字框数据结构
     char_list = []
     connections = []
@@ -598,7 +598,66 @@ def calc(chars, blocks):
             # 检查是否存在没有标记列内序号的字框
             # 云贵师兄： 能否完善该部分？
             # -------------------------
+    if columns:
+        merge_columns(char_list, columns, chars)
     return char_list
+
+
+def find_nearest_box(box, boxes):
+    min_d = 1e7
+    ret = -1
+    for i, b in enumerate(boxes):
+        if box['y2'] > b['y'] and box['y'] < b['y'] + b['h']:
+            dx = abs((box['x'] + box['x2']) / 2 - b['x'] - b['w'] / 2)
+            if min_d > dx:
+                min_d = dx
+                ret = i
+    return ret
+
+
+def has_note_in_column(chars_in):
+    return [c for c in chars_in if c['subcolumn_id']]
+
+
+def merge_columns(new_chars, columns, chars_ocr):
+    column_ids = ['b%dc%02d' % (c['block_id'], c['column_id']) for i, c in enumerate(new_chars)]
+    new_columns = sorted(list(set(column_ids)))
+    # 先比较列框个数：新算法得到的列框个数 > 列框校对后列框个数
+    if len(new_columns) > len(columns):
+        # 合并新算法得到的列框
+        column_boxes = {}
+        for i, (column_id, c) in enumerate(zip(column_ids, chars_ocr)):
+            if column_id not in column_boxes:
+                column_boxes[column_id] = dict(x=c['x'], y=c['y'], x2=c['x'] + c['w'], y2=c['y'] + c['h'])
+            else:
+                column_boxes[column_id]['x'] = min(column_boxes[column_id]['x'], c['x'])
+                column_boxes[column_id]['y'] = min(column_boxes[column_id]['y'], c['y'])
+                column_boxes[column_id]['x2'] = max(column_boxes[column_id]['x2'], c['x'] + c['w'])
+                column_boxes[column_id]['y2'] = max(column_boxes[column_id]['y2'], c['y'] + c['h'])
+
+        # 判断新算法得到的各列所在的列框校对后的列框索引
+        index_column = [find_nearest_box(column_boxes[c], columns) for c in new_columns]
+
+        # 判断新算法得到的列数据是否存在下列情况：相邻的两个仅包含大字的列有相同的列框索引
+        block_no, column_no, chars_prev = None, 0, []
+        for i, idx in enumerate(index_column):
+            chars_cur = [c for ci, c in enumerate(new_chars) if column_ids[ci] == new_columns[i]]
+            if block_no != chars_cur[0]['block_id']:
+                block_no = chars_cur[0]['block_id']
+                column_no = 0
+                chars_prev = []
+            column_no += 1
+            if chars_prev and idx >= 0 and idx == index_column[i - 1] \
+                    and not has_note_in_column(chars_cur) \
+                    and not has_note_in_column(chars_prev):
+                # print('%s merge columns: %s %s' % (name, new_columns[i], new_columns[i - 1]))
+                column_no -= 1
+                for ci, c in enumerate(chars_cur):
+                    c['column_order'] = len(chars_prev) + ci + 1
+                chars_cur = chars_prev + chars_cur
+            for ci, c in enumerate(chars_cur):
+                c['column_id'] = column_no
+            chars_prev = chars_cur
 
 
 # main 函数
