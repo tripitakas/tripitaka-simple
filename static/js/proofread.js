@@ -136,7 +136,7 @@ var currentSpan = [];
 
 function unicodeValuesToText(values) {
   return values.map(function (c) {
-    return c.length > 2 ? decodeURIComponent(c) : ' ';
+    return /^[A-Za-z0-9?*]$/.test(c) ? c : c.length > 2 ? decodeURIComponent(c) : ' ';
   }).join('');
 }
 

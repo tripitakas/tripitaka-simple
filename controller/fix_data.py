@@ -23,13 +23,13 @@ def clean_log():
             f.writelines(rows)
 
 
-def scan_lock_files(callback, in_path):
+def scan_lock_files(callback, in_path, name=None):
     num = 0
     if not path.exists(in_path):
         return
     for fn in listdir(in_path):
         filename = path.join(in_path, fn)
-        if '.' not in fn and '_' in fn:
+        if '.' not in fn and '_' in fn and (not name or fn.startswith(name)):
             with open(filename) as f:
                 text = f.read()
                 rows = text.split('\n')
@@ -69,19 +69,19 @@ def callback_sum_work(num, fn, filename, text, rows):
             work[user] = work.get(user, 0) + 1
 
 
-def fix(in_path):
+def fix(in_path, name=None):
     work.clear()
-    scan_lock_files(callback_get_ip_users, in_path)
-    scan_lock_files(callback_anonymous, in_path)
-    scan_lock_files(callback_sum_work, in_path)
+    scan_lock_files(callback_get_ip_users, in_path, name)
+    scan_lock_files(callback_anonymous, in_path, name)
+    scan_lock_files(callback_sum_work, in_path, name)
     return [(u, c) for u, c in sorted(work.items(), key=itemgetter(1), reverse=True)]
 
 
 class RankingHandler(BaseHandler):
-    URL = r'/ranking/(block|column|char|proof)'
+    URL = r'/ranking/(block|column|char|proof)(\d?)([A-Z]{2})?'
 
-    def get(self, pos):
-        ranking = fix(path.join(data_path, 'lock', pos))
+    def get(self, pos, order=0, name=None):
+        ranking = fix(path.join(data_path, 'lock', pos + (str(order) if order else '')), name)
         items = ['<li><a href="/{2}/me/{0}">{0}</a> {1}</li>'.format(n, c, pos) for n, c in ranking]
         self.write('<h3>校对排行榜</h3><ol>%s</ol>' % ''.join(items))
 

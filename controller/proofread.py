@@ -36,7 +36,7 @@ class ProofreadHandler(CutHandler):
                 col_diff = 1
                 block_txt = re.sub(r'\n{2}', '\n', block_txt, flags=re.M)
                 for col_i, column in enumerate(block_txt.strip().split('\n')):
-                    column = column.strip()
+                    column = column.strip().replace('\ufeff', '')
                     line_no = col_diff + col_i
                     if not column:
                         segments.append(dict(block_no=1 + blk_i, line_no=line_no, type='emptyline', ocr=''))
