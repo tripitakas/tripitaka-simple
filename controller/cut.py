@@ -161,7 +161,7 @@ class CutHandler(BaseHandler):
                 elif export:
                     mismatch = r.get('mismatch_lines')
                     if mismatch:
-                        msg = 'skip %s\t%d\t%s' % (p, len(mismatch), ','.join(mismatch))
+                        msg = '跳过 %s\t有%d个不匹配\t%s' % (p, len(mismatch), ','.join(mismatch))
                         messages.append(msg)
                         logging.warning(msg)
                     else:

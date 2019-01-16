@@ -45,6 +45,8 @@ def scan_dir(txt_path):
             if fn[:2] == 'GL' and 0:
                 text = change(text.replace('爲', '為'), text, '爲->為')
                 text = change(text.replace('無', '无'), text, '無->无')
+            if fn[:2] == 'QL' and 0:
+                text = change(text.replace('蜜', '𮔉'), text, '蜜->U0002e509')
             # text = change(text.replace('庾', '𢈔'), text, '庾->U00022214')
             if old != text:
                 with open(filename, 'w') as f:
