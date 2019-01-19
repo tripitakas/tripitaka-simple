@@ -54,6 +54,9 @@ class ProofreadHandler(CutHandler):
                             c['no'] = c.get('char_no') or c['no']
                         for i, c in enumerate(sorted(boxes, key=itemgetter('no'))):
                             c['txt'] = column_strip[i]
+                            if len(c['txt']) > 1:
+                                code = int(re.sub(r'^U', '', c['txt']), 16)
+                                c['txt'] = chr(code)
                     column = [url_escape(c) for c in list(column)]
                     items = []
                     for c in column:

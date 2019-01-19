@@ -154,7 +154,11 @@ class CutHandler(BaseHandler):
                                test=test, messages=messages,
                                page=page, pos=pos, kind=kind, **page, get_img=get_img, txt=get_txt(p))
             if isinstance(r, dict):
-                if 'force_layout_type' in r:
+                if self.get_query_argument('fix', None):
+                    page = load_json(filename)
+                    page['chars'] = r['chars']
+                    save_json(page, filename + '~')
+                elif 'force_layout_type' in r:
                     page = load_json(filename)
                     page['layout_type'] = r['force_layout_type']
                     save_json(page, filename)
