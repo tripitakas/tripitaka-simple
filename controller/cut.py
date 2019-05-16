@@ -137,7 +137,7 @@ class CutHandler(BaseHandler):
         def get_img(p):
             if options.debug:
                 return '/static/' + '/'.join(['img', *p.split('_')[:-1], p + '.jpg'])
-            base_url = 'http://tripitaka-img.oss-cn-beijing.aliyuncs.com/page'
+            base_url = 'http://tripitaka-img.oss-cn-beijing.aliyuncs.com/pages'
             return '/'.join([base_url, *p.split('_')[:-1], p+'_'+get_hash(p)+'.jpg'])
 
         name = kind + '_' + name
