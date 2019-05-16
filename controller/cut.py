@@ -55,7 +55,7 @@ class PagesHandler(BaseHandler):
         def get_icon(p):
             if options.debug:
                 return '/static/' + '/'.join(['img', *p.split('_')[:-1], p + '.jpg'])
-            base_url = 'http://tripitaka-img.oss-cn-beijing.aliyuncs.com/page'
+            base_url = 'http://tripitaka-img.oss-cn-beijing.aliyuncs.com/pages'
             url = '/'.join([base_url, *p.split('_')[:-1], p + '_' + page_codes.get(p) + '.jpg'])
             return url + '?x-oss-process=image/resize,m_lfit,h_300,w_300'
 
