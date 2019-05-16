@@ -9,7 +9,7 @@
   <title>{{imgname}}</title>
   <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
   <link rel="shortcut icon" type="image/x-icon" href="/static/favicon.ico">
-
+  {% include _font.html %}
   <link href="{{ static_url('css/bootstrap.min.css') }}" rel="stylesheet">
   <link href="{{ static_url('css/cut.css') }}" rel="stylesheet">
   <script src="{{ static_url('js/vendor/jquery.js') }}"></script>
@@ -41,32 +41,47 @@
         <button type="button" class="btn btn-primary navbar-btn" style="margin-left: 10px;"  id="save">保存</button>
         <button type="button" class="btn btn-primary navbar-btn" id="submit">提交</button>
         {% end %}
+        <button type="button" class="btn btn-default navbar-btn" style="margin-left: 10px;"
+                data-toggle="modal" data-target="#helpModal">说明</button>
       </ul>
       {% include nav-right.html %}
     </div>
   </div>
 
   <div id="body-content" style="margin-top: 65px">
-    <div id="help" class="col-md-4" style="font-size:16px;">
-      <p style="text-align:center">【说明】</p>
-      <ul>
-        <li>本次切列校对的是嘉兴藏的图文，从而为OCR引擎提供标注数据。</li>
-        <li>工作目标是将一列图像和一列文字对应。</li>
-        <li><span style="color:red">一、切列校对：</span>嘉兴藏的列与列之间有分隔线，按分隔线进行切分。</li>
-        <li style="margin-left:20px">注意：如果某列中有大字和夹注小字，不必切开。如果某列中包含两列小字，也不必切开。</li>
-        <li><span style="color:red">二、文字校对：</span>文本来自CBETA，有可能出现换行不对以及多余文字的错误。</li>
-        <li style="margin-left:20px">1. 换行不对：此时按照图像调整文本换行。</li>
-        <li style="margin-left:20px">2. 文字多余：删除多余文字。</li>
-        <li style="margin-left:20px">注意：不需要逐字校对，只需要检查上述两种情况即可。</li>
-      </ul>
-    </div>
-
-    <div id="holder" class="col-md-4"></div> 
-    <div id="txt" class="col-md-4" style="font-size:18px;">
-      <p style="text-align:center">【经文】</p>
-      <textarea class="form-control" rows="15" style="font-size: 18px;">
+    <div id="holder" class="col-md-9"></div>
+    <div id="txt" class="col-md-3" style="font-size:18px;">
+      <p style="text-align:center">【经文】{{txt_lines}}行</p>
+      <textarea class="form-control" rows="20" style="font-size: 18px;">
         {{ txt }}
       </textarea>
+    </div>
+  </div>
+
+
+  <div class="panel-body" style="padding: 0;">
+    <!-- modal content -->
+    <div id="helpModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="helpModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true" style="color: blue">×</button>
+            <h4 class="modal-title" id="helpModalLabel">校对说明</h4>
+          </div>
+          <div class="modal-body">
+            <ul>
+              <li>本次切列校对的是嘉兴藏的图文，从而为OCR引擎提供标注数据。</li>
+              <li>工作目标是将一列图像和一列文字对应。</li>
+              <li><span style="color:red">一、切列校对：</span>嘉兴藏的列与列之间有分隔线，按分隔线进行切分。</li>
+              <li style="margin-left:20px">注意：如果某列中有大字和夹注小字，不必切开。如果某列中包含两列小字，也不必切开。</li>
+              <li><span style="color:red">二、文字校对：</span>文本来自CBETA，有可能出现换行不对以及多余文字的错误。</li>
+              <li style="margin-left:20px">1. 换行不对：此时按照图像调整文本换行。</li>
+              <li style="margin-left:20px">2. 文字多余：删除多余文字。</li>
+              <li style="margin-left:20px">注意：不需要逐字校对，只需要检查上述两种情况即可。</li>
+            </ul>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -85,7 +100,7 @@
 
   <script>
     $.cut.create({
-      blockMode: true,
+      columnMode: true,
       name: '{{pos}}_{{imgname}}',
       width: {{ imgsize['width'] }},
       height: {{ imgsize['height'] }},
@@ -123,6 +138,9 @@
             .then(function () {
               if (/^jump:/.test(res)) {
                 window.location.href = '/{{pos}}/{{kind}}/' + res.replace(/^jump:/, '');
+              }
+              else {
+                window.location.reload();
               }
             });
         }

@@ -5,12 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <title>文字校对</title>
+  {% include _font.html %}
   <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
   <link href="{{ static_url('css/proof-base.css') }}" type="text/css" rel="stylesheet">
   <link href="{{ static_url('css/proofread.css') }}" type="text/css" rel="stylesheet">
 
+  <style>
+    .modal-header {
+      cursor: move;
+    }
+  </style>
 </head>
 
 <body>
@@ -25,13 +31,17 @@
           <span class="icon-bar"></span>
         </button>
         <a class="navbar-brand" href="/"><span class="glyphicon glyphicon-th" aria-hidden="true"></span></a>
-        <a class="navbar-brand" href="/{{pos}}/{{kind}}" style="padding-left: 0;color: #e4c3a8">{{pos_type}}校对</a>
+        <a class="navbar-brand" href="/{{pos}}/{{kind}}" style="padding-left: 0;color: #e4c3a8">{{pos_type}}校对 ({{imgname}})</a>
       </div>
 
       <!-- Collect the nav links, forms, and other content for toggling -->
       <div class="collapse navbar-collapse" id="bs-navbar-collapse-1">
         <ul class="nav navbar-nav">
           {% if not readonly %}
+          <button type="button" class="btn btn-normal navbar-btn" style="{{'' if layout_type == 2 else 'color: blue'}}"
+                  id="layout1">重排(旧算法)</button>
+          <button type="button" class="btn btn-normal navbar-btn" style="{{'color: blue' if layout_type == 2 else ''}}"
+                  id="layout2">重排(新算法)</button>
           <button type="button" class="btn btn-normal navbar-btn" id="save">保存</button>
           <button type="button" class="btn btn-normal navbar-btn" id="submit">提交</button>
           {% end %}
@@ -51,13 +61,16 @@
                   <span><i title="显隐字框" class="btn-cut-show"></i></span>
                   <span><i title="显隐序号" class="btn-num-show"></i></span>
                   <span><i title="显隐文本" class="btn-txt-hidden"></i></span>
-                  <span><i title="全屏" class="btn-fullscrean"></i></span>
+                  <span><i title="全屏校对字框" class="btn-fullscrean btn-full-chars"></i></span>
+                  <span><i title="全屏校对列框" class="btn-fullscrean btn-full-columns"></i></span>
+                  <span><i title="全屏校对栏框" class="btn-fullscrean btn-full-blocks"></i></span>
                   <button type="button" class="btn btn-default btn-sm" style="margin-left: 10px;" id="undo">撤销</button>
                   <button type="button" class="btn btn-default btn-sm" id="redo">重做</button>
                 </div>
                 <div class="fr">
-                  <input id="order" class="form-control input-sm" placeholder="序号" style="width: 50px; margin: 8 8 0 0;"
-                    maxlength="2">
+                  <span style="font-size: 14px; color: #777;" id="char-id"></span>
+                  <input id="order" class="form-control input-sm" placeholder="序号"
+                         style="width: 50px; margin: 8px 8px 0 0; display: inline-block" maxlength="2">
                 </div>
               </div>
             </div>
@@ -95,6 +108,7 @@
               <div class="sutra-text" id="sutra-text">
               </div>
               <div class="pfread-dialog dialog-common" id="pfread-dialog" style="display:none">
+                <div class="dlg-before"></div>
                 <dl class="item">
                   <dt>OCR</dt>
                   <dd class="text" id="pfread-dialog-ocr">&nbsp;</dd>
@@ -107,6 +121,7 @@
                   <dt>选择结果</dt>
                   <dd class="text"><span id="pfread-dialog-slct" type="text" placeholder="请选择或输入……" contenteditable="true"></span></dd>
                 </dl>
+                <div class="dlg-after"></div>
               </div>
             </div>
           </div>
@@ -147,14 +162,15 @@
         <div class="modal-content">
           <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal" aria-hidden="true" style="color: blue">×</button>
-            <h4 class="modal-title" id="txtModalLabel">原文</h4>
+            <h4 class="modal-title" id="txtModalLabel">原文
+              <button class="btn btn-default" style="margin-left: 10px" id="save-txt">保存</button>
+            </h4>
           </div>
           <div class="modal-body">
-            <ol style="list-style-type: decimal; padding: 8px; margin-left: 20px; font-size: 1.2em">
-              {% for s in origin_txt %}
-              <li>{{s}}</li>
-              {% end %}
-            </ol>
+            <textarea style="width: 100%; font-size: 1.2em; border: none; margin-bottom: 10px" rows="26">
+              {{'\n'.join(origin_txt)}}
+            </textarea>
+            <p><b>说明</b>：用两个空行作栏分隔符</p>
           </div>
         </div>
       </div>
@@ -175,6 +191,8 @@
   <script>
     var char_data = $.cut.decodeJSON('{{chars}}');
     var cmpdata = $.cut.decodeJSON('{{txt}}');
+    var columns = $.cut.decodeJSON('{{columns}}');
+    var blocks = $.cut.decodeJSON('{{blocks}}');
 
     function createPage() {
       $.cut.create({
@@ -194,7 +212,7 @@
     }
     createPage();
 
-    $('.btn-fullscrean').click(function () {
+    $('.btn-full-chars').click(function () {
       var $modal = $('#cutModal');
       var bindings = $.fn.mapKey.bindings;
 
@@ -205,6 +223,7 @@
         showAllBoxes();
         highlightBox();
       });
+      $modal.find('#cutModalLabel').text('字框校对（' + char_data.length + '个字框）');
 
       $.cut.create({
         name: '{{imgname}}-',
@@ -229,6 +248,98 @@
       });
     });
 
+    $('.btn-full-columns').click(function () {
+      var $modal = $('#cutModal');
+      var bindings = $.fn.mapKey.bindings;
+
+      $modal.modal().on('hidden.bs.modal', function () {
+        $.fn.mapKey.bindings = bindings;
+        createPage();
+      });
+      $modal.find('#cutModalLabel').text('列框校对（' + columns.length + '个列）');
+
+      $.cut.create({
+        columnMode: true,
+        name: '{{imgname}}-c',
+        width: {{imgsize['width']}},
+        height: {{imgsize['height']}},
+        scrollContainer: '#cut-canvas-bd',
+        holder: 'cut-canvas',
+        image: '{{get_img(imgname)}}',
+        chars: columns
+      });
+
+      $.fn.mapKey.bindings = {
+        up: {},
+        down: {}
+      };
+      $.cut.bindKeys();
+      updateUndo();
+
+      $modal.find('button.btn-primary').unbind('click').click(function () {
+        $.post('/{{pos}}/{{kind}}/{{imgname}}', {
+          is_column: true,
+          boxes: JSON.stringify($.cut.exportBoxes())
+        }, function (res) {
+          if (/^error:/.test(res)) {
+            swal('操作失败', res.replace(/^error:/, ''), 'error', {buttons: false, timer: 1500});
+          } else {
+            swal('列框更新成功', '{{imgname}} ' + '的列框已更新成功。', 'success',
+               {buttons: false, timer: 1000})
+               .then(function () {
+                 window.location = '/{{pos}}/{{kind}}/{{imgname}}?layout={{layout_type}}&v=' + Math.ceil(Math.random() * 1000);
+               });
+          }
+        });
+      });
+    });
+
+    $('.btn-full-blocks').click(function () {
+      var $modal = $('#cutModal');
+      var bindings = $.fn.mapKey.bindings;
+
+      $modal.modal().on('hidden.bs.modal', function () {
+        $.fn.mapKey.bindings = bindings;
+        createPage();
+      });
+      $modal.find('#cutModalLabel').text('栏框校对（' + blocks.length + '个栏）');
+
+      $.cut.create({
+        blockMode: true,
+        name: '{{imgname}}-b',
+        width: {{imgsize['width']}},
+        height: {{imgsize['height']}},
+        scrollContainer: '#cut-canvas-bd',
+        holder: 'cut-canvas',
+        image: '{{get_img(imgname)}}',
+        chars: blocks
+      });
+
+      $.fn.mapKey.bindings = {
+        up: {},
+        down: {}
+      };
+      $.cut.bindKeys();
+      updateUndo();
+
+      $modal.find('button.btn-primary').unbind('click').click(function () {
+        $.post('/{{pos}}/{{kind}}/{{imgname}}', {
+          is_block: true,
+          boxes: JSON.stringify($.cut.exportBoxes())
+        }, function (res) {
+          if (/^error:/.test(res)) {
+            swal('操作失败', res.replace(/^error:/, ''), 'error', {buttons: false, timer: 1500});
+          } else {
+            swal('栏框更新成功', '{{imgname}} ' + '的栏框已更新成功。', 'success',
+               {buttons: false, timer: 1000})
+               .then(function () {
+                 window.location = '/{{pos}}/{{kind}}/{{imgname}}?layout={{layout_type}}&v=' + Math.ceil(Math.random() * 1000);
+               });
+          }
+        });
+      });
+    });
+
     function updateUndo() {
       $('#undo').toggleClass('disabled', !$.cut.canUndo());
       $('#redo').toggleClass('disabled', !$.cut.canRedo());
@@ -243,9 +354,10 @@
     });
     $.cut.onBoxChanged(function () {
       updateUndo();
+      $('#char-id').text($.cut.getCurrentCharID() || '');
     });
 
-    function save(submit) {
+    function save(submit, ended) {
       var txt = $('#sutra-text').find('.block').map(function (i, block) {
         return $(block).find('.line').map(function (line, el) {
           return $(el).text();
@@ -253,8 +365,9 @@
       }).get().join('\n\n\n');
       $.post('/{{pos}}/{{kind}}/{{imgname}}', {
         submit: submit,
+        layout_type: {{layout_type}},
         txt: JSON.stringify(txt),
-        boxes: [] // JSON.stringify($.cut.exportBoxes())
+        boxes: JSON.stringify($.cut.exportBoxes())
       }, function (res) {
         if (/^error:/.test(res)) {
           swal('操作失败', res.replace(/^error:/, ''), 'error', {buttons: false, timer: 1500});
@@ -268,6 +381,12 @@
                 else if (/^jump:/.test(res)) {
                   window.location.href = '/{{pos}}/{{kind}}/' + res.replace(/^jump:/, '');
                 }
+                else if (typeof ended === 'function') {
+                  ended();
+                }
+                else {
+                  window.location = '/{{pos}}/{{kind}}/{{imgname}}';
+                }
               });
         }
       });
@@ -275,9 +394,51 @@
     $('#save').click(save.bind(null, false));
     $('#submit').click(save.bind(null, true));
     $('.btn-returnback').click(save.bind(null, 'rollback'));
+    $('#layout1').click(function () {
+      window.location = '/{{pos}}/{{kind}}/{{imgname}}?layout=1&v=' + Math.ceil(Math.random() * 1000);
+    });
+    $('#layout2').click(function () {
+      window.location = '/{{pos}}/{{kind}}/{{imgname}}?layout=2&v=' + Math.ceil(Math.random() * 1000);
+    });
+
+    {% if zero_char_id %}
+    swal('有{{len(zero_char_id)}}个异常编号的字框', '请检查修正已标红的字框：{{", ".join(zero_char_id)}}', 'warning', {buttons: false, timer: 2000});
+    {% end %}
 
     $('.btn-doubts').click(function () {
       $('#txtModal').modal();
+    });
+
+    $(".modal-header").on("mousedown", function (mousedownEvt) {
+      var $draggable = $(this);
+      var x = mousedownEvt.pageX - $draggable.offset().left,
+          y = mousedownEvt.pageY - $draggable.offset().top;
+      $("body").on("mousemove.draggable", function (mousemoveEvt) {
+        $draggable.closest(".modal-dialog").offset({
+          "left": mousemoveEvt.pageX - x,
+          "top": mousemoveEvt.pageY - y
+        });
+      });
+      $("body").one("mouseup", function () {
+        $("body").off("mousemove.draggable");
+      });
+      $draggable.closest(".modal").one("bs.modal.hide", function () {
+        $("body").off("mousemove.draggable");
+      });
+    });
+
+    $('#save-txt').click(function () {
+      var txt = $('#txtModal .modal-body > textarea').val().replace(/-/g, '');
+      $.post('/{{pos}}/{{kind}}/{{imgname}}', {
+        txt: JSON.stringify(txt),
+        boxes: JSON.stringify($.cut.exportBoxes())
+      }, function (res) {
+        if (/^error:/.test(res)) {
+          swal('操作失败', res.replace(/^error:/, ''), 'error', {buttons: false, timer: 1500});
+        } else {
+          window.location.reload();
+        }
+      });
     });
   </script>
 </body>

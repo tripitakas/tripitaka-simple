@@ -317,6 +317,9 @@
       var st = win.scrollTop(), sl = win.scrollLeft(), w = win.innerWidth(), h = win.innerHeight();
       var scroll = 0;
 
+      if (!box) {
+        return;
+      }
       if (data.scrollContainer) {
         var parentRect = data.scrollContainer[0].getBoundingClientRect();
         bound.y -= parentRect.y;
@@ -376,7 +379,7 @@
       if (el) {
         state.editStroke = el.attr('stroke');
         state.editHandle.fill = el.attr('fill');
-        state.editHandle.hidden = el.node.style.display === 'none';
+        state.editHandle.hidden = el.node && el.node.style.display === 'none';
         el.attr({
           stroke: rgb_a(data.changedColor, data.boxOpacity),
           fill: rgb_a(data.hoverFill, data.activeFillOpacity)
@@ -508,6 +511,7 @@
 
       state.readonly = p.readonly;
       data.blockMode = p.blockMode;
+      data.columnMode = p.columnMode;
       if (p.blockMode) {
         data.activeFillOpacity = 0.2;
       }
@@ -527,11 +531,16 @@
       }
 
       p.chars.forEach(function(b, idx) {
-        if (!b.line_no && b.char_id) {
+        if (p.columnMode) {
+          b.char_id = b.column_id;
+        }
+        if (b.char_id) {
           var ids = b.char_id.replace('b', 'c').split('c');
-          b.block_no = parseInt(ids[1]);
-          b.line_no = parseInt(ids[2]);
-          b.char_no = parseInt(ids[3]);
+          if (ids.length > 2) {
+            b.block_no = parseInt(ids[1]);
+            b.line_no = parseInt(ids[2]);
+            b.char_no = parseInt(ids[3]);
+          }
         }
         if (b.block_no && b.line_no && b.char_no && !b.char_id) {
           b.char_id = (b.block_no * 1000 + b.line_no) + 'n' + (b.char_no > 9 ? b.char_no : '0' + b.char_no);
@@ -620,6 +629,13 @@
           })
           .data('cid', b.char_id)
           .data('char', b.ch);
+
+        if (b.char_id && parseInt(b.char_id.split('c')[2]) > 100) {
+          setTimeout(function () {
+            c.shape.attr({fill: rgb_a(data.hoverFill, 0.8)});
+            c.shape.show();
+          }, 100);
+        }
       });
       var char = this.findCharById(cid);
       this.switchCurrentBox(char && char.shape);
@@ -723,6 +739,11 @@
         var box = c.shape.getBBox();
         c = $.extend({}, c, {x: r(box.x), y: r(box.y), w: r(box.width), h: r(box.height)});
         delete c.shape;
+        Object.keys(c).forEach(function (k) {
+          if (c[k] === null) {
+            delete c[k];
+          }
+        });
         return c;
       });
     },
@@ -804,6 +825,9 @@
       ret = cur = state.edit || state.hover || (chars[chars.length - 1] || {}).shape;
       cur = cur && cur.getBBox();
 
+      if (!cur) {
+        return;
+      }
       if (direction === 'left' || direction === 'right') {
         calc = function(box) {
           // 排除水平反方向的框：如果方向为left，则用当前框右边的x来过滤；如果方向为right，则用当前框左边的x来过滤
@@ -927,8 +951,8 @@
 
       this.switchCurrentBox(el);
 
-      if (box) {
-        var box2 = el.getBBox();
+      var box2 = el.getBBox();
+      if (box && box2) {
         window.scrollTo(box2.x + box2.width / 2 - box.x - box.width / 2 + pos[0],
           box2.y + box2.width / 2 - box.y - box.width / 2 + pos[1]);
       }

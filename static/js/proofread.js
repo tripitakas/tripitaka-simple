@@ -45,7 +45,7 @@ function highlightBox($span, first) {
     }
     var $line = $span.parent(), $block = $line.parent();
     var block_no = parseInt($block.attr('id').replace(/^.+-/, ''));
-    var line_no = parseInt($line.attr('id').replace(/^.+-/, ''));
+    var line_no = parseInt(($line.attr('id') || '').replace(/^.+-/, ''));
     var offset0 = parseInt($span.attr('offset'));
     var offsetInSpan = first ? 0 : getCursorPosition($span[0]);
     var offsetInLine = offsetInSpan + offset0;
@@ -86,12 +86,18 @@ function highlightBox($span, first) {
     currentSpan = [$span, first];
 
     // 按字序号浮动亮显当前行的字框
-    text = $line.text().replace(/\s/g, '');
+    text = getLineText($line);
     all = $.cut.findCharsByLine(block_no, line_no);
     $.cut.showFloatingPanel((showOrder || showText) ? all : [],
       function(char, index) {
-          return (showOrder ? char.char_no : '') + (showText ? text[index] : '');
+          return (showOrder ? char.char_no : '') + (!text[index] ? '？' : showText ? text[index] : '');
       }, highlightBox);
+
+    // 显示当前栏框和列框
+    if ($.cut.showColumn) {
+      $.cut.showColumn('columnBox', window.columns, all.length && all[0].char_id.split('c').slice(0, 2).join('c'));
+      $.cut.showColumn('blockBox', window.blocks, all.length && all[0].char_id.split('c')[0]);
+    }
 
     $.cut.switchCurrentBox(((boxes.length ? boxes : all)[0] || {}).shape);
 }
@@ -128,6 +134,12 @@ var showOrder = true;
 var showText = false;
 var currentSpan = [];
 
+function unicodeValuesToText(values) {
+  return values.map(function (c) {
+    return /^[A-Za-z0-9?*]$/.test(c) ? c : c.length > 2 ? decodeURIComponent(c) : ' ';
+  }).join('');
+}
+
 $(document).ready(function () {
     // 根据json生成html
     var contentHtml = "";
@@ -137,6 +149,10 @@ $(document).ready(function () {
 
     function genHtmlByJson(item) {
         var cls;
+        if (Array.isArray(item.ocr)) {
+          item.unicode = item.ocr;
+          item.ocr = unicodeValuesToText(item.ocr);
+        }
         if (item.block_no !== curBlockNo) {
             if (item.block_no !== 1) {
                 contentHtml += "</ul>";
@@ -157,6 +173,7 @@ $(document).ready(function () {
         }
         if (item.type === 'same') {
             contentHtml += "<span contentEditable='false' class='same' ocr='" + item.ocr +
+              (item.unicode ? "' unicode='" + item.unicode.join(',') : '') +
               "' cmp='" + item.ocr + "' offset=" + offset + ">" + item.ocr + "</span>";
         } else if (item.type === 'diff') {
             cls = item.ocr === '' ? 'not-same diff emptyplace' : 'not-same diff';
@@ -165,10 +182,11 @@ $(document).ready(function () {
             diffCounts++;
         } else if (item.type === 'variant') {
             contentHtml += "<span contentEditable='false' class='not-same variant' ocr='" + item.ocr +
+              (item.unicode ? "' unicode='" + item.unicode.join(',') : '') +
               "' cmp='" + item.cmp + "' offset=" + offset + ">" + item.ocr + "</span>";
             variantCounts++;
         } else if (item.type === 'emptyline') {
-            adjustLineNo++;
+            // adjustLineNo++;
         }
         offset += item.ocr ? item.ocr.length : 0;
     }
@@ -187,7 +205,7 @@ $(document).ready(function () {
 // 对字数不匹配的行加下划线
 function checkMismatch(report) {
   var mismatch = [];
-  var total, ocrColumns = [];
+  var total = '', ocrColumns = [];
 
   $.cut.data.chars.forEach(function (c) {
       if (c.shape && c.line_no) {
@@ -204,18 +222,43 @@ function checkMismatch(report) {
     var boxes = $.cut.findCharsByLine(no[0], no[1]);
     var $line = $('#block-' + no[0] + ' #line-' + no[1]);
     var text = $line.text().replace(/\s/g, '');
-    $line.toggleClass('mismatch', boxes.length != text.length);
-    if (boxes.length != text.length) {
-      mismatch.push('第 ' + no[1] + ' 行，文本 ' + text.length + ' 字，图像 ' + boxes.length + ' 字。');
+    var len = getLineText($line).length;
+    $line.toggleClass('mismatch', boxes.length !== len);
+    if (boxes.length !== len) {
+      mismatch.push('第 ' + no[1] + ' 行，文本 ' + len + ' 字，图像 ' + boxes.length +
+          ' 字。\n' + text + '\n');
     }
   });
-  if (report && total && mismatch.length) {
+  if (report && (total || mismatch.length)) {
       swal('图文不匹配', total + '\n' + mismatch.join('\n'));
   }
 }
 
+function getLineText($line) {
+  var chars = [];
+  $line.find('span').each(function (i, el) {
+      if ($(el).hasClass('variant')) {
+        chars.push($(el).text());
+      } else {
+        var text = $(el).text().replace(/\s/g, '');
+        chars = chars.concat(text.split(''));
+      }
+    });
+  return chars;
+}
+
 $('.btn-check').click(function() {
   checkMismatch(true);
+});
+
+// 双击异文删除，临时用
+$(document).on('dblclick', '.not-same', function (e) {
+    e.stopPropagation();
+    var cmp = $(this).attr("cmp");
+    if (!cmp) {
+        swal('已删除此字', '在保存前此字还未彻底删除，保存或提交后将彻底删除。', 'info', {timer: 2000, buttons: false});
+        $(this).remove();
+    }
 });
 
 // 单击异文
@@ -227,11 +270,50 @@ $(document).on('click', '.not-same', function (e) {
     if ($(this).hasClass('variant') && !$(this).hasClass('variant-highlight')) {
         return;
     }
+    var $dlg = $("#pfread-dialog");
     $("#pfread-dialog-cmp").text($(this).attr("cmp"));
     $("#pfread-dialog-ocr").text($(this).attr("ocr"));
     $("#pfread-dialog-slct").text("");
-    $("#pfread-dialog").offset({ top: $(this).offset().top + 40, left: $(this).offset().left - 4 });
-    $("#pfread-dialog").show();
+    $dlg.offset({ top: $(this).offset().top + 40, left: $(this).offset().left - 4 });
+    $dlg.show();
+    
+    //当弹框超出文字框时，向上弹出
+    var r_h = $(".right").height();
+    var o_t = $dlg.offset().top;
+    var d_h = $dlg.height();
+    var shouldUp = false;
+    $dlg.removeClass('dialog-common-t');
+    $dlg.addClass('dialog-common');
+    if (o_t + d_h > r_h) {
+        $dlg.offset({ top: $(this).offset().top - 180 });
+        $dlg.removeClass('dialog-common');
+        $dlg.addClass('dialog-common-t');
+        shouldUp = true;
+    }
+
+    // 当弹框右边出界时，向左移动
+    var r_w = $dlg.parent()[0].getBoundingClientRect().right;
+    var o_l = $dlg.offset().left;
+    var d_r = $dlg[0].getBoundingClientRect().right;
+    var offset = 0;
+    if (d_r > r_w - 20) {
+        offset = parseInt(r_w - d_r - 20);
+        $dlg.offset({left: o_l + offset});
+    }
+
+    var $mark = $dlg.find('.dlg-after');
+    var ml = $mark.attr('last-left') || $mark.css('marginLeft');
+    if (shouldUp) {
+        $mark.attr('last-left', ml)
+        $mark.css('marginLeft', parseInt(ml) - offset);
+    }
+
+    $mark = $dlg.find('.dlg-before');
+    ml = $mark.attr('last-left') || $mark.css('marginLeft');
+    if (!shouldUp) {
+        $mark.attr('last-left', ml);
+        $mark.css('marginLeft', parseInt(ml) - offset);
+    }
 
     // 设置当前异文
     $('.not-same').removeClass('current-not-same');

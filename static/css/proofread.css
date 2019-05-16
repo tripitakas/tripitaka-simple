@@ -34,7 +34,7 @@
 }
 
 .pfread .left {
-  width: 49%;
+  width: 59%;
   border: 1px solid #ccc;
   border-radius: 5px;
   box-sizing: border-box;
@@ -80,7 +80,7 @@
 }
 
 .pfread .right {
-  width: 49%;
+  width: 39%;
   margin-left: 1%;
   border: 1px solid #ccc;
   border-radius: 5px;
@@ -155,8 +155,16 @@
   background-image: url(../images/proofread/txt-hidden.png);
 }
 
-.pfread .hd i.btn-fullscrean {
-  background-image: url(../images/proofread/fullscrean.png);
+.pfread .hd i.btn-full-chars {
+  background-image: url(../images/proofread/chars.png);
+}
+
+.pfread .hd i.btn-full-columns {
+  background-image: url(../images/proofread/columns.png);
+}
+
+.pfread .hd i.btn-full-blocks {
+  background-image: url(../images/proofread/blocks.png);
 }
 
 .pfread .hd i.btn-addupline {
@@ -229,7 +237,7 @@
   padding: 10px;
 }
 
-.pfread .pfread-dialog:before {
+.pfread .pfread-dialog > .dlg-before {
   left: 31%;
 }
 
@@ -286,7 +294,7 @@
   border-radius: 5px;
 }
 
-.dialog-common:before {
+.dialog-common > .dlg-before {
   position: absolute;
   width: 12px;
   height: 12px;
@@ -298,6 +306,37 @@
   background-color: #fff;
   top: -6px;
   left: 50%;
+  margin-left: -103px;
+  border-top: none;
+  border-left: none;
+  box-shadow: 1px 1px 1px 0 rgba(0, 0, 0, .3);
+}
+
+.dialog-common-t {
+  position: absolute;
+  top: 0;
+  left: 0;
+  background-color: #fff;
+  box-shadow: -1px -1px 8px 0 rgba(0, 0, 0, .76);
+  padding: 10px;
+  z-index: 2;
+  height: auto;
+  white-space: nowrap;
+  border-radius: 5px;
+}
+
+.dialog-common-t > .dlg-after {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  content: " ";
+  -webkit-transform: rotate(45deg);
+  -ms-transform: rotate(45deg);
+  transform: rotate(45deg);
+  border: 1px solid transparent;
+  background-color: #fff;
+  bottom: -6px;
+  left: 32%;
   margin-left: -103px;
   border-top: none;
   border-left: none;
@@ -345,10 +384,12 @@
 
 .right .current-span {
   border: 1px solid #C1C1C1;
+}
+
+.right .add {
   display: block;
   margin-right: 10px;
 }
-
 
 .right .variant-highlight {
   color: blue;

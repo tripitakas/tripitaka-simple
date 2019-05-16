@@ -60,7 +60,7 @@
       <li><a href="/char/{{k}}">{{n}} ({{len(index['char'].get(k, []))}})</a></li>
       {% end %}
     </ul>
-    <h4>文字校对</h4>
+    <h4>文字校对 (<a href="/fix_txt/" style="font-weight: 300">统计</a>)</h4>
     <ul>
       {% for k, n in kinds['proof'].items() %}
       <li><a href="/proof/{{k}}">{{n}} ({{len(index['proof'].get(k, []))}})</a></li>

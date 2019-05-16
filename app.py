@@ -9,8 +9,11 @@ from tornado.options import define, options
 import logging
 from os import path
 import controller.cut as cut
-from controller.proofread import ProofreadHandler
+from controller.proofread import ProofreadHandler, ColumnCheckHandler
 from controller.fix_data import HelpHandler, RankingHandler, HistoryHandler
+from controller.fix_txt import FixTextHandler
+from controller.cmp_pos import CmpTxtPosHandler
+from controller.export import ExportHandler
 
 
 BASE_DIR = path.dirname(__file__)
@@ -20,7 +23,8 @@ define('num_processes', default=4, help='sub-processes count', type=int)
 
 
 def make_app():
-    classes = [cut.MainHandler, cut.PagesHandler, cut.CutHandler, HelpHandler, RankingHandler, HistoryHandler, ProofreadHandler]
+    classes = [cut.MainHandler, cut.PagesHandler, cut.CutHandler, HelpHandler, RankingHandler, HistoryHandler,
+               ProofreadHandler, ColumnCheckHandler, ExportHandler, FixTextHandler, CmpTxtPosHandler]
     handlers = []
     for cls in classes:
         if isinstance(cls.URL, list):

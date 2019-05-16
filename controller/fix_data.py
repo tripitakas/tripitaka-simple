@@ -1,13 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from os import path, listdir
+from os import path, listdir, mkdir
 import re
 from operator import itemgetter
-from controller.base import BaseHandler
+from controller.base import BaseHandler, load_json, save_json
 
 
 data_path = path.join(path.dirname(path.dirname(__file__)), 'data')
+static_path = path.join(path.dirname(path.dirname(__file__)), 'static')
 log_file = path.join(data_path, '..', 'log', 'app.log')
 ip_user = {}
 work = {}
@@ -22,13 +23,13 @@ def clean_log():
             f.writelines(rows)
 
 
-def scan_lock_files(callback, in_path):
+def scan_lock_files(callback, in_path, name=None):
     num = 0
     if not path.exists(in_path):
         return
     for fn in listdir(in_path):
         filename = path.join(in_path, fn)
-        if '.' not in fn and '_' in fn:
+        if '.' not in fn and '_' in fn and (not name or fn.startswith(name)):
             with open(filename) as f:
                 text = f.read()
                 rows = text.split('\n')
@@ -68,19 +69,19 @@ def callback_sum_work(num, fn, filename, text, rows):
             work[user] = work.get(user, 0) + 1
 
 
-def fix(in_path):
+def fix(in_path, name=None):
     work.clear()
-    scan_lock_files(callback_get_ip_users, in_path)
-    scan_lock_files(callback_anonymous, in_path)
-    scan_lock_files(callback_sum_work, in_path)
+    scan_lock_files(callback_get_ip_users, in_path, name)
+    scan_lock_files(callback_anonymous, in_path, name)
+    scan_lock_files(callback_sum_work, in_path, name)
     return [(u, c) for u, c in sorted(work.items(), key=itemgetter(1), reverse=True)]
 
 
 class RankingHandler(BaseHandler):
-    URL = r'/ranking/(block|column|char|proof)'
+    URL = r'/ranking/(block|column|char|proof)(\d?)([A-Z]{2})?'
 
-    def get(self, pos):
-        ranking = fix(path.join(data_path, 'lock', pos))
+    def get(self, pos, order=0, name=None):
+        ranking = fix(path.join(data_path, 'lock', pos + (str(order) if order else '')), name)
         items = ['<li><a href="/{2}/me/{0}">{0}</a> {1}</li>'.format(n, c, pos) for n, c in ranking]
         self.write('<h3>校对排行榜</h3><ol>%s</ol>' % ''.join(items))
 
@@ -106,8 +107,8 @@ class HistoryHandler(BaseHandler):
         name = name[:2].upper() + re.sub(r'-|\s', '_', name[2:])
         scan_lock_files(callback_get, path.join(data_path, 'lock', pos + h[1:]))
         items.sort(key=itemgetter(2))
-        items = ['<li><span>{0}</span> {1}</li>'.format(fn, s) for fn, s, t in items]
-        css = 'li>span{display: inline-block; min-width: 120px; margin-right: 10px}'
+        items = ['<li><a href="/{2}/{3}/{4}">{0}</a> {1}</li>'.format(f, s, pos, f[:2], f[3:]) for f, s, t in items]
+        css = 'li>a{display: inline-block; min-width: 120px; margin-right: 10px; text-decoration: none}'
         self.write('<style>%s</style><h3>页面校对历史 (%d 个页面)</h3><ol>%s</ol>' % (css, len(items), ''.join(items)))
 
 
@@ -118,6 +119,53 @@ class HelpHandler(BaseHandler):
         self.render('proofread-help.html')
 
 
+def merge_chars(dst_path, char_path, column_path):
+    for fn in listdir(dst_path):
+        dst_file = path.join(dst_path, fn)
+        if path.isdir(dst_file):
+            merge_chars(dst_file, char_path, column_path)
+        elif fn.endswith('.json'):
+            char = load_json(path.join(char_path, fn))
+            column = load_json(path.join(column_path, fn))
+            assert char and column
+            assert char.get('blocks')
+            assert char.get('chars')
+            assert column.get('columns')
+
+            assert len(char['blocks']) == len(column['blocks']) and len(char['blocks']) == 1
+            for i, (a, b) in enumerate(zip(char['blocks'], column['blocks'])):
+                if not(a['x'] == b['x'] and a['y'] == b['y'] and a['w'] == b['w'] and a['h'] == b['h']):
+                    print('\t'.join([fn, str(i + 1), str(a), str(b)]))
+                    char['blocks'][i].update(dict(x=b['x'], y=b['y'], w=b['w'], h=b['h'], changed=True))
+
+            char['columns'] = sorted(column['columns'], key=itemgetter('x'), reverse=True)
+            for i, c in enumerate(char['columns']):
+                c['no'] = c['column_id'] = 'b1c%d' % (i + 1)
+            save_json(char, dst_file)
+
+
+def merge_columns(dst_path, char_path):
+    indexes = load_json(path.join(static_path, 'index.json'))
+    indexes['column'] = {}
+    for fn in listdir(char_path):
+        src_file = path.join(char_path, fn)
+        if fn.endswith('.json') and fn[:2] in ['GL', 'QL', 'YB']:
+            dst_file = dst_path
+            for folder in fn.split('_')[:-1]:
+                dst_file = path.join(dst_file, folder)
+                if not path.exists(dst_file):
+                    mkdir(dst_file)
+            dst_file = path.join(dst_file, fn)
+            column = load_json(src_file)
+            assert column and column.get('columns')
+            save_json(column, dst_file)
+            indexes['column'][fn[:2]] = indexes['column'].get(fn[:2], []) + [fn[:-5]]
+    save_json(indexes, path.join(static_path, 'index.json'))
+
+
 if __name__ == '__main__':
-    print(fix(path.join(data_path, 'lock', 'char')))
-    clean_log()
+    # print(fix(path.join(data_path, 'lock', 'char')))
+    # clean_log()
+    if 0:
+        merge_columns(path.join(static_path, 'pos/column/'),
+                      path.join(static_path, 'pos/column/char-cut'))
